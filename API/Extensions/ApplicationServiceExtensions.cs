@@ -24,6 +24,7 @@ public static class ApplicationServiceExtensions
         services.AddMediatR(cfg =>
         {
             cfg.RegisterServicesFromAssembly(typeof(CreateActivity).Assembly);
+            cfg.AddOpenBehavior(typeof(ValidationBehavior<,>));
             cfg.LicenseKey = config["MediatR:LicenseKey"];
         });
 

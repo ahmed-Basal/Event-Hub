@@ -316,7 +316,7 @@ export default function ActivityCard({ activity }: Props) {
           {/* Book button */}
           <Button
             component={Link}
-            to={`/activities/${activity.slug || activity.id}`}
+            to={activity.slug ? `/activities/${activity.id}/${activity.slug}` : `/activities/${activity.id}`}
             variant="outlined"
             size="small"
             sx={{

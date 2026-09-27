@@ -7,7 +7,6 @@ public class Activity
     private string _title = string.Empty;
 
     public string ID { get; set; } = Guid.NewGuid().ToString();
-    public string Id { get => ID; set => ID = value; }
 
     public string Title
     {

@@ -219,6 +219,23 @@ export default function NavBar() {
               Explore
             </Button>
 
+            {/* Errors link */}
+            <Button
+              component={NavLink}
+              to="/errors"
+              variant="text"
+              sx={{
+                display: { xs: 'none', md: 'flex' },
+                color: tokens.textSecondary,
+                px: 1.5,
+                fontSize: '0.875rem',
+                '&.active': { color: tokens.primary },
+                '&:hover': { color: tokens.textPrimary, bgcolor: 'rgba(255,255,255,0.05)' },
+              }}
+            >
+              Errors
+            </Button>
+
             {/* Create Activity button */}
             <Button
               component={NavLink}

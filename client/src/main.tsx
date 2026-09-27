@@ -11,8 +11,23 @@ import '@fontsource/inter/400.css'
 import '@fontsource/inter/500.css'
 import '@fontsource/inter/600.css'
 import '@fontsource/inter/700.css'
+import { ToastContainer } from 'react-toastify'
+import 'react-toastify/dist/ReactToastify.css'
 
-const queryClient = new QueryClient()
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      retry: (failureCount, error: any) => {
+        const status = error?.response?.status;
+        if (status && status >= 400 && status < 600) {
+          return false;
+        }
+        return failureCount < 1;
+      },
+      refetchOnWindowFocus: false,
+    },
+  },
+})
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
@@ -20,6 +35,7 @@ createRoot(document.getElementById('root')!).render(
       <CssBaseline />
       <QueryClientProvider client={queryClient}>
         <ReactQueryDevtools />
+        <ToastContainer position="bottom-right" hideProgressBar theme="colored" />
         <RouterProvider router={router} />
       </QueryClientProvider>
     </ThemeProvider>

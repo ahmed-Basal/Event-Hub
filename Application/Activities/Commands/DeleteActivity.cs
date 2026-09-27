@@ -9,14 +9,14 @@ public static class DeleteActivity
 {
     public class Command : IRequest<Result<Unit>>
     {
-        public required string Id { get; set; }
+        public required string ID { get; set; }
     }
 
     public class CommandValidator : AbstractValidator<Command>
     {
         public CommandValidator()
         {
-            RuleFor(x => x.Id).NotEmpty().WithMessage("Activity ID is required");
+            RuleFor(x => x.ID).NotEmpty().WithMessage("Activity ID is required");
         }
     }
 
@@ -25,7 +25,7 @@ public static class DeleteActivity
         public async Task<Result<Unit>> Handle(Command request, CancellationToken cancellationToken)
         {
             var activity = await context.Activities
-                .FindAsync([request.Id], cancellationToken);
+                .FindAsync([request.ID], cancellationToken);
 
             if (activity == null) return Result<Unit>.NotFound("Activity not found");
 

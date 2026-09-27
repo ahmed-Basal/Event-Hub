@@ -17,7 +17,7 @@ public class ActivitiesController : BaseApiController
     [HttpGet("{id}")]
     public async Task<ActionResult<Activity>> GetActivity(string id, CancellationToken ct)
     {
-       return HandleResult(await Mediator.Send(new GetActivityDetails.Query { Id = id }, ct));
+       return HandleResult(await Mediator.Send(new GetActivityDetails.Query { ID = id }, ct));
     }
 
     [HttpPost]
@@ -27,14 +27,14 @@ public class ActivitiesController : BaseApiController
     }
 
     [HttpPut("{id}")]
-    public async Task<ActionResult> EditActivity(string id, EditActivityDto activity, CancellationToken ct)
+    public async Task<ActionResult> EditActivity(string id, EditActivityDto dto, CancellationToken ct)
     {
-        return HandleResult(await Mediator.Send(new EditActivity.Command { Id = id, ActivityDto = activity }, ct));
+        return HandleResult(await Mediator.Send(new EditActivity.Command { ID = id, ActivityDto = dto }, ct));
     }
 
     [HttpDelete("{id}")]
     public async Task<ActionResult> DeleteActivity(string id, CancellationToken ct)
     {
-       return HandleResult(await Mediator.Send(new DeleteActivity.Command { Id = id }, ct));
+       return HandleResult(await Mediator.Send(new DeleteActivity.Command { ID = id }, ct));
     }
 }

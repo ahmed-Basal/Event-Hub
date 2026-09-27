@@ -13,7 +13,7 @@ public static class EditActivity
 {
     public class Command : IRequest<Result<Unit>>
     {
-        public required string Id { get; set; }
+        public required string ID { get; set; }
         public required EditActivityDto ActivityDto { get; set; }
     }
 
@@ -21,7 +21,7 @@ public static class EditActivity
     {
         public CommandValidator() : base(x => x.ActivityDto)
         {
-            RuleFor(x => x.Id).NotEmpty().WithMessage("Activity ID is required");
+            RuleFor(x => x.ID).NotEmpty().WithMessage("Activity ID is required");
         }
     }
 
@@ -30,7 +30,7 @@ public static class EditActivity
         public async Task<Result<Unit>> Handle(Command request, CancellationToken cancellationToken)
         {
             var activity = await context.Activities
-                .FindAsync([request.Id], cancellationToken);
+                .FindAsync([request.ID], cancellationToken);
 
             if (activity == null) return Result<Unit>.NotFound("Activity not found");
 

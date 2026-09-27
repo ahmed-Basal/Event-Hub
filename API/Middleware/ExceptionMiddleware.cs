@@ -26,13 +26,41 @@ public class ExceptionMiddleware(ILogger<ExceptionMiddleware> logger, IHostEnvir
 
     private async Task HandleException(HttpContext context, Exception ex)
     {
-        logger.LogError(ex, ex.Message);
+        var traceId = context.TraceIdentifier;
+        var path = context.Request.Path.Value ?? "/";
+        var method = context.Request.Method;
+
+        logger.LogError(
+            ex,
+            "Unhandled Exception: [{Method}] {Path} | TraceId: {TraceId} | Error: {ErrorMessage}",
+            method,
+            path,
+            traceId,
+            ex.Message
+        );
+
         context.Response.ContentType = "application/json";
         context.Response.StatusCode = StatusCodes.Status500InternalServerError;
 
         var response = env.IsDevelopment()
-            ? new AppException(context.Response.StatusCode, ex.Message, ex.StackTrace)
-            : new AppException(context.Response.StatusCode, ex.Message, null);
+            ? new AppException(
+                context.Response.StatusCode,
+                ex.Message,
+                ex.StackTrace,
+                traceId,
+                path,
+                method,
+                DateTime.UtcNow
+            )
+            : new AppException(
+                context.Response.StatusCode,
+                "An internal server error occurred. Please provide the Trace ID to support if the issue persists.",
+                null,
+                traceId,
+                path,
+                method,
+                DateTime.UtcNow
+            );
 
         var options = new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase };
 
