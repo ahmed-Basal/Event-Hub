@@ -20,6 +20,7 @@ import type { Activity } from '../../../lib/Types';
 import { CATEGORY_OPTIONS, LEVEL_OPTIONS } from '../../../lib/schemas/activitySchema';
 import Spinner from '../../../lib/components/Spinner';
 import { tokens } from '../../../theme/theme';
+import { GradientTag } from '../../../lib/UTlity/tagUtils';
 
 const POPULAR_TAGS = [
   '.NET 9',
@@ -359,24 +360,13 @@ export default function ActivityForm() {
                   border: `1px solid ${tokens.border}`,
                 }}
               >
-                {tags.map((tag) => (
-                  <Chip
+                {tags.map((tag, idx) => (
+                  <GradientTag
                     key={tag}
-                    label={`#${tag}`}
+                    tag={tag}
+                    index={idx}
+                    fontSize="0.8rem"
                     onDelete={() => handleRemoveTag(tag)}
-                    sx={{
-                      bgcolor: `${tokens.teal}18`,
-                      color: tokens.teal,
-                      border: `1px solid ${tokens.teal}40`,
-                      fontWeight: 600,
-                      fontSize: '0.82rem',
-                      '& .MuiChip-deleteIcon': {
-                        color: `${tokens.teal}99`,
-                        '&:hover': {
-                          color: tokens.accent,
-                        },
-                      },
-                    }}
                   />
                 ))}
               </Box>

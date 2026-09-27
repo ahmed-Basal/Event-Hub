@@ -1,5 +1,4 @@
 import Box from '@mui/material/Box';
-import Chip from '@mui/material/Chip';
 import Paper from '@mui/material/Paper';
 import Typography from '@mui/material/Typography';
 import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
@@ -9,6 +8,7 @@ import LocalOfferIcon from '@mui/icons-material/LocalOffer';
 import ArticleIcon from '@mui/icons-material/Article';
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import { formatDate } from '../../../lib/UTlity/Utle';
+import { GradientTag } from '../../../lib/UTlity/tagUtils';
 import type { Activity } from '../../../lib/Types';
 import { tokens } from '../../../theme/theme';
 
@@ -71,24 +71,8 @@ export default function ActivityDetailsInfo({ activity }: Props) {
               </Typography>
             </Box>
             <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
-              {activity.tags.map((tag) => (
-                <Chip
-                  key={tag}
-                  label={`#${tag}`}
-                  size="small"
-                  sx={{
-                    bgcolor: `${tokens.teal}14`,
-                    color: tokens.teal,
-                    border: `1px solid ${tokens.teal}40`,
-                    fontWeight: 600,
-                    fontSize: '0.78rem',
-                    transition: 'all 0.15s ease',
-                    '&:hover': {
-                      bgcolor: `${tokens.teal}28`,
-                      borderColor: tokens.teal,
-                    },
-                  }}
-                />
+              {activity.tags.map((tag, idx) => (
+                <GradientTag key={tag} tag={tag} index={idx} fontSize="0.78rem" />
               ))}
             </Box>
           </Box>
