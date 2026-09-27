@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react';
-import { useLocation, useNavigate } from 'react-router';
+import { useLocation, useNavigate, useRouteError } from 'react-router';
 import {
   Container,
   Paper,
@@ -41,10 +41,18 @@ interface ServerErrorPayload {
 export default function ServerError() {
   const { state } = useLocation();
   const navigate = useNavigate();
+  const routeError = useRouteError() as { status?: number; statusText?: string; message?: string; stack?: string } | null;
 
-  // 1. Recover error from state or fallback to sessionStorage
+  // 1. Recover error from state, routeError (ErrorBoundary), or fallback to sessionStorage
   const [errorData, setErrorData] = useState<ServerErrorPayload | null>(() => {
     if (state?.error) return state.error;
+    if (routeError) {
+      return {
+        statusCode: routeError.status || 500,
+        message: routeError.statusText || routeError.message || 'React Application Error',
+        details: routeError.stack || (typeof routeError === 'string' ? routeError : undefined),
+      };
+    }
     try {
       const saved = sessionStorage.getItem('lastServerError');
       return saved ? JSON.parse(saved) : null;

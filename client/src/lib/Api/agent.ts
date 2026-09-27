@@ -48,7 +48,19 @@ agent.interceptors.response.use(
                 router.navigate('/not-found');
                 break;
 
-            case 500:
+            case 500: {
+                const method = config?.method?.toLowerCase();
+                const isMutation = method && ['post', 'put', 'delete', 'patch'].includes(method);
+
+                // Senior Pattern: On mutations (submitting forms / actions), do NOT navigate away!
+                // Keep the user on the page with their entered form data intact, and alert with Trace ID.
+                if (isMutation) {
+                    const traceSuffix = data?.traceId ? ` (Trace ID: ${data.traceId})` : '';
+                    toast.error(`Server Error: ${data?.message || 'Operation failed'}${traceSuffix}`);
+                    break;
+                }
+
+                // On data fetching queries (GET), navigate to diagnostic ServerError page
                 try {
                     sessionStorage.setItem('lastServerError', JSON.stringify(data));
                 } catch {
@@ -56,6 +68,7 @@ agent.interceptors.response.use(
                 }
                 router.navigate('/server-error', { state: { error: data } });
                 break;
+            }
 
             default:
                 break;
