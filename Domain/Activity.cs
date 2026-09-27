@@ -1,9 +1,24 @@
+using Domain.Common;
+
 namespace Domain;
 
 public class Activity
 {
+    private string _title = string.Empty;
+
     public string ID { get; set; } = Guid.NewGuid().ToString();
-    public string Title { get; set; } = string.Empty;
+
+    public string Title
+    {
+        get => _title;
+        set
+        {
+            _title = value;
+            Slug = SlugHelper.GenerateSlug(value);
+        }
+    }
+
+    public string Slug { get; set; } = string.Empty;
     public DateTime Date { get; set; } = DateTime.UtcNow;
     public string Description { get; set; } = string.Empty;
     public string Category { get; set; } = string.Empty;

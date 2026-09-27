@@ -5,6 +5,7 @@ export type ActivityLevel = 'Beginner' | 'Intermediate' | 'Advanced' | 'All Leve
 export interface Activity {
     id: string;
     title: string;
+    slug: string;
     date: string;
     description: string;
     category: Category | string;

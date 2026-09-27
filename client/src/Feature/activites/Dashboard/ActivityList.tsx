@@ -1,7 +1,7 @@
 import Box from '@mui/material/Box';
 import Grid from '@mui/material/Grid';
 import Typography from '@mui/material/Typography';
-import CircularProgress from '@mui/material/CircularProgress';
+import Spinner from '../../../lib/components/Spinner';
 import ActivityCard from './ActivityCard';
 import useactivites from '../../../lib/Hooks/useactivites';
 import { tokens } from '../../../theme/theme';
@@ -10,11 +10,7 @@ export default function ActivityList() {
   const { activities, isPending } = useactivites();
 
   if (isPending) {
-    return (
-      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: 300 }}>
-        <CircularProgress sx={{ color: tokens.primary }} />
-      </Box>
-    );
+    return <Spinner message="Discovering tech events..." minHeight={350} />;
   }
 
   if (!activities || activities.length === 0) {

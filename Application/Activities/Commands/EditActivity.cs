@@ -21,6 +21,7 @@ public static class EditActivity
                     ?? throw new Exception("Cannot find activity");
 
             mapper.Map(request.Activity, activity);
+            activity.Slug = Domain.Common.SlugHelper.GenerateSlug(activity.Title);
 
             await context.SaveChangesAsync(cancellationToken);
         }

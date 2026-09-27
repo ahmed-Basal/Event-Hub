@@ -1,4 +1,6 @@
 using Domain;
+using Domain.Common;
+using Microsoft.EntityFrameworkCore;
 
 namespace Persistence;
 
@@ -7,13 +9,24 @@ public static class DbInitializer
     public static async Task SeedData(DevMeetDbContext context)
     {
         // Automatically replace old non-tech categories or sample cities
-        if (context.Activities.Any(a => a.Category == "culture" || a.Category == "drinks" || a.Category == "music" || a.City == "London"))
+        if (await context.Activities.AnyAsync(a => a.Category == "culture" || a.Category == "drinks" || a.Category == "music" || a.City == "London"))
         {
             context.Activities.RemoveRange(context.Activities);
             await context.SaveChangesAsync();
         }
 
-        if (context.Activities.Any()) return;
+        // Backfill slugs for any activities missing a slug
+        var activitiesWithoutSlug = await context.Activities.Where(a => string.IsNullOrEmpty(a.Slug)).ToListAsync();
+        if (activitiesWithoutSlug.Count != 0)
+        {
+            foreach (var act in activitiesWithoutSlug)
+            {
+                act.Slug = SlugHelper.GenerateSlug(act.Title);
+            }
+            await context.SaveChangesAsync();
+        }
+
+        if (await context.Activities.AnyAsync()) return;
 
         var activities = new List<Activity>
         {

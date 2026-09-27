@@ -9,6 +9,7 @@ import { useParams, useNavigate } from 'react-router';
 import useactivites from '../../../lib/Hooks/useactivites';
 import type { Activity } from '../../../lib/Types';
 import { CATEGORY_OPTIONS, LEVEL_OPTIONS } from '../../../lib/schemas/activitySchema';
+import Spinner from '../../../lib/components/Spinner';
 
 export default function ActivityForm() {
   const { id } = useParams<{ id: string }>();
@@ -45,7 +46,7 @@ export default function ActivityForm() {
     }
   };
 
-  if (isLoadingActivity) return <Typography variant="h5">Loading...</Typography>;
+  if (isLoadingActivity) return <Spinner message="Loading meetup details..." minHeight={300} />;
   return (
     <Paper sx={{ borderRadius: 3, p: 3, boxShadow: '0 4px 20px rgba(0, 0, 0, 0.08)' }}>
       <Typography variant="h6" sx={{ fontWeight: 'bold', color: '#1976d2', mb: 2.5 }}>

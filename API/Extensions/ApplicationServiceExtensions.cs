@@ -1,5 +1,5 @@
 using API.Options;
-using Application.Activities.Queries;
+using Application.Activities.Commands;
 using Application.Activities.Validators;
 using Application.Core;
 using AutoMapper;
@@ -23,7 +23,7 @@ public static class ApplicationServiceExtensions
         // Register MediatR
         services.AddMediatR(cfg =>
         {
-            cfg.RegisterServicesFromAssembly(typeof(GetActivityList.Handler).Assembly);
+            cfg.RegisterServicesFromAssembly(typeof(CreateActivity).Assembly);
             cfg.LicenseKey = config["MediatR:LicenseKey"];
         });
 

@@ -353,7 +353,7 @@ export default function HomePage() {
                     {/* Book button */}
                     <Button
                       component={Link}
-                      to={`/activities/${featured.id}`}
+                      to={`/activities/${featured.slug || featured.id}`}
                       variant="contained"
                       color="secondary"
                       fullWidth
