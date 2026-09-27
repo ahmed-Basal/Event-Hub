@@ -1,3 +1,5 @@
+using Application.Core;
+using FluentValidation;
 using MediatR;
 using Persistence;
 
@@ -10,17 +12,28 @@ public static class DeleteActivity
         public required string Id { get; set; }
     }
 
-    public class Handler(DevMeetDbContext context) : IRequestHandler<Command,Result<Unit>>
+    public class CommandValidator : AbstractValidator<Command>
+    {
+        public CommandValidator()
+        {
+            RuleFor(x => x.Id).NotEmpty().WithMessage("Activity ID is required");
+        }
+    }
+
+    public class Handler(DevMeetDbContext context) : IRequestHandler<Command, Result<Unit>>
     {
         public async Task<Result<Unit>> Handle(Command request, CancellationToken cancellationToken)
         {
             var activity = await context.Activities
-                .FindAsync([request.Id], cancellationToken)
-                    ?? throw new Exception("Cannot find activity");
-                if(activity==null) return Result<Unit>.NotFound();
+                .FindAsync([request.Id], cancellationToken);
+
+            if (activity == null) return Result<Unit>.NotFound("Activity not found");
+
             context.Remove(activity);
 
-            await context.SaveChangesAsync(cancellationToken);
+            var result = await context.SaveChangesAsync(cancellationToken) > 0;
+            if (!result) return Result<Unit>.Failure("Failed to delete activity", 400);
+
             return Result<Unit>.Success(Unit.Value);
         }
     }

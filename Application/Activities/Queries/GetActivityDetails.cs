@@ -1,4 +1,6 @@
+using Application.Core;
 using Domain;
+using FluentValidation;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Persistence;
@@ -12,16 +14,24 @@ public static class GetActivityDetails
         public required string Id { get; set; }
     }
 
+    public class QueryValidator : AbstractValidator<Query>
+    {
+        public QueryValidator()
+        {
+            RuleFor(x => x.Id).NotEmpty().WithMessage("Activity ID is required");
+        }
+    }
+
     public class Handler(DevMeetDbContext context) : IRequestHandler<Query, Result<Activity>>
     {
         public async Task<Result<Activity>> Handle(Query request, CancellationToken cancellationToken)
         {
-           var  acctivity=await context.findasync(typeof(Activity),request.Id) as Activity;
-           if(acctivity==null)
+           var activity = await context.Activities.FindAsync([request.Id], cancellationToken);
+           if (activity == null)
            {
-            return Result<Activity>.Failure("Activity not found");
+               return Result<Activity>.NotFound("Activity not found");
            }
-           return Result<Activity>.Success(acctivity);
+           return Result<Activity>.Success(activity);
         }
     }
 }
