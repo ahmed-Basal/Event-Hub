@@ -1,4 +1,3 @@
-import useactivites from '../../../lib/Hooks/useactivites';
 import { useParams, Link } from 'react-router';
 import Grid2 from '@mui/material/Grid';
 import Box from '@mui/material/Box';
@@ -9,12 +8,12 @@ import ActivityDetailsChats from './ActivityDetailscahts';
 import ActivityDetailsInfo from './ActivityDetailsInfo';
 import ActivityDetailsSideBar from './ActivityDetailsSideBar';
 import ActivityDetailsheader from './ActivityDetailsHeaders';
-import Spinner from '../../../lib/components/Spinner';
+import { useActivities, Spinner } from '../../../lib';
 import { tokens } from '../../../theme/theme';
 
 export default function ActivityDetails() {
   const { id } = useParams();
-  const { activity, isLoadingActivity } = useactivites(id);
+  const { activity, isLoadingActivity } = useActivities(id);
 
   if (isLoadingActivity) {
     return <Spinner message="Loading event details..." minHeight="60vh" />;

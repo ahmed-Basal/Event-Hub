@@ -5,16 +5,14 @@ import Card from '@mui/material/Card';
 import Chip from '@mui/material/Chip';
 import IconButton from '@mui/material/IconButton';
 import Typography from '@mui/material/Typography';
-import Tooltip from '@mui/material/Tooltip';
 import BookmarkBorderIcon from '@mui/icons-material/BookmarkBorder';
 import BookmarkIcon from '@mui/icons-material/Bookmark';
 import LocationOnIcon from '@mui/icons-material/LocationOn';
 import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
 import { Link } from 'react-router';
-import { format } from 'date-fns';
-import type { Activity } from '../../../lib/Types';
+import type { Activity } from '../../../lib';
+import { TagList, formatDate, formatDateOnly, formatTimeOnly } from '../../../lib';
 import { tokens } from '../../../theme/theme';
-import { GradientTag } from '../../../lib/UTlity/tagUtils';
 
 type Props = { activity: Activity };
 
@@ -40,10 +38,9 @@ export default function ActivityCard({ activity }: Props) {
   const catStyle = CATEGORY_COLORS[catKey] ?? { color: tokens.textSecondary, bg: 'rgba(255,255,255,0.07)' };
   const coverImg = `/images/categoryImages/${catKey}.jpg`;
 
-  const eventDate = new Date(activity.date);
-  const dayStr = format(eventDate, 'dd');
-  const monthStr = format(eventDate, 'MMM').toUpperCase();
-  const timeStr = format(eventDate, 'h:mm a');
+  const dayStr = formatDate(activity.date, 'dd');
+  const monthStr = formatDate(activity.date, 'MMM').toUpperCase();
+  const timeStr = formatTimeOnly(activity.date);
 
   return (
     <Card
@@ -193,7 +190,7 @@ export default function ActivityCard({ activity }: Props) {
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.7 }}>
             <CalendarTodayIcon sx={{ fontSize: 13, color: tokens.textMuted }} />
             <Typography sx={{ fontSize: '0.78rem', color: tokens.textSecondary }}>
-              {format(eventDate, 'dd MMM yyyy')} — {timeStr}
+              {formatDateOnly(activity.date)} — {timeStr}
             </Typography>
           </Box>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.7 }}>
@@ -205,79 +202,12 @@ export default function ActivityCard({ activity }: Props) {
         </Box>
 
         {/* Tags with Gradient Borders & Monospace Typography */}
-        {activity.tags && activity.tags.length > 0 && (
-          <Box
-            sx={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: 0.8,
-              flexWrap: 'wrap',
-              mb: 1.8,
-            }}
-          >
-            {activity.tags.slice(0, 3).map((tag, idx) => (
-              <GradientTag key={tag} tag={tag} index={idx} />
-            ))}
-
-            {activity.tags.length > 3 && (
-              <Tooltip
-                title={
-                  <Box sx={{ p: 0.5 }}>
-                    <Typography sx={{ fontSize: '0.72rem', fontWeight: 700, color: tokens.primary, mb: 0.5 }}>
-                      More Topics:
-                    </Typography>
-                    <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
-                      {activity.tags.slice(3).map((t) => (
-                        <Box
-                          key={t}
-                          component="span"
-                          sx={{
-                            fontSize: '0.7rem',
-                            fontFamily: 'monospace',
-                            color: '#FFFFFF',
-                            bgcolor: 'rgba(255,255,255,0.1)',
-                            px: 0.8,
-                            py: 0.2,
-                            borderRadius: '4px',
-                          }}
-                        >
-                          #{t}
-                        </Box>
-                      ))}
-                    </Box>
-                  </Box>
-                }
-                arrow
-                placement="top"
-              >
-                <Box
-                  sx={{
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    px: 0.9,
-                    py: 0.35,
-                    borderRadius: '7px',
-                    fontSize: '0.72rem',
-                    fontFamily: "'JetBrains Mono', monospace",
-                    fontWeight: 700,
-                    color: tokens.textSecondary,
-                    background: `linear-gradient(${tokens.surface}, ${tokens.surface}) padding-box, linear-gradient(135deg, ${tokens.teal}, ${tokens.primary}) border-box`,
-                    border: '1px solid transparent',
-                    cursor: 'pointer',
-                    transition: 'all 0.2s ease',
-                    '&:hover': {
-                      transform: 'translateY(-2px)',
-                      color: tokens.primary,
-                      boxShadow: `0 4px 12px ${tokens.primary}40`,
-                    },
-                  }}
-                >
-                  +{activity.tags.length - 3}
-                </Box>
-              </Tooltip>
-            )}
-          </Box>
-        )}
+        <TagList
+          tags={activity.tags}
+          maxVisible={3}
+          size="small"
+          sx={{ mb: 1.8 }}
+        />
 
         {/* Divider */}
         <Box sx={{ borderTop: `1px solid ${tokens.border}`, my: 1.5 }} />

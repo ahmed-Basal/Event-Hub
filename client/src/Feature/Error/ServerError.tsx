@@ -27,16 +27,7 @@ import BugReportIcon from '@mui/icons-material/BugReport';
 import DownloadIcon from '@mui/icons-material/Download';
 import DeleteOutlinedIcon from '@mui/icons-material/DeleteOutlined';
 import { tokens } from '../../theme/theme';
-
-interface ServerErrorPayload {
-  statusCode?: number;
-  message?: string;
-  details?: string;
-  traceId?: string;
-  path?: string;
-  method?: string;
-  timestamp?: string;
-}
+import type { ServerErrorPayload } from '../../lib/Types';
 
 export default function ServerError() {
   const { state } = useLocation();

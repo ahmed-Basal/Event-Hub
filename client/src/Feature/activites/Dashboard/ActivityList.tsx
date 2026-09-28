@@ -1,13 +1,9 @@
-import Box from '@mui/material/Box';
-import Grid from '@mui/material/Grid';
-import Typography from '@mui/material/Typography';
-import Spinner from '../../../lib/components/Spinner';
+import { Grid } from '@mui/material';
+import { useActivities, Spinner, EmptyState } from '../../../lib';
 import ActivityCard from './ActivityCard';
-import useactivites from '../../../lib/Hooks/useactivites';
-import { tokens } from '../../../theme/theme';
 
 export default function ActivityList() {
-  const { activities, isPending } = useactivites();
+  const { activities, isPending } = useActivities();
 
   if (isPending) {
     return <Spinner message="Discovering tech events..." minHeight={350} />;
@@ -15,23 +11,11 @@ export default function ActivityList() {
 
   if (!activities || activities.length === 0) {
     return (
-      <Box
-        sx={{
-          textAlign: 'center',
-          py: 10,
-          bgcolor: tokens.surface,
-          border: `1px solid ${tokens.border}`,
-          borderRadius: '18px',
-        }}
-      >
-        <Typography sx={{ fontSize: '2rem', mb: 1 }}>🎭</Typography>
-        <Typography sx={{ color: tokens.textSecondary, fontWeight: 600 }}>
-          No events found
-        </Typography>
-        <Typography sx={{ color: tokens.textMuted, fontSize: '0.85rem', mt: 0.5 }}>
-          Check back later or host a new event!
-        </Typography>
-      </Box>
+      <EmptyState
+        icon="🎭"
+        title="No events found"
+        message="Check back later or host a new event!"
+      />
     );
   }
 

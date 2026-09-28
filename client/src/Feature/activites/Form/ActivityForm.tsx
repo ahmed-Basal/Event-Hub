@@ -1,73 +1,38 @@
-import { useState, type FormEvent, type KeyboardEvent } from 'react';
+import { useState, type FormEvent } from 'react';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import MenuItem from '@mui/material/MenuItem';
 import Paper from '@mui/material/Paper';
 import Typography from '@mui/material/Typography';
 import TextField from '@mui/material/TextField';
-import Chip from '@mui/material/Chip';
 import Divider from '@mui/material/Divider';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import RocketLaunchIcon from '@mui/icons-material/RocketLaunch';
 import SaveIcon from '@mui/icons-material/Save';
 import EditNoteIcon from '@mui/icons-material/EditNote';
 import AddCircleIcon from '@mui/icons-material/AddCircle';
-import LocalOfferIcon from '@mui/icons-material/LocalOffer';
-import AddIcon from '@mui/icons-material/Add';
 import { useParams, useNavigate } from 'react-router';
-import useactivites from '../../../lib/Hooks/useactivites';
-import type { Activity } from '../../../lib/Types';
-import { CATEGORY_OPTIONS, LEVEL_OPTIONS } from '../../../lib/schemas/activitySchema';
-import Spinner from '../../../lib/components/Spinner';
+import {
+  useActivities,
+  Spinner,
+  TagInput,
+  POPULAR_TAGS,
+  CATEGORY_OPTIONS,
+  LEVEL_OPTIONS,
+  type Activity,
+} from '../../../lib';
 import { tokens } from '../../../theme/theme';
-import { GradientTag } from '../../../lib/UTlity/tagUtils';
-
-const POPULAR_TAGS = [
-  '.NET 9',
-  'C#',
-  'Microservices',
-  'React',
-  'Clean Architecture',
-  'Docker',
-  'PostgreSQL',
-  'Next.js',
-  'Cybersecurity',
-  'DevOps',
-  'AI / ML',
-  'Cloud / Azure',
-];
 
 export default function ActivityForm() {
   const { id } = useParams<{ id: string }>();
-  const { updateActivity, createActivity, activity, isLoadingActivity } = useactivites(id);
+  const { updateActivity, createActivity, activity, isLoadingActivity } = useActivities(id);
   const navigate = useNavigate();
 
   // Tags state
   const [tags, setTags] = useState<string[]>(activity?.tags ?? []);
-  const [currentTagInput, setCurrentTagInput] = useState<string>('');
 
   const isSubmitting = updateActivity.isPending || createActivity.isPending;
   const closeForm = () => navigate('/activities');
-
-  const handleAddTag = (tagToAdd: string) => {
-    const clean = tagToAdd.trim().replace(/^#/, '');
-    if (!clean) return;
-    if (!tags.includes(clean)) {
-      setTags((prev) => [...prev, clean]);
-    }
-    setCurrentTagInput('');
-  };
-
-  const handleRemoveTag = (tagToRemove: string) => {
-    setTags((prev) => prev.filter((t) => t !== tagToRemove));
-  };
-
-  const handleTagKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter' || e.key === ',') {
-      e.preventDefault();
-      handleAddTag(currentTagInput);
-    }
-  };
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -306,115 +271,11 @@ export default function ActivityForm() {
           />
 
           {/* 4. Interactive Tags Manager */}
-          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-              <LocalOfferIcon sx={{ fontSize: 18, color: tokens.primary }} />
-              <Typography variant="subtitle2" sx={{ fontWeight: 700, color: tokens.textPrimary }}>
-                Topics &amp; Tech Stack Tags
-              </Typography>
-            </Box>
-
-            {/* Tag input row */}
-            <Box sx={{ display: 'flex', gap: 1.5 }}>
-              <TextField
-                label="Add a topic (type & press Enter)"
-                placeholder="e.g. Docker, GraphQL, Redis..."
-                value={currentTagInput}
-                onChange={(e) => setCurrentTagInput(e.target.value)}
-                onKeyDown={handleTagKeyDown}
-                fullWidth
-                sx={fieldSx}
-              />
-              <Button
-                type="button"
-                variant="outlined"
-                onClick={() => handleAddTag(currentTagInput)}
-                disabled={!currentTagInput.trim()}
-                startIcon={<AddIcon />}
-                sx={{
-                  borderRadius: '14px',
-                  px: 2.8,
-                  borderColor: tokens.border,
-                  color: tokens.primary,
-                  whiteSpace: 'nowrap',
-                  '&:hover': {
-                    borderColor: tokens.primary,
-                    bgcolor: `${tokens.primary}12`,
-                  },
-                }}
-              >
-                Add Tag
-              </Button>
-            </Box>
-
-            {/* Selected Tags Chips */}
-            {tags.length > 0 ? (
-              <Box
-                sx={{
-                  display: 'flex',
-                  flexWrap: 'wrap',
-                  gap: 1,
-                  p: 1.5,
-                  borderRadius: '14px',
-                  bgcolor: tokens.surface3,
-                  border: `1px solid ${tokens.border}`,
-                }}
-              >
-                {tags.map((tag, idx) => (
-                  <GradientTag
-                    key={tag}
-                    tag={tag}
-                    index={idx}
-                    fontSize="0.8rem"
-                    onDelete={() => handleRemoveTag(tag)}
-                  />
-                ))}
-              </Box>
-            ) : (
-              <Typography variant="caption" sx={{ color: tokens.textMuted }}>
-                No tags added yet. Choose from popular topics below or type your own.
-              </Typography>
-            )}
-
-            {/* Recommended Quick-Pick Tags */}
-            <Box sx={{ mt: 0.5 }}>
-              <Typography variant="caption" sx={{ color: tokens.textMuted, display: 'block', mb: 1 }}>
-                Suggested Topics:
-              </Typography>
-              <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.8 }}>
-                {POPULAR_TAGS.map((recTag) => {
-                  const isSelected = tags.includes(recTag);
-                  return (
-                    <Chip
-                      key={recTag}
-                      label={recTag}
-                      size="small"
-                      clickable
-                      onClick={() =>
-                        isSelected ? handleRemoveTag(recTag) : handleAddTag(recTag)
-                      }
-                      sx={{
-                        fontSize: '0.75rem',
-                        fontWeight: 600,
-                        bgcolor: isSelected ? `${tokens.primary}22` : 'rgba(255, 255, 255, 0.04)',
-                        color: isSelected ? tokens.primary : tokens.textSecondary,
-                        border: `1px solid ${
-                          isSelected ? `${tokens.primary}60` : tokens.border
-                        }`,
-                        transition: 'all 0.15s ease',
-                        '&:hover': {
-                          bgcolor: isSelected
-                            ? `${tokens.primary}33`
-                            : 'rgba(255, 255, 255, 0.08)',
-                          borderColor: tokens.primary,
-                        },
-                      }}
-                    />
-                  );
-                })}
-              </Box>
-            </Box>
-          </Box>
+          <TagInput
+            value={tags}
+            onChange={setTags}
+            suggestions={POPULAR_TAGS}
+          />
 
           {/* 5. Date & Schedule */}
           <TextField

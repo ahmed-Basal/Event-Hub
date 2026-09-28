@@ -1,20 +1,21 @@
-import Card from '@mui/material/Card';
-import CardMedia from '@mui/material/CardMedia';
-import Box from '@mui/material/Box';
-import Typography from '@mui/material/Typography';
-import Button from '@mui/material/Button';
-import Chip from '@mui/material/Chip';
-import Avatar from '@mui/material/Avatar';
-import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
-import LocationOnIcon from '@mui/icons-material/LocationOn';
-import EditIcon from '@mui/icons-material/Edit';
-import EventBusyIcon from '@mui/icons-material/EventBusy';
-import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import {
+  Card,
+  CardMedia,
+  Box,
+  Typography,
+  Button,
+  Chip,
+  Avatar,
+} from '@mui/material';
+import {
+  CalendarMonth as CalendarMonthIcon,
+  LocationOn as LocationOnIcon,
+  Edit as EditIcon,
+  EventBusy as EventBusyIcon,
+  CheckCircle as CheckCircleIcon,
+} from '@mui/icons-material';
 import { Link } from 'react-router';
-import type { Activity } from '../../../lib/Types';
-import useactivites from '../../../lib/Hooks/useactivites';
-import { formatDate } from '../../../lib/UTlity/Utle';
-import { tokens } from '../../../theme/theme';
+import { useActivities, formatDate, tokens, type Activity } from '../../../lib';
 
 interface Props {
   activity: Activity;
@@ -29,7 +30,7 @@ const CATEGORY_GRADIENTS: Record<string, { badge: string; color: string }> = {
 };
 
 export default function ActivityDetailsHeader({ activity }: Props) {
-  const { updateActivity } = useactivites(activity?.id);
+  const { updateActivity } = useActivities(activity?.id);
   const isCancelled = activity?.isCancelled ?? false;
   const isHost = true;
   const isGoing = true;

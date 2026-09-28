@@ -1,29 +1,23 @@
-import Paper from '@mui/material/Paper';
-import Typography from '@mui/material/Typography';
-import List from '@mui/material/List';
-import ListItem from '@mui/material/ListItem';
-import Chip from '@mui/material/Chip';
-import ListItemAvatar from '@mui/material/ListItemAvatar';
-import Avatar from '@mui/material/Avatar';
-import ListItemText from '@mui/material/ListItemText';
-import Box from '@mui/material/Box';
-import Button from '@mui/material/Button';
-import Divider from '@mui/material/Divider';
-import GroupsIcon from '@mui/icons-material/Groups';
-import StarIcon from '@mui/icons-material/Star';
-import ShareIcon from '@mui/icons-material/Share';
+import {
+  Paper,
+  Typography,
+  List,
+  ListItem,
+  Chip,
+  ListItemAvatar,
+  Avatar,
+  ListItemText,
+  Box,
+  Button,
+  Divider,
+} from '@mui/material';
+import {
+  Groups as GroupsIcon,
+  Star as StarIcon,
+  Share as ShareIcon,
+} from '@mui/icons-material';
 import { Link } from 'react-router';
-import { tokens } from '../../../theme/theme';
-
-interface Attendee {
-  id: string;
-  name: string;
-  role: string;
-  avatar: string;
-  isHost?: boolean;
-  isFollowing?: boolean;
-  badgeColor?: string;
-}
+import { tokens, type Attendee } from '../../../lib';
 
 const ATTENDEES: Attendee[] = [
   {

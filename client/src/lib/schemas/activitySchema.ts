@@ -15,8 +15,8 @@ export const LEVEL_OPTIONS = [
   'All Levels',
 ] as const;
 
-export type Category = (typeof CATEGORY_OPTIONS)[number];
-export type Level = (typeof LEVEL_OPTIONS)[number];
+export type SchemaCategory = (typeof CATEGORY_OPTIONS)[number];
+export type SchemaLevel = (typeof LEVEL_OPTIONS)[number];
 
 export const activitySchema = z.object({
   title: z.string().min(1, { message: 'Title is required' }),

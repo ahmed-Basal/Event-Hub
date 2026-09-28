@@ -7,8 +7,17 @@ const agent = axios.create({
     baseURL,
 });
 
+const sleep = (delay: number) => {
+    return new Promise(resolve => {
+        setTimeout(resolve, delay);
+    });
+};
+
 agent.interceptors.response.use(
-    response => {
+    async response => {
+        if (import.meta.env.DEV) {
+            await sleep(1000);
+        }
         return response;
     },
     (error: AxiosError) => {

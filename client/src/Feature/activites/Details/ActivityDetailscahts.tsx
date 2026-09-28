@@ -1,26 +1,21 @@
 import { useState } from 'react';
-import Box from '@mui/material/Box';
-import Typography from '@mui/material/Typography';
-import Card from '@mui/material/Card';
-import CardContent from '@mui/material/CardContent';
-import TextField from '@mui/material/TextField';
-import Avatar from '@mui/material/Avatar';
-import Button from '@mui/material/Button';
-import Chip from '@mui/material/Chip';
-import Divider from '@mui/material/Divider';
-import ForumIcon from '@mui/icons-material/Forum';
-import SendIcon from '@mui/icons-material/Send';
+import {
+  Box,
+  Typography,
+  Card,
+  CardContent,
+  TextField,
+  Avatar,
+  Button,
+  Chip,
+  Divider,
+} from '@mui/material';
+import {
+  Forum as ForumIcon,
+  Send as SendIcon,
+} from '@mui/icons-material';
 import { Link } from 'react-router';
-import { tokens } from '../../../theme/theme';
-
-interface Comment {
-  id: string;
-  author: string;
-  avatar: string;
-  date: string;
-  body: string;
-  isSpeaker?: boolean;
-}
+import { tokens, type Comment } from '../../../lib';
 
 const INITIAL_COMMENTS: Comment[] = [
   {

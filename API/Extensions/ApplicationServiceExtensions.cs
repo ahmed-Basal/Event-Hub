@@ -1,64 +1,43 @@
-using API.Options;
-using Application.Activities.Commands;
-using Application.Activities.Validators;
-using Application.Core;
-using AutoMapper;
-using FluentValidation;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Options;
-using Persistence;
-
 namespace API.Extensions;
 
+/// <summary>
+/// Root extension orchestrator that provides factory-based and default registration of application services.
+/// </summary>
 public static class ApplicationServiceExtensions
 {
-    public static IServiceCollection AddApplicationServices(this IServiceCollection services, IConfiguration config)
+    /// <summary>
+    /// Registers application services using the Fluent ApplicationServiceFactory.
+    /// If no custom configure delegate is provided, all default services are registered automatically.
+    /// </summary>
+    public static IServiceCollection AddApplicationServices(
+        this IServiceCollection services,
+        IConfiguration config,
+        Action<ApplicationServiceFactory>? configure = null)
     {
-        // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
-        services.AddOpenApi();
+        var factory = new ApplicationServiceFactory(services, config);
 
-        // Register AutoMapper
-        services.AddAutoMapper(cfg => cfg.AddMaps(typeof(MappingProfiles).Assembly));
-
-        // Register MediatR
-        services.AddMediatR(cfg =>
+        if (configure is not null)
         {
-            cfg.RegisterServicesFromAssembly(typeof(CreateActivity).Assembly);
-            cfg.AddOpenBehavior(typeof(ValidationBehavior<,>));
-            cfg.LicenseKey = config["MediatR:LicenseKey"];
-        });
-
-        // Register FluentValidation
-        services.AddValidatorsFromAssemblyContaining<CreateActivityvalidator>();
-
-        // Options Pattern: Bind and validate ConnectionStrings configuration
-        services.AddOptions<DatabaseOptions>()
-            .BindConfiguration(DatabaseOptions.SectionName)
-            .ValidateDataAnnotations()
-            .ValidateOnStart();
-
-        // DbContext with PostgreSQL
-        services.AddDbContext<DevMeetDbContext>((serviceProvider, options) =>
+            configure(factory);
+        }
+        else
         {
-            var dbOptions = serviceProvider.GetRequiredService<IOptions<DatabaseOptions>>().Value;
-            options.UseNpgsql(dbOptions.DefaultConnection);
-        });
-        services.AddScoped<AppDbContext>(sp => (AppDbContext)sp.GetRequiredService<DevMeetDbContext>());
+            factory.WithAllDefaults();
+        }
 
-        // CORS Policy
-        services.AddCors(opt =>
-        {
-            opt.AddPolicy("CorsPolicy", policy =>
-            {
-                policy.AllowAnyHeader().AllowAnyMethod().WithOrigins(
-                    "http://localhost:5173",
-                    "https://localhost:5173",
-                    "http://localhost:3000",
-                    "https://localhost:3000"
-                );
-            });
-        });
+        return factory.Build();
+    }
 
-        return services;
+    /// <summary>
+    /// Creates a fluent factory instance directly for custom registration pipelines.
+    /// </summary>
+    public static ApplicationServiceFactory CreateServiceFactory(
+        this IServiceCollection services,
+        IConfiguration config)
+    {
+        return new ApplicationServiceFactory(services, config);
     }
 }
+
+
+

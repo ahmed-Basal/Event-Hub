@@ -23,11 +23,23 @@ public static class CreateActivity
         }
     }
 
-    public class Handler(DevMeetDbContext context, IMapper mapper) : IRequestHandler<Command, Result<string>>
+    public class Handler(DevMeetDbContext context) : IRequestHandler<Command, Result<string>>
     {
         public async Task<Result<string>> Handle(Command request, CancellationToken cancellationToken)
         {
-            var activity = mapper.Map<Activity>(request.ActivityDto);
+            var dto = request.ActivityDto;
+            var activity = Activity.Create(
+                title: dto.Title,
+                description: dto.Description,
+                category: dto.Category,
+                date: dto.Date,
+                city: dto.City,
+                venue: dto.Venue,
+                latitude: dto.Latitude,
+                longitude: dto.Longitude,
+                level: dto.Level,
+                tags: dto.Tags
+            );
 
             context.Activities.Add(activity);
 

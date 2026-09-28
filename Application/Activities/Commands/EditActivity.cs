@@ -25,7 +25,7 @@ public static class EditActivity
         }
     }
 
-    public class Handler(DevMeetDbContext context, IMapper mapper) : IRequestHandler<Command, Result<Unit>>
+    public class Handler(DevMeetDbContext context) : IRequestHandler<Command, Result<Unit>>
     {
         public async Task<Result<Unit>> Handle(Command request, CancellationToken cancellationToken)
         {
@@ -34,8 +34,21 @@ public static class EditActivity
 
             if (activity == null) return Result<Unit>.NotFound("Activity not found");
 
-            mapper.Map(request.ActivityDto, activity);
-            activity.Slug = Domain.Common.SlugHelper.GenerateSlug(activity.Title);
+            var dto = request.ActivityDto;
+            activity.UpdateDetails(
+                dto.Title,
+                dto.Description,
+                dto.Category,
+                dto.Date,
+                dto.Level,
+                dto.Tags
+            );
+            activity.UpdateLocation(
+                dto.City,
+                dto.Venue,
+                dto.Latitude,
+                dto.Longitude
+            );
 
             var result = await context.SaveChangesAsync(cancellationToken) > 0;
             if (!result) return Result<Unit>.Failure("Failed to update activity", 400);
