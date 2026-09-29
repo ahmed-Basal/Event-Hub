@@ -3,8 +3,7 @@ import Box from '@mui/material/Box';
 import NavBar from './NavBar';
 import Footer from './Footer';
 import { Outlet, useLocation } from 'react-router';
-import HomePage from '../../Feature/Home/HomePage';
-import { tokens } from '../../theme/theme';
+import { tokens } from '../../theme';
 
 function App() {
   const location = useLocation();
@@ -20,7 +19,7 @@ function App() {
       }}
     >
       {isHome ? (
-        <HomePage />
+        <Outlet />
       ) : (
         <>
           <NavBar />

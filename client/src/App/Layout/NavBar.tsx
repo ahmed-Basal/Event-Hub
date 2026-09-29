@@ -20,7 +20,7 @@ import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import AddIcon from '@mui/icons-material/Add';
 import MenuIcon from '@mui/icons-material/Menu';
 import { NavLink, useNavigate } from 'react-router';
-import { tokens } from '../../theme/theme';
+import { tokens } from '../../theme';
 
 const CITIES = ['Cairo', 'Alexandria', 'Giza', 'El Gouna', 'Dahab', 'Sahel'];
 

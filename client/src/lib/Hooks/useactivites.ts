@@ -1,1 +1,0 @@
-export { useActivities, useactivites, default } from './useActivities';

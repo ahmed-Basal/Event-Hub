@@ -9,7 +9,7 @@ import GitHubIcon from '@mui/icons-material/GitHub';
 import LinkedInIcon from '@mui/icons-material/LinkedIn';
 import TwitterIcon from '@mui/icons-material/Twitter';
 import { NavLink } from 'react-router';
-import { tokens } from '../../theme/theme';
+import { tokens } from '../../theme';
 
 const QUICK_LINKS = [
   { label: 'Explore Events', to: '/activities' },

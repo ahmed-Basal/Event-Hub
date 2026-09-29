@@ -21,7 +21,8 @@ public static class DbInitializer
         {
             foreach (var act in activitiesWithoutSlug)
             {
-                act.UpdateTitle(act.Title);
+                var title = string.IsNullOrWhiteSpace(act.Title) ? "Untitled Activity" : act.Title;
+                act.UpdateTitle(title);
             }
             await context.SaveChangesAsync();
         }
