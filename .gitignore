@@ -1,4 +1,4 @@
-## .NET Core
+## .NET Core Build & Cache
 [Bb]in/
 [Oo]bj/
 [Ll]og/
@@ -12,14 +12,31 @@
 # .NET Launch Settings & Local Configurations
 **/launchSettings.json
 **/appsettings.Development.json
+**/appsettings.*.local.json
 
-## Node / React
+# Databases & Local Storage
+*.db
+*.db-shm
+*.db-wal
+*.sqlite
+*.sqlite3
+
+# Certificates & Keys
+*.pfx
+*.pem
+*.crt
+*.key
+
+## Node / React / Vite
 **/node_modules/
 **/dist/
 **/dist-ssr/
 *.local
+.vite/
+*.tsbuildinfo
+.eslintcache
 
-# Environment variables
+# Environment variables & Secrets
 .env
 .env.*
 !.env.example
@@ -31,14 +48,16 @@ yarn-error.log*
 pnpm-debug.log*
 *.log
 
-# Visual Studio / VS Code
+# IDE & Editors
 .vscode/*
 !.vscode/settings.json
 !.vscode/tasks.json
 !.vscode/launch.json
 !.vscode/extensions.json
 .idea/
+*.sw?
 
 # OS Files
 .DS_Store
 Thumbs.db
+desktop.ini
