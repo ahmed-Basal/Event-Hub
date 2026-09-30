@@ -13,6 +13,7 @@ import '@fontsource/inter/600.css'
 import '@fontsource/inter/700.css'
 import { ToastContainer } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
+import { ErrorBoundary } from './shared'
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -31,13 +32,15 @@ const queryClient = new QueryClient({
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <ThemeProvider theme={lammaMubarmegeen}>
-      <CssBaseline />
-      <QueryClientProvider client={queryClient}>
-        <ReactQueryDevtools />
-        <ToastContainer position="bottom-right" hideProgressBar theme="colored" />
-        <RouterProvider router={router} />
-      </QueryClientProvider>
-    </ThemeProvider>
+    <ErrorBoundary>
+      <ThemeProvider theme={lammaMubarmegeen}>
+        <CssBaseline />
+        <QueryClientProvider client={queryClient}>
+          <ReactQueryDevtools />
+          <ToastContainer position="bottom-right" hideProgressBar theme="colored" />
+          <RouterProvider router={router} />
+        </QueryClientProvider>
+      </ThemeProvider>
+    </ErrorBoundary>
   </StrictMode>,
 )

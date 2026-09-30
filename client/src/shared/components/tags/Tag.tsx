@@ -224,5 +224,5 @@ export const Tag: React.FC<TagProps> = ({
   );
 };
 
-// Backward compatibility alias
-export const GradientTag = Tag;
+// Default export
+export default Tag;

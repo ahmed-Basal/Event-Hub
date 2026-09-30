@@ -7,9 +7,27 @@
 export { default as Spinner } from './components/feedback/Spinner';
 export { EmptyState, type EmptyStateProps } from './components/feedback/EmptyState';
 export { ErrorBoundary } from './components/feedback/ErrorBoundary';
+export { default as ErrorMessage, type ErrorMessageProps } from './components/feedback/ErrorMessage';
+
+// Navigation Components
+export { default as MenuItemLink, type MenuItemLinkProps } from './components/navigation/MenuItemLink';
+
+// Form Components
+export {
+  TextInput,
+  type TextInputProps,
+  TextArea,
+  type TextAreaProps,
+  SelectInput,
+  type SelectInputProps,
+  type SelectOption,
+  DateInput,
+  type DateInputProps,
+  formFieldSx,
+} from './components/form';
 
 // Tag Components
-export { Tag, GradientTag, type TagProps } from './components/tags/Tag';
+export { Tag, type TagProps } from './components/tags/Tag';
 export { TagList, type TagListProps } from './components/tags/TagList';
 export { TagInput, type TagInputProps } from './components/tags/TagInput';
 

@@ -1,10 +1,8 @@
 import { useEffect } from 'react';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
-import MenuItem from '@mui/material/MenuItem';
 import Paper from '@mui/material/Paper';
 import Typography from '@mui/material/Typography';
-import TextField from '@mui/material/TextField';
 import Divider from '@mui/material/Divider';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import RocketLaunchIcon from '@mui/icons-material/RocketLaunch';
@@ -21,6 +19,10 @@ import {
   CATEGORY_OPTIONS,
   LEVEL_OPTIONS,
   activitySchema,
+  TextInput,
+  TextArea,
+  SelectInput,
+  DateInput,
   type ActivityFormData,
   type SchemaCategory,
 } from '../../../shared';
@@ -33,6 +35,7 @@ import { useActivityDetail, useActivityMutations } from '../hooks';
  * - SRP: Form logic is isolated from API transport and global cache logic.
  * - DIP: Depends on useActivityDetail and useActivityMutations abstractions.
  * - Type Safety: Validated via Zod with automatic React Hook Form error binding.
+ * - Reusability: Leverages generic shared form components (TextInput, TextArea, SelectInput, DateInput).
  */
 export default function ActivityForm() {
   const { id } = useParams<{ id: string }>();
@@ -43,11 +46,9 @@ export default function ActivityForm() {
   const { createActivity, updateActivity, isMutating } = useActivityMutations(id);
 
   const {
-    register,
     handleSubmit,
     control,
     reset,
-    formState: { errors },
   } = useForm<ActivityFormData>({
     resolver: zodResolver(activitySchema),
     defaultValues: {
@@ -108,41 +109,6 @@ export default function ActivityForm() {
   if (isLoadingActivity) {
     return <Spinner message="Loading meetup details..." minHeight={340} />;
   }
-
-  // Modern dark input styling preserving exact design system tokens
-  const fieldSx = {
-    '& .MuiOutlinedInput-root': {
-      borderRadius: '14px',
-      backgroundColor: tokens.surface2,
-      transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
-      '& fieldset': {
-        borderColor: tokens.border,
-        borderWidth: '1px',
-      },
-      '&:hover fieldset': {
-        borderColor: tokens.borderHover,
-      },
-      '&.Mui-focused fieldset': {
-        borderColor: tokens.primary,
-        borderWidth: '1.5px',
-      },
-    },
-    '& .MuiInputLabel-root': {
-      color: tokens.textSecondary,
-      '&.Mui-focused': {
-        color: tokens.primary,
-      },
-    },
-    '& .MuiInputBase-input': {
-      color: tokens.textPrimary,
-      fontSize: '0.95rem',
-    },
-    '& .MuiFormHelperText-root': {
-      color: tokens.textMuted,
-      fontSize: '0.78rem',
-      mt: 0.8,
-    },
-  };
 
   return (
     <Box sx={{ maxWidth: 840, mx: 'auto', mb: 8, mt: 1 }}>
@@ -240,22 +206,19 @@ export default function ActivityForm() {
 
         <Divider sx={{ borderColor: tokens.border, mb: 3.5 }} />
 
-        {/* ── Form with React Hook Form + Zod Validation ── */}
+        {/* ── Form with React Hook Form + Shared Form Components ── */}
         <Box
           component="form"
           onSubmit={handleSubmit(onSubmit)}
           sx={{ display: 'flex', flexDirection: 'column', gap: 3.2 }}
         >
           {/* 1. Title */}
-          <TextField
-            {...register('title')}
+          <TextInput
+            name="title"
+            control={control}
             label="Event Title"
             required
             placeholder="e.g. Cairo .NET 9 & Microservices Summit"
-            error={Boolean(errors.title)}
-            helperText={errors.title?.message}
-            fullWidth
-            sx={fieldSx}
           />
 
           {/* 2. Category & Level Grid */}
@@ -266,70 +229,29 @@ export default function ActivityForm() {
               gap: 2.5,
             }}
           >
-            <Controller
+            <SelectInput
               name="category"
               control={control}
-              render={({ field }) => (
-                <TextField
-                  {...field}
-                  select
-                  label="Technical Track"
-                  error={Boolean(errors.category)}
-                  helperText={errors.category?.message}
-                  fullWidth
-                  sx={fieldSx}
-                >
-                  {CATEGORY_OPTIONS.map((cat) => (
-                    <MenuItem key={cat} value={cat}>
-                      {cat}
-                    </MenuItem>
-                  ))}
-                </TextField>
-              )}
+              label="Technical Track"
+              options={CATEGORY_OPTIONS}
             />
 
-            <Controller
+            <SelectInput
               name="level"
               control={control}
-              render={({ field }) => (
-                <TextField
-                  {...field}
-                  value={field.value ?? 'All Levels'}
-                  select
-                  label="Audience Level"
-                  error={Boolean(errors.level)}
-                  helperText={errors.level?.message}
-                  fullWidth
-                  sx={fieldSx}
-                >
-                  {LEVEL_OPTIONS.map((lvl) => (
-                    <MenuItem key={lvl} value={lvl}>
-                      {lvl}
-                    </MenuItem>
-                  ))}
-                </TextField>
-              )}
+              label="Audience Level"
+              options={LEVEL_OPTIONS}
             />
           </Box>
 
           {/* 3. Description */}
-          <TextField
-            {...register('description')}
+          <TextArea
+            name="description"
+            control={control}
             label="Detailed Agenda & Overview"
             required
-            placeholder="Describe the key takeaways, speakers, prerequisites, and what developers will build or learn..."
-            error={Boolean(errors.description)}
-            helperText={errors.description?.message}
-            multiline
             rows={4}
-            fullWidth
-            sx={{
-              ...fieldSx,
-              '& .MuiOutlinedInput-root': {
-                ...fieldSx['& .MuiOutlinedInput-root'],
-                borderRadius: '16px',
-              },
-            }}
+            placeholder="Describe the key takeaways, speakers, prerequisites, and what developers will build or learn..."
           />
 
           {/* 4. Interactive Tags Manager */}
@@ -346,21 +268,11 @@ export default function ActivityForm() {
           />
 
           {/* 5. Date & Schedule */}
-          <TextField
-            {...register('date')}
-            type="date"
+          <DateInput
+            name="date"
+            control={control}
             label="Event Date"
             required
-            slotProps={{ inputLabel: { shrink: true } }}
-            error={Boolean(errors.date)}
-            helperText={errors.date?.message}
-            fullWidth
-            sx={{
-              ...fieldSx,
-              '& input[type="date"]': {
-                colorScheme: 'dark',
-              },
-            }}
           />
 
           {/* 6. Location: City & Venue */}
@@ -371,26 +283,20 @@ export default function ActivityForm() {
               gap: 2.5,
             }}
           >
-            <TextField
-              {...register('city')}
+            <TextInput
+              name="city"
+              control={control}
               label="City"
               required
               placeholder="e.g. Cairo, Alexandria, Giza, Assiut"
-              error={Boolean(errors.city)}
-              helperText={errors.city?.message}
-              fullWidth
-              sx={fieldSx}
             />
 
-            <TextField
-              {...register('venue')}
+            <TextInput
+              name="venue"
+              control={control}
               label="Venue / Address"
               required
               placeholder="e.g. The GrEEK Campus, Downtown Cairo"
-              error={Boolean(errors.venue)}
-              helperText={errors.venue?.message}
-              fullWidth
-              sx={fieldSx}
             />
           </Box>
 

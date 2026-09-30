@@ -19,15 +19,16 @@ import LocationOnIcon from '@mui/icons-material/LocationOn';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import AddIcon from '@mui/icons-material/Add';
 import MenuIcon from '@mui/icons-material/Menu';
-import { NavLink, useNavigate } from 'react-router';
+import { NavLink } from 'react-router';
 import { tokens } from '../../theme';
+import { MenuItemLink } from '../../shared';
 
 const CITIES = ['Cairo', 'Alexandria', 'Giza', 'El Gouna', 'Dahab', 'Sahel'];
 
 export default function NavBar() {
-  const navigate = useNavigate();
   const [city, setCity] = useState('Cairo');
   const [cityAnchor, setCityAnchor] = useState<null | HTMLElement>(null);
+  const [mobileAnchor, setMobileAnchor] = useState<null | HTMLElement>(null);
   const [searchFocused, setSearchFocused] = useState(false);
 
   return (
@@ -299,10 +300,42 @@ export default function NavBar() {
             {/* Mobile menu icon */}
             <IconButton
               sx={{ display: { xs: 'flex', md: 'none' }, color: tokens.textSecondary }}
-              onClick={() => navigate('/activities')}
+              onClick={(e) => setMobileAnchor(e.currentTarget)}
             >
               <MenuIcon />
             </IconButton>
+
+            {/* Mobile Navigation Dropdown */}
+            <Menu
+              anchorEl={mobileAnchor}
+              open={Boolean(mobileAnchor)}
+              onClose={() => setMobileAnchor(null)}
+              slotProps={{
+                paper: {
+                  sx: {
+                    mt: 1,
+                    bgcolor: tokens.surface2,
+                    border: `1px solid ${tokens.border}`,
+                    borderRadius: '14px',
+                    minWidth: 180,
+                    p: 0.5,
+                  },
+                },
+              }}
+            >
+              <MenuItemLink to="/" onClick={() => setMobileAnchor(null)}>
+                Home
+              </MenuItemLink>
+              <MenuItemLink to="/activities" onClick={() => setMobileAnchor(null)}>
+                Explore
+              </MenuItemLink>
+              <MenuItemLink to="/createActivity" onClick={() => setMobileAnchor(null)}>
+                Create Activity
+              </MenuItemLink>
+              <MenuItemLink to="/errors" onClick={() => setMobileAnchor(null)}>
+                Errors
+              </MenuItemLink>
+            </Menu>
           </Box>
         </Toolbar>
       </Container>

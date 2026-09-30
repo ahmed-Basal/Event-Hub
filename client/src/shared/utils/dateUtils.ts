@@ -52,10 +52,3 @@ export function formatRelativeTime(date?: Date | string | null): string {
     return '';
   }
 }
-
-/**
- * Returns formatted HTML input date string 'yyyy-MM-dd' for `<input type="date" />`.
- */
-export function formatDateForInput(date?: Date | string | null): string {
-  return formatDate(date, 'yyyy-MM-dd');
-}

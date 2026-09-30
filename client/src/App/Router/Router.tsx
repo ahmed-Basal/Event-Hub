@@ -5,7 +5,7 @@ import { Spinner } from '../../shared';
 
 // Code Splitting / Lazy Loading (Phase 7 Optimization)
 // Significantly reduces initial bundle size by loading pages on-demand
-const HomePage = lazy(() => import('../../features/home/HomePage'));
+const HomePage = lazy(() => import('../../features/home/pages/HomePage'));
 const ActivityDashboard = lazy(() => import('../../features/activities/pages/ActivityDashboard'));
 const ActivityForm = lazy(() => import('../../features/activities/pages/ActivityForm'));
 const ActivityDetailsPage = lazy(() => import('../../features/activities/pages/ActivityDetailsPage'));
