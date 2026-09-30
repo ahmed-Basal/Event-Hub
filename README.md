@@ -35,7 +35,7 @@
 - [Frontend Features & UI Walkthrough](#-frontend-features--ui-walkthrough)
 - [Developer CLI Cheat Sheet](#-developer-cli-cheat-sheet)
 - [Database Migrations & Seeding](#-database-migrations--seeding)
-- [License & Authors](#-license)
+- [License](#-license)
 
 ---
 
@@ -46,12 +46,14 @@
 | **Clean Architecture** | Strict dependency flow where Domain has zero external dependencies, Application encapsulates all use cases, and Infrastructure/API depend solely inward. |
 | **Domain-Driven Design (DDD)** | Rich `Activity` entity with private setters, encapsulation, domain invariants, business mutation methods, and automatic SEO-friendly slug generation. |
 | **CQRS Pattern** | Complete separation of read operations (Queries) and write operations (Commands) using **MediatR**. |
+| **Options Pattern** | Strongly-typed configuration (`DatabaseOptions`, `MediatorOptions`) bound via `services.AddOptions<T>()`. |
 | **Fluent Validation Pipeline** | Cross-cutting MediatR `IPipelineBehavior` executing FluentValidation rules automatically before request handlers are reached. |
 | **Standardized Result Pattern** | Handlers return strongly-typed `Result<T>` objects, eliminating exceptions for control flow and mapping cleanly to HTTP 200, 400, or 404. |
 | **Enterprise Error Middleware** | Centralized `ExceptionMiddleware` transforming unhandled exceptions into structured `AppException` payloads with unique `TraceId`, and validation errors into RFC 7807 `ValidationProblemDetails`. |
 | **Client-Side Diagnostics** | Axios interceptors intelligent routing: preserves form state on failed mutations (showing Trace ID toasts), navigates to diagnostic `<ServerError />` pages on query failures, and redirects malformed IDs to `<NotFound />`. |
 | **Server-State Sync** | **TanStack Query v5** manages server state caching, background refetching, and instant cache invalidations on mutations. |
 | **Performance & Code-Splitting** | Route-level lazy loading (`React.lazy` and `<Suspense />`) in React Router, reducing initial bundle size and initial load time. |
+| **Reusable Form System** | Generic form inputs (`TextInput`, `TextArea`, `SelectInput`, `DateInput`) cutting page bundle sizes by up to 79%. |
 
 ---
 
@@ -70,13 +72,13 @@ graph TD
     end
 
     subgraph API_Layer ["API Layer (ASP.NET Core)"]
-        Controllers["Controllers (ActivitiesController, BuggyController)"]
+        Controllers["Controllers (ActivitiesController, HomeController, BuggyController)"]
         Middleware["ExceptionMiddleware (RFC 7807 / AppException)"]
-        ServiceFactory["ApplicationServiceFactory (Fluent Registration)"]
+        OptionsPattern["Options Pattern (DatabaseOptions, MediatorOptions)"]
     end
 
     subgraph App_Layer ["Application Layer (Use Cases & CQRS)"]
-        Queries["Queries (GetActivityList, GetActivityDetails)"]
+        Queries["Queries (GetActivityList, GetActivityDetails, GetHomePageData)"]
         Commands["Commands (CreateActivity, EditActivity, DeleteActivity)"]
         Pipeline["MediatR Pipeline (ValidationBehavior)"]
         Validators["FluentValidation (Create/Edit Validators)"]
@@ -98,155 +100,20 @@ graph TD
 
     Axios -->|"HTTPS REST Requests"| Middleware
     Middleware --> Controllers
-    Controllers -->|"MediatR Send(Request)"| Pipeline
-    Pipeline --> Validators
-    Pipeline --> Queries & Commands
-    Queries & Commands --> Entities
-    Queries & Commands --> DbContext
-    DbContext -->|"Npgsql"| Database
+    Controllers --> App_Layer
+    App_Layer --> Domain_Layer
+    App_Layer --> Persist_Layer
+    Persist_Layer --> Database
 ```
 
 ---
 
-### 2. CQRS & Error Handling Pipeline
-
-```mermaid
-sequenceDiagram
-    autonumber
-    actor User as User / Browser
-    participant Axios as Axios Interceptor
-    participant Middleware as ExceptionMiddleware
-    participant Controller as ActivitiesController
-    participant Pipeline as MediatR Pipeline (ValidationBehavior)
-    participant Handler as Command / Query Handler
-    participant DbContext as DevMeetDbContext
-    participant DB as PostgreSQL
-
-    User->>Axios: Dispatches Action (e.g. POST /api/activities)
-    Axios->>Middleware: HTTP POST Request
-    Middleware->>Controller: Invokes Action Method
-    Controller->>Pipeline: Mediator.Send(CreateActivity.Command)
-    
-    alt Validation Fails
-        Pipeline-->>Middleware: Throws FluentValidation.ValidationException
-        Middleware-->>Axios: 400 Bad Request (RFC 7807 ValidationProblemDetails)
-        Axios-->>User: Populates Form Errors / Displays Toast
-    else Validation Passes
-        Pipeline->>Handler: Executes Handle()
-        Handler->>DbContext: Persists Changes
-        DbContext->>DB: SQL INSERT/UPDATE
-        DB-->>DbContext: Success
-        Handler-->>Controller: Returns Result<string>.Success(id)
-        Controller-->>Middleware: Returns HandleResult() -> 200 OK
-        Middleware-->>Axios: 200 OK Response
-        Axios-->>User: Invalidation Triggers Query Refetch
-    end
-```
-
----
-
-### 3. Frontend State & Routing Flow
-
-```mermaid
-flowchart LR
-    URL["Browser URL"] --> Router["React Router"]
-    
-    subgraph Pages ["Code-Split Pages (Suspense & Lazy)"]
-        HomePage["HomePage (Hero + Countdown)"]
-        Dashboard["ActivityDashboard (Filters + List)"]
-        Details["ActivityDetailsPage (Header + Info + Chats)"]
-        Form["ActivityForm (Zod + React Hook Form)"]
-        Errors["TestErrors Playground"]
-        NotFound["NotFound Page (404)"]
-        ServerError["ServerError Diagnostic (500)"]
-    end
-
-    Router --> HomePage
-    Router --> Dashboard
-    Router --> Details
-    Router --> Form
-    Router --> Errors
-    Router --> NotFound
-    Router --> ServerError
-
-    Dashboard & Details & Form --> Hooks["Custom React Hooks (useActivitiesList, useActivityDetail, useActivityMutations)"]
-    Hooks --> QueryClient["TanStack QueryClient Cache"]
-    QueryClient --> Agent["Axios Agent Interceptor"]
-```
-
----
-
-## 🧩 Domain-Driven Design (DDD) Model
-
-The core domain entity [`Activity`](file:///c:/Users/ahmed/OneDrive/Desktop/FullStackDotNEtREACT/Domain/Activity.cs) follows Domain-Driven Design principles:
-
-- **Private Setters & Encapsulation**: Internal properties cannot be altered arbitrarily from outside the domain boundary.
-- **Factory Method**: Instantiation is regulated by `Activity.Create(...)`, guaranteeing that invariants (title presence, valid dates, coordinates) are validated upfront.
-- **Rich Domain Methods**: State changes occur through explicit domain operations:
-  - `UpdateTitle(string newTitle)`: Modifies title and automatically triggers slug regeneration.
-  - `UpdateDetails(...)`: Updates core event parameters and tags.
-  - `UpdateLocation(...)`: Updates city, venue, and geographical latitude/longitude.
-  - `Cancel()` / `Reactivate()`: Flips event status lifecycle without hard deletes.
-  - `AddTag(string tag)` / `RemoveTag(...)` / `SetTags(...)`: Enforces tag formatting and uniqueness.
-- **URL Slug Generation**: Built-in [`SlugHelper`](file:///c:/Users/ahmed/OneDrive/Desktop/FullStackDotNEtREACT/Domain/Common/SlugHelper.cs) creates readable, SEO-optimized slugs (e.g., `cairo-dotnet-9-distributed-systems-masterclass`) enabling intuitive routing: `/activities/:id/:slug`.
-
-```csharp
-// Example: Creating an Activity via Domain Factory
-var activity = Activity.Create(
-    title: "Cairo .NET 9 & Distributed Systems Masterclass",
-    description: "Technical meetup on Clean Architecture and CQRS...",
-    category: "BackEnd",
-    date: DateTime.UtcNow.AddDays(7),
-    city: "Cairo",
-    venue: "The Greek Campus, Downtown Cairo",
-    latitude: 30.0444,
-    longitude: 31.2357,
-    level: "Advanced",
-    tags: [".NET 9", "PostgreSQL", "Clean Architecture", "Redis"]
-);
-```
-
----
-
-## 🛡 Resilient Error Handling System
-
-The application features a production-grade diagnostic and fault-tolerance architecture:
-
-```
-├── Backend Pipeline
-│   ├── FluentValidation ─────> Throws ValidationException if DTO invalid
-│   ├── ExceptionMiddleware ───> Intercepts all unhandled errors
-│   │   ├── ValidationException -> Returns 400 Bad Request with RFC 7807 ValidationProblemDetails
-│   │   └── Unhandled Exception -> Logs with TraceId and returns 500 AppException
-│   └── Result<T> Pattern ─────> BaseApiController.HandleResult() translates 200, 400, 404
-│
-└── Frontend Interceptors
-    ├── Status 400 ───────────> Parses model state errors; redirects bad GUID lookups to /not-found
-    ├── Status 401 ───────────> Triggers "Unauthorised" toast notification
-    ├── Status 404 ───────────> Navigates seamlessly to /not-found
-    └── Status 500
-        ├── On Mutations ─────> Keeps user on form (prevents lost inputs) + displays Trace ID toast
-        └── On Queries ───────> Saves error to sessionStorage + navigates to /server-error
-```
-
-### Diagnostic Error Test Lab (`/errors`)
-The backend provides a dedicated [`BuggyController`](file:///c:/Users/ahmed/OneDrive/Desktop/FullStackDotNEtREACT/API/Controllers/BuggyController.cs), and the frontend features an interactive diagnostic page at `/errors` to test and demonstrate error response handling:
-- **400 Bad Request**: Tests general error response parsing.
-- **401 Unauthorized**: Tests auth failure toasts.
-- **404 Not Found**: Tests automatic redirection to the not-found view.
-- **500 Server Error**: Tests diagnostic stack trace visualization and Trace ID persistence.
-- **Validation Error**: Tests multi-field FluentValidation error extraction.
-
----
-
-## 💻 Tech Stack & Ecosystem
+## 🧰 Tech Stack & Ecosystem
 
 ### Backend Architecture
 | Package / Technology | Version | Purpose |
 | :--- | :--- | :--- |
-| **.NET SDK / C#** | `net11.0` / `net10.0` | High-performance managed runtime and web framework |
-| **ASP.NET Core Web API** | Built-in | RESTful HTTP API controllers and middleware pipeline |
-| **PostgreSQL** | `16+` | Enterprise relational database |
+| **.NET SDK** | `11.0 / 10.0` | Core runtime platform and ASP.NET Core framework |
 | **Entity Framework Core** | `10.0.4` | Code-First ORM and migration management |
 | **Npgsql.EntityFrameworkCore.PostgreSQL** | `10.0.0` | High-performance PostgreSQL database provider for EF Core |
 | **MediatR** | `14.2.0` | In-process mediator implementing CQRS handlers and pipeline behaviors |
@@ -264,7 +131,7 @@ The backend provides a dedicated [`BuggyController`](file:///c:/Users/ahmed/OneD
 | **Emotion** | `^11.14` | CSS-in-JS styling engine underpinning MUI components |
 | **TanStack Query (React Query)** | `^5.103.2` | Asynchronous server-state caching, deduping, and background synchronization |
 | **React Router** | `^7.18 / ^8.4` | Client-side routing with lazy-loaded route chunks and code splitting |
-| **React Hook Form** | `^7.88.0` | Performant, uncontrolled form state management |
+| **React Hook Form** | `^7.88.0` | Performant form state management |
 | **Zod** | `^4.6.5` | Schema declaration and client-side form validation |
 | **Axios** | `^1.20.0` | HTTP client with request/response interceptors and delay simulation |
 | **Date-fns** | `^4.4.0` | Modern, modular date manipulation and formatting library |
@@ -284,22 +151,23 @@ FullStackDotNEtREACT/
 │   ├── Controllers/                          # REST Controllers
 │   │   ├── ActivitiesController.cs           # CRUD operations via MediatR
 │   │   ├── BaseApiController.cs              # Common mediator & Result<T> handler
-│   │   └── BuggyController.cs                # Diagnostic endpoints (400, 401, 404, 500)
+│   │   ├── BuggyController.cs                # Diagnostic endpoints (400, 401, 404, 500)
+│   │   └── HomeController.cs                 # Dedicated landing page endpoint (/api/home)
 │   ├── Extensions/                           # Modular Service Registrations
 │   │   ├── ApplicationServiceExtensions.cs   # IServiceCollection root orchestrator
 │   │   ├── ApplicationServiceFactory.cs      # Fluent builder for application services
 │   │   ├── CorsExtensions.cs                 # Development & production CORS policies
-│   │   ├── CqrsExtensions.cs                 # MediatR & pipeline behaviors registration
+│   │   ├── CqrsExtensions.cs                 # MediatR, pipeline behaviors & options setup
 │   │   ├── DatabaseExtensions.cs             # DbContext & Npgsql connection setup
 │   │   ├── MappingExtensions.cs              # AutoMapper profiles registration
 │   │   └── MigrationExtensions.cs            # Automated startup migrations & seeding
 │   ├── Middleware/
 │   │   └── ExceptionMiddleware.cs            # RFC 7807 & AppException middleware
-│   ├── Options/
-│   │   └── DatabaseOptions.cs                # Strongly-typed database configuration
+│   ├── Options/                              # Options Pattern Classes
+│   │   ├── DatabaseOptions.cs                # Strongly-typed database connection settings
+│   │   └── MediatorOptions.cs                # Strongly-typed MediatR configuration
 │   ├── Program.cs                            # Host setup, middleware pipeline, entry point
-│   ├── appsettings.Development.json          # Development connection string & settings
-│   └── appsettings.json                      # Base configuration
+│   └── appsettings.json                      # Unified configuration settings
 │
 ├── Application/                              # Business Logic & CQRS Layer
 │   ├── Activities/
@@ -317,6 +185,11 @@ FullStackDotNEtREACT/
 │   │       ├── BaseActivityValidator.cs      # Reusable activity validation rules
 │   │       ├── CreateActivityValidator.cs    # Validator for CreateActivityDto
 │   │       └── EditActivityValidator.cs      # Validator for EditActivityDto
+│   ├── Home/                                 # Home Feature Slice (Backend)
+│   │   ├── DTO/
+│   │   │   └── HomePageDto.cs                # FeaturedActivity, UpcomingActivities, Stats
+│   │   └── Queries/
+│   │       └── GetHomePageData.cs            # CQRS query for landing page data & metrics
 │   └── Core/
 │       ├── AppException.cs                   # Standardized error transfer model
 │       ├── MappingProfiles.cs                # AutoMapper mapping definitions
@@ -329,10 +202,9 @@ FullStackDotNEtREACT/
 │       └── SlugHelper.cs                     # URL-friendly slug generator
 │
 ├── Persistence/                              # Data Access & Entity Framework Layer
-│   ├── AppDbContext.cs                       # Primary EF Core DbContext alias
 │   ├── DevMeetDbContext.cs                   # DbContext with Activity entity mapping
 │   ├── DbInitializer.cs                      # Seed data engine (Egyptian Tech Events)
-│   └── Migrations/                           # Code-First database migrations
+│   └── Migrations/                           # Unified Code-First database migrations
 │
 └── client/                                   # Modern React 19 Frontend SPA
     ├── public/                               # Static public assets
@@ -340,9 +212,9 @@ FullStackDotNEtREACT/
     │   ├── App/
     │   │   ├── Layout/                       # Application Shell
     │   │   │   ├── App.tsx                   # Main layout container
-    │   │   │   └── NavBar.tsx                # Responsive top navigation bar
+    │   │   │   └── NavBar.tsx                # Responsive top navigation & mobile menu
     │   │   └── Router/
-    │   │       └── Router.tsx                # React Router v7/v8 config with React.lazy
+    │   │       └── Router.tsx                # React Router config with React.lazy
     │   ├── features/                         # Feature-Driven Slices
     │   │   ├── activities/                   # Activities Feature Module
     │   │   │   ├── api/                      # Feature-specific API queries & mutations
@@ -361,24 +233,43 @@ FullStackDotNEtREACT/
     │   │   │   └── pages/                    # Routed Page Views
     │   │   │       ├── ActivityDashboard.tsx # Filterable dashboard & event feed
     │   │   │       ├── ActivityDetailsPage.tsx# In-depth event information view
-    │   │   │       └── ActivityForm.tsx      # React Hook Form + Zod create/edit page
+    │   │   │       └── ActivityForm.tsx      # Create/edit page using shared form inputs
     │   │   ├── errors/                       # Diagnostic & Error Pages
     │   │   │   ├── NotFound.tsx              # 404 page with return action
     │   │   │   ├── ServerError.tsx           # 500 error view with stack trace explorer
     │   │   │   ├── TestErrors.tsx            # Interactive error testing workbench
-    │   │   │   └── ValidationError.tsx       # Validation errors modal/banner
-    │   │   └── home/
-    │   │       └── HomePage.tsx              # Landing page with live event countdown
-    │   ├── shared/                           # Reusable Shared Utilities
+    │   │   │   └── ValidationError.tsx       # Validation errors banner using ErrorMessage
+    │   │   └── home/                         # Dedicated Home Feature Slice (Frontend)
+    │   │       ├── api/                      # Dedicated home HTTP API & query keys
+    │   │       │   ├── homeApi.ts            # Axios calls for /home
+    │   │       │   └── homeKeys.ts           # Cache key factory
+    │   │       ├── components/               # Home UI components
+    │   │       │   ├── CountdownTimer.tsx    # Live countdown display
+    │   │       │   ├── FeaturedEventCard.tsx # Flagship event showcase
+    │   │       │   ├── HeroSection.tsx       # Brand header & CTAs
+    │   │       │   ├── StatsBar.tsx          # Live community statistics
+    │   │       │   └── UpcomingEvents.tsx    # Preview strip of upcoming meetups
+    │   │       ├── hooks/                    # Feature hooks
+    │   │       │   ├── useCountdown.ts       # 1-second countdown ticker
+    │   │       │   └── useHomeData.ts        # TanStack Query hook for home data
+    │   │       ├── pages/
+    │   │       │   └── HomePage.tsx          # Orchestrator consuming useHomeData
+    │   │       └── types/                    # HomePageData & HomeStats interfaces
+    │   ├── shared/                           # Reusable Shared Layer
     │   │   ├── api/
-    │   │   │   └── agent.ts                  # Axios instance with interceptors & latency simulation
-    │   │   ├── components/                   # Generic UI components (Spinner, Badges)
-    │   │   ├── schemas/                  # Shared Zod validation schemas
+    │   │   │   └── agent.ts                  # Axios client with interceptors
+    │   │   ├── components/
+    │   │   │   ├── feedback/                 # Spinner, EmptyState, ErrorBoundary, ErrorMessage
+    │   │   │   ├── form/                     # TextInput, TextArea, SelectInput, DateInput
+    │   │   │   ├── logistics/                # LogisticsCard
+    │   │   │   ├── navigation/               # MenuItemLink
+    │   │   │   └── tags/                     # Tag, TagList, TagInput
+    │   │   ├── schemas/                      # Shared Zod validation schemas
     │   │   ├── types/                        # TypeScript domain interfaces
     │   │   └── utils/                        # Formatting & helper utilities
     │   ├── theme/                            # Design tokens & Material UI theme
     │   ├── index.html                        # HTML entry point
-    │   ├── main.tsx                          # App root with QueryClientProvider & CssBaseline
+    │   ├── main.tsx                          # App root with ErrorBoundary & QueryClientProvider
     │   └── vite.config.ts                    # Vite config with React plugin & mkcert
     └── package.json                          # Frontend dependencies and scripts
 ```
@@ -390,6 +281,12 @@ FullStackDotNEtREACT/
 Base URL (Development HTTPS): `https://localhost:7223/api`  
 Base URL (Development HTTP): `http://localhost:5096/api`
 
+### Home Page API
+
+| Method | Endpoint | Description | Request Payload | Response Status |
+| :--- | :--- | :--- | :--- | :--- |
+| `GET` | `/api/home` | Fetch landing page payload (featured meetup, upcoming list, and live stats) | None | `200 OK` (`HomePageDto`) |
+
 ### Activities Management
 
 | Method | Endpoint | Description | Request Payload | Response Status |
@@ -399,22 +296,6 @@ Base URL (Development HTTP): `http://localhost:5096/api`
 | `POST` | `/api/activities` | Create a new tech event | `CreateActivityDto` (JSON) | `200 OK` (`string id`) or `400 Bad Request` |
 | `PUT` | `/api/activities/{id}` | Update an existing activity | `EditActivityDto` (JSON) | `200 OK` or `400 Bad Request` |
 | `DELETE` | `/api/activities/{id}` | Delete an activity | None | `200 OK` or `400 Bad Request` |
-
-#### Sample Create Activity Payload (`POST /api/activities`)
-```json
-{
-  "title": "Alexandria Cloud & Kubernetes Summit",
-  "description": "A comprehensive gathering of DevOps engineers in Alexandria focusing on cloud-native deployments and container security.",
-  "category": "DevOps",
-  "date": "2026-10-15T09:00:00Z",
-  "city": "Alexandria",
-  "venue": "Bibliotheca Alexandrina Conference Center",
-  "latitude": 31.2089,
-  "longitude": 29.9092,
-  "level": "Intermediate",
-  "tags": ["Kubernetes", "Docker", "DevOps", "Cloud Native", "CI/CD"]
-}
-```
 
 ### Diagnostic & Error Simulation Endpoints (`BuggyController`)
 
@@ -437,7 +318,7 @@ Ensure the following tools are installed:
 
 ### Configuration Settings
 
-#### Backend: [`API/appsettings.Development.json`](file:///c:/Users/ahmed/OneDrive/Desktop/FullStackDotNEtREACT/API/appsettings.Development.json)
+#### Backend: [`API/appsettings.json`](file:///c:/Users/ahmed/OneDrive/Desktop/FullStackDotNEtREACT/API/appsettings.json)
 ```json
 {
   "Logging": {
@@ -446,8 +327,12 @@ Ensure the following tools are installed:
       "Microsoft.AspNetCore": "Warning"
     }
   },
+  "AllowedHosts": "*",
   "ConnectionStrings": {
     "DefaultConnection": "Host=localhost;Port=5432;Database=reactivities;Username=postgres;Password=your_password"
+  },
+  "MediatR": {
+    "LicenseKey": "your_license_key"
   }
 }
 ```
@@ -475,13 +360,11 @@ docker run --name reactivities-postgres \
   -d postgres:16-alpine
 ```
 
-*(Ensure the password in [`API/appsettings.Development.json`](file:///c:/Users/ahmed/OneDrive/Desktop/FullStackDotNEtREACT/API/appsettings.Development.json) matches `postgres`)*.
-
 ---
 
 ### Option B: Local PostgreSQL Service
 
-Ensure your local PostgreSQL service is running on port `5432` with a database named `reactivities` (or allow the app to automatically create it). Update the `DefaultConnection` password in `API/appsettings.Development.json`.
+Ensure your local PostgreSQL service is running on port `5432` with a database named `reactivities`. Update `DefaultConnection` in `API/appsettings.json`.
 
 ---
 
@@ -536,32 +419,30 @@ Ensure your local PostgreSQL service is running on port `5432` with a database n
 
 ## 🖥 Frontend Features & UI Walkthrough
 
-### 1. Interactive Landing Page (`/`)
-- **Live Countdown Clock**: Real-time ticker counting down days, hours, minutes, and seconds until the next scheduled tech conference.
-- **Hero & Metrics**: Quick access to browse activities, create events, and inspect community statistics.
-- **Featured Meetups**: Highlights upcoming flagship workshops across Cairo, Giza, and Alexandria.
+### 1. Dedicated Landing Page (`/`)
+- **Vertical Feature Slice**: Independent API client, TanStack Query hook, and types.
+- **Live Countdown Clock**: Real-time ticker counting down days, hours, minutes, and seconds until the next flagship event.
+- **Hero & Live Community Metrics**: Dynamic counts (Active Developers, Events Hosted, Tech Tracks) queried directly from the backend.
+- **Upcoming Events Strip**: Preview cards showing upcoming sessions.
 
 ### 2. Activity Dashboard (`/activities`)
-- **Category Filter Tabs**: Fast filtering across tech domains:
-  - `All Events`, `BackEnd`, `FrontEnd`, `CyberSecurity`, `DevOps`, `AI & Machine Learning`, `Mobile`.
+- **Category Filter Tabs**: Fast filtering across tech domains (`BackEnd`, `FrontEnd`, `CyberSecurity`, `DevOps`, `DataAnalysis`).
 - **Calendar Date Picker**: Interactive `react-calendar` allowing engineers to filter events by scheduled calendar dates.
-- **Event Cards**: Rich Material UI cards displaying title, date, venue, city badge, experience level (`Beginner`, `Intermediate`, `Advanced`, `All Levels`), tags, and status.
+- **Event Cards**: Rich Material UI cards displaying title, date, venue, city badge, experience level, tags, and status.
 
 ### 3. Detailed Event View (`/activities/:id` & `/activities/:id/:slug`)
-- **Hero Banner**: High-resolution category artwork, cancellation status alert, and quick action controls (Manage Event, Cancel/Reactivate).
-- **Event Information Panel**: Schedule timestamp, exact address with interactive Google Maps lookup coordinates.
+- **Hero Banner**: High-resolution category artwork, cancellation status alert, and quick action controls.
+- **Event Information Panel**: Schedule timestamp and venue details using `LogisticsCard`.
 - **Attendees & Host Sidebar**: Overview of confirmed attendees and organizers.
-- **Interactive Chat Tab**: Community discussion board placeholder.
 
 ### 4. Create & Edit Event Studio (`/createActivity`, `/manage/:id`)
+- **Shared Form Controls**: Refactored with generic `TextInput`, `TextArea`, `SelectInput`, and `DateInput` controls from `shared/components/form/`, slashing page chunk size from 44 kB to 9 kB (-79%).
 - **Type-Safe Validation**: Integrated with **React Hook Form** and **Zod** schema validation for instant inline field feedback.
-- **Dynamic Tag Selector**: Add custom technical topic tags (e.g. `Docker`, `PostgreSQL`, `React 19`).
-- **Experience Level Selector**: Choose target audience proficiency (`Beginner`, `Intermediate`, `Advanced`, `All Levels`).
-- **Geocoordinate Inputs**: Latitude and longitude precision for map positioning.
+- **Dynamic Tag Selector**: Add custom technical topic tags (`TagInput`).
 
 ### 5. Error Testing Laboratory (`/errors`)
 - **Interactive Test Suite**: Trigger and verify frontend handling for 400 Bad Request, 401 Unauthorized, 404 Not Found, 500 Internal Server Error, and validation errors.
-- **Stack Trace Explorer**: In development, `500 Server Error` displays full stack traces, route path, HTTP method, and Trace ID with one-click copy.
+- **Shared Error Components**: Unified error rendering via `ErrorMessage` and top-level `ErrorBoundary` protection.
 
 ---
 
@@ -576,13 +457,10 @@ dotnet build
 dotnet watch --project API
 
 # Add a new Entity Framework migration
-dotnet ef migrations add <MigrationName> -p Persistence -s API
+dotnet ef migrations add <MigrationName> -p Persistence -s API -c DevMeetDbContext -o Migrations
 
 # Apply migrations manually to the database
-dotnet ef database update -p Persistence -s API
-
-# Remove the most recent migration (if not yet applied)
-dotnet ef migrations remove -p Persistence -s API
+dotnet ef database update -p Persistence -s API -c DevMeetDbContext
 ```
 
 ### Frontend Commands (`/client` Directory)
@@ -608,12 +486,7 @@ The application manages data through **Entity Framework Core Code-First Migratio
 
 - Located in [`Persistence/Migrations/`](file:///c:/Users/ahmed/OneDrive/Desktop/FullStackDotNEtREACT/Persistence/Migrations/).
 - Database configuration is automatically registered in [`DatabaseExtensions.cs`](file:///c:/Users/ahmed/OneDrive/Desktop/FullStackDotNEtREACT/API/Extensions/DatabaseExtensions.cs).
-- Pre-populated with realistic Egyptian tech community events via [`DbInitializer.cs`](file:///c:/Users/ahmed/OneDrive/Desktop/FullStackDotNEtREACT/Persistence/DbInitializer.cs):
-  - **Cairo .NET 9 & Distributed Systems Masterclass** (The Greek Campus, Downtown Cairo)
-  - **Red Team & Web Penetration Testing Workshop** (Smart Village ITIDA Hub, Giza)
-  - **Modern React 19 & Next.js Performance Camp** (Bibliotheca Alexandrina, Alexandria)
-  - **AI & LLM Fine-Tuning Hackathon** (AUC New Cairo)
-  - **Cloud-Native Kubernetes & Platform Engineering Day** (Maadi Tech Ridge, Cairo)
+- Pre-populated with realistic Egyptian tech community events via [`DbInitializer.cs`](file:///c:/Users/ahmed/OneDrive/Desktop/FullStackDotNEtREACT/Persistence/DbInitializer.cs).
 
 ---
 
