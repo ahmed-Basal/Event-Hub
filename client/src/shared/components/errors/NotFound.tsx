@@ -1,7 +1,9 @@
-import { Button, Container, Typography } from '@mui/material';
+import Button from '@mui/material/Button';
+import Container from '@mui/material/Container';
+import Typography from '@mui/material/Typography';
 import { Link } from 'react-router';
 import SearchOffIcon from '@mui/icons-material/SearchOff';
-import { tokens } from '../../theme';
+import { tokens } from '../../../theme';
 
 export default function NotFound() {
   return (

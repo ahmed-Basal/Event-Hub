@@ -26,8 +26,8 @@ import RefreshIcon from '@mui/icons-material/Refresh';
 import BugReportIcon from '@mui/icons-material/BugReport';
 import DownloadIcon from '@mui/icons-material/Download';
 import DeleteOutlinedIcon from '@mui/icons-material/DeleteOutlined';
-import { tokens } from '../../theme';
-import type { ServerErrorPayload } from '../../shared';
+import { tokens } from '../../../theme';
+import type { ServerErrorPayload } from '../..';
 
 export default function ServerError() {
   const { state } = useLocation();
@@ -116,9 +116,10 @@ export default function ServerError() {
   };
 
   // 2. Parse and highlight application frames vs framework frames
+  const details = errorData?.details;
   const stackFrames = useMemo(() => {
-    if (!errorData?.details) return [];
-    return errorData.details
+    if (!details) return [];
+    return details
       .split('\n')
       .map(line => line.trim())
       .filter(Boolean)
@@ -130,7 +131,7 @@ export default function ServerError() {
           line.includes('Persistence.');
         return { id: idx, line, isAppCode };
       });
-  }, [errorData?.details]);
+  }, [details]);
 
   const displayedFrames = useMemo(() => {
     if (!filterAppOnly) return stackFrames;

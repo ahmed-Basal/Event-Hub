@@ -2,7 +2,7 @@ import axios, { type AxiosError, type AxiosResponse } from "axios";
 import { toast } from "react-toastify";
 import { router } from "../../App/Router/Router";
 
-const baseURL = import.meta.env.VITE_API_URL;
+const baseURL = import.meta.env.VITE_API_URL || '/api';
 const agent = axios.create({
     baseURL,
 });

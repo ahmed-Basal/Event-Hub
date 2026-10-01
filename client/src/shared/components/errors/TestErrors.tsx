@@ -6,7 +6,7 @@ import {
   Container,
   Typography,
 } from '@mui/material';
-import { agent } from '../../shared';
+import { agent } from '../..';
 import ValidationError from './ValidationError';
 
 export default function TestErrors() {

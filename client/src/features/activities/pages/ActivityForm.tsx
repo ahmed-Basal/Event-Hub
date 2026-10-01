@@ -29,14 +29,7 @@ import {
 import { tokens } from '../../../theme';
 import { useActivityDetail, useActivityMutations } from '../hooks';
 
-/**
- * ActivityForm (Page)
- * SOLID Principles:
- * - SRP: Form logic is isolated from API transport and global cache logic.
- * - DIP: Depends on useActivityDetail and useActivityMutations abstractions.
- * - Type Safety: Validated via Zod with automatic React Hook Form error binding.
- * - Reusability: Leverages generic shared form components (TextInput, TextArea, SelectInput, DateInput).
- */
+
 export default function ActivityForm() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();

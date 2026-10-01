@@ -61,6 +61,15 @@ public sealed class ApplicationServiceFactory
     }
 
     /// <summary>
+    /// Registers OpenTelemetry tracing (Seq + Jaeger) and Prometheus metrics.
+    /// </summary>
+    public ApplicationServiceFactory WithObservability()
+    {
+        _services.AddObservability(_config);
+        return this;
+    }
+
+    /// <summary>
     /// Convenience method to register all standard production services in recommended sequence.
     /// </summary>
     public ApplicationServiceFactory WithAllDefaults()
@@ -70,7 +79,8 @@ public sealed class ApplicationServiceFactory
             .WithDatabase()
             .WithCqrs()
             .WithMapping()
-            .WithCors();
+            .WithCors()
+            .WithObservability();
     }
 
     /// <summary>

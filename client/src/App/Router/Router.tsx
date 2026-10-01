@@ -9,9 +9,9 @@ const HomePage = lazy(() => import('../../features/home/pages/HomePage'));
 const ActivityDashboard = lazy(() => import('../../features/activities/pages/ActivityDashboard'));
 const ActivityForm = lazy(() => import('../../features/activities/pages/ActivityForm'));
 const ActivityDetailsPage = lazy(() => import('../../features/activities/pages/ActivityDetailsPage'));
-const TestErrors = lazy(() => import('../../features/errors/TestErrors'));
-const NotFound = lazy(() => import('../../features/errors/NotFound'));
-const ServerError = lazy(() => import('../../features/errors/ServerError'));
+const TestErrors = lazy(() => import('../../shared/components/errors/TestErrors'));
+const NotFound = lazy(() => import('../../shared/components/errors/NotFound'));
+const ServerError = lazy(() => import('../../shared/components/errors/ServerError'));
 
 export const router = createBrowserRouter([
   {

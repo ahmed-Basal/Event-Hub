@@ -1,4 +1,4 @@
-import { ErrorMessage } from '../../shared';
+import { ErrorMessage } from '../..';
 
 interface Props {
   errors: string[];

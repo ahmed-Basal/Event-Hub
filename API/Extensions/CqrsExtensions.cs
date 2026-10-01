@@ -21,6 +21,8 @@ public static class CqrsExtensions
         {
             cfg.RegisterServicesFromAssembly(applicationAssembly);
             cfg.AddOpenBehavior(typeof(ValidationBehavior<,>));
+            cfg.AddOpenBehavior(typeof(TracingBehavior<,>));
+            cfg.AddOpenBehavior(typeof(MetricsBehavior<,>));
             cfg.LicenseKey = mediatorOptions?.LicenseKey;
         });
 
