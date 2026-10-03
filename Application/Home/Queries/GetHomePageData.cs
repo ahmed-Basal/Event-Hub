@@ -22,7 +22,7 @@ public static class GetHomePageData
 
             if (upcoming.Count == 0)
             {
-                // Fallback to recent events if no future events exist
+
                 upcoming = await context.Activities
                     .Where(a => !a.IsCancelled)
                     .OrderByDescending(a => a.Date)

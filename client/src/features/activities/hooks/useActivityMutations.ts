@@ -3,11 +3,6 @@ import { activitiesApi } from '../api/activitiesApi';
 import { activitiesKeys } from '../api/activitiesKeys';
 import type { Activity, CreateActivityDto, UpdateActivityDto } from '../../../shared';
 
-/**
- * useActivityMutations
- * SRP (Single Responsibility Principle):
- * Concentrates state changes (Create, Update, Delete) and handles cache invalidation cleanly.
- */
 export function useActivityMutations(activityId?: string) {
   const queryClient = useQueryClient();
 

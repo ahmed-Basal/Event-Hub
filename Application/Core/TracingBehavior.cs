@@ -4,10 +4,6 @@ using Microsoft.Extensions.Logging;
 
 namespace Application.Core;
 
-/// <summary>
-/// MediatR pipeline behavior that creates an OpenTelemetry Activity span
-/// for every command/query so handlers are visible in Jaeger and Seq trace views.
-/// </summary>
 public class TracingBehavior<TRequest, TResponse>(
     ILogger<TracingBehavior<TRequest, TResponse>> logger)
     : IPipelineBehavior<TRequest, TResponse>

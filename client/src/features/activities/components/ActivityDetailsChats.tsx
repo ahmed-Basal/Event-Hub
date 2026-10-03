@@ -65,7 +65,7 @@ export default function ActivityDetailsChats() {
         overflow: 'hidden',
       }}
     >
-      {/* ── Header ── */}
+
       <Box
         sx={{
           display: 'flex',
@@ -117,7 +117,7 @@ export default function ActivityDetailsChats() {
       </Box>
 
       <CardContent sx={{ p: { xs: 2.5, sm: 3.5 } }}>
-        {/* ── Add Comment Form ── */}
+
         <Box sx={{ display: 'flex', gap: 2, mb: 4 }}>
           <Avatar
             src="/images/user.png"
@@ -191,7 +191,6 @@ export default function ActivityDetailsChats() {
 
         <Divider sx={{ borderColor: tokens.border, mb: 3 }} />
 
-        {/* ── Comments List ── */}
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2.5 }}>
           {comments.map((comment) => (
             <Box

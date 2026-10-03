@@ -6,22 +6,18 @@ import type { SxProps, Theme } from '@mui/material';
 import { tokens } from '../../../theme';
 
 export interface MenuItemLinkProps {
-  /** Target route path */
+
   to: string;
-  /** Label or children elements */
+
   children: React.ReactNode;
-  /** Optional leading icon */
+
   icon?: React.ReactNode;
-  /** Click handler */
+
   onClick?: React.MouseEventHandler<HTMLAnchorElement>;
-  /** Custom MUI sx styling overrides */
+
   sx?: SxProps<Theme>;
 }
 
-/**
- * Reusable navigation link for menus and drawers.
- * Integrates react-router NavLink with MUI MenuItem and active state tokens.
- */
 export const MenuItemLink: React.FC<MenuItemLinkProps> = ({
   to,
   children,

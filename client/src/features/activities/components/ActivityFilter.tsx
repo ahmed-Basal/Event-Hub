@@ -42,12 +42,6 @@ const STATUS_FILTERS = [
   { id: 'hosting', label: "I'm Hosting" },
 ];
 
-/**
- * ActivityFilter
- * State Lifting & OCP:
- * Can be controlled via `value` and `onChange` from the parent dashboard,
- * or operate standalone with internal fallback state.
- */
 export default function ActivityFilter({ value, onChange }: ActivityFilterProps) {
   const [internalCategory, setInternalCategory] = useState('all');
   const [internalStatus, setInternalStatus] = useState('all');
@@ -83,7 +77,7 @@ export default function ActivityFilter({ value, onChange }: ActivityFilterProps)
 
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2.5 }}>
-      {/* ── Status Filter ─────────────────────────────── */}
+
       <Paper sx={{ p: 2.5, borderRadius: '18px' }}>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
           <TuneIcon sx={{ fontSize: 18, color: tokens.primary }} />
@@ -119,7 +113,6 @@ export default function ActivityFilter({ value, onChange }: ActivityFilterProps)
         </Box>
       </Paper>
 
-      {/* ── Category Pills ────────────────────────────── */}
       <Paper sx={{ p: 2.5, borderRadius: '18px' }}>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
           <AppsIcon sx={{ fontSize: 18, color: tokens.teal }} />
@@ -161,7 +154,6 @@ export default function ActivityFilter({ value, onChange }: ActivityFilterProps)
         </Box>
       </Paper>
 
-      {/* ── Date Calendar ─────────────────────────────── */}
       <Paper sx={{ p: 2.5, borderRadius: '18px' }}>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
           <CalendarMonthIcon sx={{ fontSize: 18, color: tokens.accent }} />

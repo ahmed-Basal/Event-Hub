@@ -8,33 +8,30 @@ import { tokens } from '../../../theme/theme';
 import { Tag, type TagProps, type TagSize, type TagVariant } from './Tag';
 
 export interface TagListProps {
-  /** Array of tag strings */
+
   tags?: string[];
-  /** Maximum number of tags displayed before collapsing into "+N more" */
+
   maxVisible?: number;
-  /** Size for rendered tags */
+
   size?: TagSize;
-  /** Variant for rendered tags */
+
   variant?: TagVariant;
-  /** Font size override for tags */
+
   fontSize?: string | number;
-  /** Click handler for individual tags */
+
   onTagClick?: (tag: string, index: number) => void;
-  /** Remove handler for individual tags */
+
   onTagDelete?: (tag: string, index: number) => void;
-  /** Fallback message or node when tags array is empty */
+
   emptyMessage?: React.ReactNode;
-  /** Spacing between tags */
+
   gap?: number | string;
-  /** Container custom styles */
+
   sx?: SxProps<Theme>;
-  /** Custom tag styles */
+
   tagSx?: TagProps['sx'];
 }
 
-/**
- * Renders a list of tags with optional overflow collapse (+N badge with tooltip).
- */
 export const TagList: React.FC<TagListProps> = ({
   tags = [],
   maxVisible,

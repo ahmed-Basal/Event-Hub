@@ -13,7 +13,6 @@ import { tokens } from '../../theme';
 
 const QUICK_LINKS = [
   { label: 'Explore Events', to: '/activities' },
-  { label: 'Host an Event', to: '/createActivity' },
 ];
 
 const SOCIALS = [
@@ -33,7 +32,7 @@ export default function Footer() {
       }}
     >
       <Container maxWidth="xl">
-        {/* Top section */}
+        
         <Box
           sx={{
             display: 'flex',
@@ -43,7 +42,7 @@ export default function Footer() {
             justifyContent: 'space-between',
           }}
         >
-          {/* Brand column */}
+          
           <Box sx={{ maxWidth: 320 }}>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.2, mb: 1.5 }}>
               <Box
@@ -73,7 +72,7 @@ export default function Footer() {
               The premier hub for Egypt's tech and developer community. Connect with engineers, attend tech meetups, and level up your skills.
             </Typography>
 
-            {/* Social icons */}
+            
             <Box sx={{ display: 'flex', gap: 1, mt: 2 }}>
               {SOCIALS.map((s) => (
                 <IconButton
@@ -103,7 +102,7 @@ export default function Footer() {
             </Box>
           </Box>
 
-          {/* Quick Links */}
+          
           <Box>
             <Typography sx={{ fontWeight: 700, fontSize: '0.85rem', color: tokens.textPrimary, mb: 1.8, textTransform: 'uppercase', letterSpacing: '0.08em' }}>
               Quick Links
@@ -128,7 +127,7 @@ export default function Footer() {
             </Box>
           </Box>
 
-          {/* Newsletter */}
+          
           <Box sx={{ maxWidth: 320 }}>
             <Typography sx={{ fontWeight: 700, fontSize: '0.85rem', color: tokens.textPrimary, mb: 0.5, textTransform: 'uppercase', letterSpacing: '0.08em' }}>
               Newsletter
@@ -159,7 +158,7 @@ export default function Footer() {
 
         <Divider />
 
-        {/* Bottom bar */}
+        
         <Box
           sx={{
             display: 'flex',

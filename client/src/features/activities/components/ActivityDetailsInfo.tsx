@@ -22,7 +22,7 @@ interface Props {
 export default function ActivityDetailsInfo({ activity }: Props) {
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3, mb: 3 }}>
-      {/* ── 1. About / Description Card ── */}
+
       <Paper
         elevation={0}
         sx={{
@@ -64,7 +64,6 @@ export default function ActivityDetailsInfo({ activity }: Props) {
           {activity?.description}
         </Typography>
 
-        {/* Tags Row */}
         {activity?.tags && activity.tags.length > 0 && (
           <Box sx={{ mt: 3, pt: 2.5, borderTop: `1px solid ${tokens.border}` }}>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1.5 }}>
@@ -81,7 +80,6 @@ export default function ActivityDetailsInfo({ activity }: Props) {
         )}
       </Paper>
 
-      {/* ── 2. Logistics & Highlights Grid ── */}
       <Box
         sx={{
           display: 'grid',

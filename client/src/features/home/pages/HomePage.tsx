@@ -17,16 +17,13 @@ export default function HomePage() {
         flexDirection: 'column',
       }}
     >
-      {/* ── Navigation ── */}
+
       <NavBar />
 
-      {/* ── Hero Section (Brand, CTA, Featured Event Card) ── */}
       <HeroSection featuredActivity={featuredActivity} />
 
-      {/* ── Stats Bar ── */}
       <StatsBar stats={stats} />
 
-      {/* ── Upcoming Events Preview ── */}
       <UpcomingEvents activities={upcomingActivities} />
     </Box>
   );

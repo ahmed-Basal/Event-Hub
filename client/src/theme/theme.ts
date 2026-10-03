@@ -1,8 +1,5 @@
 import { createTheme } from '@mui/material/styles';
 
-// ============================================================
-// 1. TypeScript Module Augmentation for MUI
-// ============================================================
 declare module '@mui/material/styles' {
   interface Palette {
     accent: Palette['primary'];
@@ -52,9 +49,6 @@ declare module '@mui/material/styles' {
 import { tokens, type DesignTokens } from './tokens';
 export { tokens, type DesignTokens };
 
-// ============================================================
-// 3. Theme Definition
-// ============================================================
 export const theme = createTheme({
   palette: {
     mode: 'dark',

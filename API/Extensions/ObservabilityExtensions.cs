@@ -8,10 +8,7 @@ namespace API.Extensions;
 
 public static class ObservabilityExtensions
 {
-    /// <summary>
-    /// Configures Serilog as the logging provider — writes structured logs to Console + Seq.
-    /// Call this on WebApplicationBuilder before builder.Build().
-    /// </summary>
+
     public static WebApplicationBuilder AddSerilogLogging(this WebApplicationBuilder builder)
     {
         var seqUrl = builder.Configuration["Seq:ServerUrl"] ?? "http://localhost:5341";
@@ -33,9 +30,6 @@ public static class ObservabilityExtensions
         return builder;
     }
 
-    /// <summary>
-    /// Registers OpenTelemetry tracing (Seq OTLP + Jaeger OTLP) and Prometheus metrics.
-    /// </summary>
     public static IServiceCollection AddObservability(
         this IServiceCollection services,
         IConfiguration config)

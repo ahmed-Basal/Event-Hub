@@ -34,7 +34,6 @@ export default function ServerError() {
   const navigate = useNavigate();
   const routeError = useRouteError() as { status?: number; statusText?: string; message?: string; stack?: string } | null;
 
-  // 1. Recover error from state, routeError (ErrorBoundary), or fallback to sessionStorage
   const [errorData, setErrorData] = useState<ServerErrorPayload | null>(() => {
     if (state?.error) return state.error;
     if (routeError) {
@@ -141,7 +140,7 @@ export default function ServerError() {
 
   return (
     <Container maxWidth="lg" sx={{ mt: 5, mb: 8 }}>
-      {/* Top Banner Card */}
+
       <Paper
         elevation={0}
         sx={{
@@ -243,7 +242,6 @@ export default function ServerError() {
           </Box>
         </Box>
 
-        {/* Telemetry & Correlation ID Bar */}
         {errorData?.traceId && (
           <Box
             sx={{
@@ -345,7 +343,6 @@ export default function ServerError() {
           </Box>
         )}
 
-        {/* Action Controls */}
         <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 2, mt: 3.5 }}>
           <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
             <Button
@@ -417,7 +414,6 @@ export default function ServerError() {
         </Box>
       </Paper>
 
-      {/* Fallback Notice when page is directly visited without any error */}
       {!errorData && (
         <Alert
           severity="info"
@@ -433,7 +429,6 @@ export default function ServerError() {
         </Alert>
       )}
 
-      {/* Senior Stack Trace Accordion (Development Mode) */}
       {errorData?.details && (
         <Accordion
           defaultExpanded
@@ -476,7 +471,7 @@ export default function ServerError() {
           </AccordionSummary>
 
           <AccordionDetails sx={{ p: 0 }}>
-            {/* Toolbar inside Stack Trace */}
+
             <Box
               sx={{
                 display: 'flex',
@@ -523,7 +518,6 @@ export default function ServerError() {
               </Tooltip>
             </Box>
 
-            {/* Formatted Code Block */}
             <Box
               sx={{
                 m: 0,

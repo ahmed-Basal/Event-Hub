@@ -13,12 +13,6 @@ import { Link } from 'react-router';
 import { TagList, formatDate, formatDateOnly, formatTimeOnly } from '../../../shared';
 import { tokens } from '../../../theme';
 
-/**
- * ActivityCardData
- * ISP (Interface Segregation Principle):
- * Declares the exact subset of activity data needed for rendering the card,
- * decoupling ActivityCard from monolithic domain models.
- */
 export interface ActivityCardData {
   id: string;
   title: string;
@@ -70,7 +64,7 @@ export default function ActivityCard(props: ActivityCardProps) {
         opacity: isCancelled ? 0.55 : 1,
       }}
     >
-      {/* ── Cover Image ─────────────────────────────── */}
+
       <Box
         sx={{
           height: 200,
@@ -81,7 +75,7 @@ export default function ActivityCard(props: ActivityCardProps) {
           backgroundPosition: 'center',
         }}
       >
-        {/* Dark gradient overlay */}
+
         <Box
           sx={{
             position: 'absolute',
@@ -90,7 +84,6 @@ export default function ActivityCard(props: ActivityCardProps) {
           }}
         />
 
-        {/* Date badge — top left */}
         <Box
           sx={{
             position: 'absolute',
@@ -117,7 +110,6 @@ export default function ActivityCard(props: ActivityCardProps) {
           </Typography>
         </Box>
 
-        {/* Status badge — bottom left */}
         {isCancelled ? (
           <Chip
             label="Cancelled"
@@ -149,7 +141,6 @@ export default function ActivityCard(props: ActivityCardProps) {
           />
         )}
 
-        {/* Bookmark button — top right */}
         <IconButton
           onClick={() => setBookmarked(!bookmarked)}
           size="small"
@@ -170,9 +161,8 @@ export default function ActivityCard(props: ActivityCardProps) {
         </IconButton>
       </Box>
 
-      {/* ── Card Body ────────────────────────────────── */}
       <Box sx={{ p: 2.2 }}>
-        {/* Category chip */}
+
         <Chip
           label={activity.category}
           size="small"
@@ -188,7 +178,6 @@ export default function ActivityCard(props: ActivityCardProps) {
           }}
         />
 
-        {/* Title */}
         <Typography
           sx={{
             fontWeight: 700,
@@ -205,7 +194,6 @@ export default function ActivityCard(props: ActivityCardProps) {
           {activity.title}
         </Typography>
 
-        {/* Date & Location */}
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5, mb: 1.8 }}>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.7 }}>
             <CalendarTodayIcon sx={{ fontSize: 13, color: tokens.textMuted }} />
@@ -221,7 +209,6 @@ export default function ActivityCard(props: ActivityCardProps) {
           </Box>
         </Box>
 
-        {/* Tags with Gradient Borders & Monospace Typography */}
         <TagList
           tags={activity.tags}
           maxVisible={3}
@@ -229,12 +216,10 @@ export default function ActivityCard(props: ActivityCardProps) {
           sx={{ mb: 1.8 }}
         />
 
-        {/* Divider */}
         <Box sx={{ borderTop: `1px solid ${tokens.border}`, my: 1.5 }} />
 
-        {/* Bottom row: attendees + book button */}
         <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          {/* Attendee avatars */}
+
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.8 }}>
             <Box sx={{ display: 'flex', '& > *:not(:first-of-type)': { ml: '-8px' } }}>
               {DUMMY_ATTENDEES.map((a) => (
@@ -263,7 +248,6 @@ export default function ActivityCard(props: ActivityCardProps) {
             </Typography>
           </Box>
 
-          {/* Book button */}
           <Button
             component={Link}
             to={activity.slug ? `/activities/${activity.id}/${activity.slug}` : `/activities/${activity.id}`}

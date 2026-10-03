@@ -1,54 +1,47 @@
+import { useController, type UseControllerProps, type FieldValues } from 'react-hook-form';
 import TextField, { type TextFieldProps } from '@mui/material/TextField';
-import { useController, type Control, type FieldValues, type Path } from 'react-hook-form';
-import { formFieldSx } from './formFieldSx';
+import { tokens } from '../../../theme';
 
-export type TextInputProps<T extends FieldValues = FieldValues> = Omit<TextFieldProps, 'name'> & {
-  name?: Path<T>;
-  control?: Control<T>;
-};
+export type TextInputProps<T extends FieldValues> = UseControllerProps<T> &
+  Omit<TextFieldProps, 'name' | 'defaultValue'> & {
+    label: string;
+  };
 
-export function TextInput<T extends FieldValues = FieldValues>({
-  name,
-  control,
-  sx,
-  ...props
-}: TextInputProps<T>) {
-  if (control && name) {
-    return <ControlledTextInput name={name} control={control} sx={sx} {...props} />;
-  }
+export default function TextInput<T extends FieldValues>(props: TextInputProps<T>) {
+  const { field, fieldState } = useController({ ...props, defaultValue: ('' as any) });
 
   return (
     <TextField
-      fullWidth
-      sx={[formFieldSx, ...(Array.isArray(sx) ? sx : sx ? [sx] : [])]}
       {...props}
-    />
-  );
-}
-
-function ControlledTextInput<T extends FieldValues>({
-  name,
-  control,
-  sx,
-  helperText,
-  ...props
-}: TextInputProps<T> & { name: Path<T>; control: Control<T> }) {
-  const {
-    field,
-    fieldState: { error },
-  } = useController({ name, control });
-
-  return (
-    <TextField
       {...field}
       value={field.value ?? ''}
-      error={Boolean(error)}
-      helperText={error?.message ?? helperText}
       fullWidth
-      sx={[formFieldSx, ...(Array.isArray(sx) ? sx : sx ? [sx] : [])]}
-      {...props}
+      variant="outlined"
+      error={Boolean(fieldState.error)}
+      helperText={fieldState.error?.message}
+      sx={{
+        '& .MuiOutlinedInput-root': {
+          borderRadius: '12px',
+          bgcolor: 'rgba(255, 255, 255, 0.02)',
+          transition: 'border-color 0.2s, box-shadow 0.2s',
+          '& fieldset': {
+            borderColor: tokens.border,
+          },
+          '&:hover fieldset': {
+            borderColor: tokens.borderHover,
+          },
+          '&.Mui-focused fieldset': {
+            borderColor: tokens.primary,
+          },
+        },
+        '& .MuiInputLabel-root': {
+          color: tokens.textSecondary,
+          '&.Mui-focused': {
+            color: tokens.primary,
+          },
+        },
+        ...props.sx,
+      }}
     />
   );
 }
-
-export default TextInput;

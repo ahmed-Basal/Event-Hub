@@ -61,7 +61,7 @@ export default function ActivityDetailsSideBar() {
 
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2.5, position: 'sticky', top: 88 }}>
-      {/* ── Attendees Card ── */}
+
       <Paper
         elevation={0}
         sx={{
@@ -72,7 +72,7 @@ export default function ActivityDetailsSideBar() {
           overflow: 'hidden',
         }}
       >
-        {/* Header bar */}
+
         <Box
           sx={{
             display: 'flex',
@@ -116,7 +116,6 @@ export default function ActivityDetailsSideBar() {
           />
         </Box>
 
-        {/* List of Attendees */}
         <List disablePadding sx={{ py: 1 }}>
           {ATTENDEES.map((attendee, index) => (
             <Box key={attendee.id}>
@@ -204,7 +203,6 @@ export default function ActivityDetailsSideBar() {
           ))}
         </List>
 
-        {/* Share Button Footer */}
         <Box sx={{ p: 2, borderTop: `1px solid ${tokens.border}`, bgcolor: tokens.surface3 }}>
           <Button
             fullWidth

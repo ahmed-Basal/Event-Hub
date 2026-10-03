@@ -1,14 +1,12 @@
 import { lazy, Suspense } from 'react';
 import { createBrowserRouter, Navigate } from 'react-router';
 import App from '../Layout/App';
-import { Spinner } from '../../shared';
+import Spinner from '../../shared/components/feedback/Spinner';
 
-// Code Splitting / Lazy Loading (Phase 7 Optimization)
-// Significantly reduces initial bundle size by loading pages on-demand
 const HomePage = lazy(() => import('../../features/home/pages/HomePage'));
 const ActivityDashboard = lazy(() => import('../../features/activities/pages/ActivityDashboard'));
-const ActivityForm = lazy(() => import('../../features/activities/pages/ActivityForm'));
 const ActivityDetailsPage = lazy(() => import('../../features/activities/pages/ActivityDetailsPage'));
+const ActivityForm = lazy(() => import('../../features/activities/pages/ActivityForm'));
 const TestErrors = lazy(() => import('../../shared/components/errors/TestErrors'));
 const NotFound = lazy(() => import('../../shared/components/errors/NotFound'));
 const ServerError = lazy(() => import('../../shared/components/errors/ServerError'));
@@ -58,16 +56,16 @@ export const router = createBrowserRouter([
       {
         path: 'createActivity',
         element: (
-          <Suspense fallback={<Spinner message="Preparing form..." minHeight="60vh" />}>
-            <ActivityForm key="createActivity" />
+          <Suspense fallback={<Spinner message="Loading event studio..." minHeight="60vh" />}>
+            <ActivityForm key="create" />
           </Suspense>
         ),
       },
       {
         path: 'manage/:id',
         element: (
-          <Suspense fallback={<Spinner message="Loading event editor..." minHeight="60vh" />}>
-            <ActivityForm key="manage" />
+          <Suspense fallback={<Spinner message="Loading event studio..." minHeight="60vh" />}>
+            <ActivityForm />
           </Suspense>
         ),
       },

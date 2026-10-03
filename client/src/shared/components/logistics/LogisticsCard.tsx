@@ -3,25 +3,22 @@ import { Box, Paper, Typography, type SxProps, type Theme } from '@mui/material'
 import { tokens } from '../../../theme';
 
 export interface LogisticsCardProps {
-  /** The icon component to display in the colored badge */
+
   icon: React.ReactNode;
-  /** Accent color for badge background, border, and icon (hex or rgb) */
+
   color?: string;
-  /** Header label text (e.g. "Date & Schedule") */
+
   label: string;
-  /** Primary value / title */
+
   value: React.ReactNode;
-  /** Optional secondary subtitle or description */
+
   subtitle?: React.ReactNode;
-  /** Click handler if the card is interactive */
+
   onClick?: () => void;
-  /** Custom MUI sx styling overrides */
+
   sx?: SxProps<Theme>;
 }
 
-/**
- * Reusable event logistics card with animated badge and typography.
- */
 export const LogisticsCard: React.FC<LogisticsCardProps> = ({
   icon,
   color = tokens.primary,
@@ -62,7 +59,7 @@ export const LogisticsCard: React.FC<LogisticsCardProps> = ({
         ...sx,
       }}
     >
-      {/* Icon Badge */}
+
       <Box
         className="logistics-badge"
         sx={{
@@ -82,7 +79,6 @@ export const LogisticsCard: React.FC<LogisticsCardProps> = ({
         {icon}
       </Box>
 
-      {/* Text Details */}
       <Box sx={{ minWidth: 0, flex: 1 }}>
         <Typography
           variant="caption"

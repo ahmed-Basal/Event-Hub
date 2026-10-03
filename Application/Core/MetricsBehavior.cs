@@ -4,10 +4,6 @@ using MediatR;
 
 namespace Application.Core;
 
-/// <summary>
-/// MediatR pipeline behavior that records request count and duration histogram
-/// per handler name, exported to Prometheus via /metrics.
-/// </summary>
 public class MetricsBehavior<TRequest, TResponse>
     : IPipelineBehavior<TRequest, TResponse>
     where TRequest : notnull

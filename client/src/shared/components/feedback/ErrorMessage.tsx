@@ -15,23 +15,20 @@ import { tokens } from '../../../theme';
 import type { AppError, ValidationErrorResponse } from '../../types';
 
 export interface ErrorMessageProps {
-  /** The error payload: single string, array of strings, Error instance, or structured error object */
+
   error?: string | string[] | Error | AppError | ValidationErrorResponse | null;
-  /** Optional title displayed above the error description */
+
   title?: string;
-  /** Severity level for Alert styling (default: 'error') */
+
   severity?: 'error' | 'warning' | 'info';
-  /** Optional retry callback (renders a retry action button) */
+
   onRetry?: () => void;
-  /** Optional close/dismiss callback */
+
   onClose?: () => void;
-  /** Optional custom styling overrides */
+
   sx?: SxProps<Theme>;
 }
 
-/**
- * Extracts an array of string messages from various error types.
- */
 function extractErrorMessages(
   error?: string | string[] | Error | AppError | ValidationErrorResponse | null
 ): string[] {
@@ -49,7 +46,6 @@ function extractErrorMessages(
     return [error.message];
   }
 
-  // Structured ValidationErrorResponse
   if ('errors' in error && error.errors) {
     if (Array.isArray(error.errors)) {
       return error.errors.map(String);
@@ -68,7 +64,6 @@ function extractErrorMessages(
     }
   }
 
-  // AppError or object with message
   if ('message' in error && error.message) {
     return [error.message];
   }
@@ -76,10 +71,6 @@ function extractErrorMessages(
   return [String(error)];
 }
 
-/**
- * Reusable, theme-aware error display component.
- * Handles single errors, validation error lists (e.g. ASP.NET ModelState), and retry actions.
- */
 export const ErrorMessage: React.FC<ErrorMessageProps> = ({
   error,
   title,

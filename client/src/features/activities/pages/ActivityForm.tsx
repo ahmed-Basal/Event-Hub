@@ -1,372 +1,395 @@
 import { useEffect } from 'react';
+import { useNavigate, useParams, Link } from 'react-router';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
 import Box from '@mui/material/Box';
-import Button from '@mui/material/Button';
+import Container from '@mui/material/Container';
 import Paper from '@mui/material/Paper';
 import Typography from '@mui/material/Typography';
-import Divider from '@mui/material/Divider';
+import Button from '@mui/material/Button';
+import Grid from '@mui/material/Grid';
+import CircularProgress from '@mui/material/CircularProgress';
+import Chip from '@mui/material/Chip';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
-import RocketLaunchIcon from '@mui/icons-material/RocketLaunch';
+import EventNoteIcon from '@mui/icons-material/EventNote';
+import EditCalendarIcon from '@mui/icons-material/EditCalendar';
 import SaveIcon from '@mui/icons-material/Save';
-import EditNoteIcon from '@mui/icons-material/EditNote';
-import AddCircleIcon from '@mui/icons-material/AddCircle';
-import { useParams, useNavigate } from 'react-router';
-import { useForm, Controller } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
+import CancelIcon from '@mui/icons-material/Cancel';
+
 import {
-  Spinner,
-  TagInput,
-  POPULAR_TAGS,
-  CATEGORY_OPTIONS,
-  LEVEL_OPTIONS,
-  activitySchema,
   TextInput,
   TextArea,
   SelectInput,
   DateInput,
+  TagInput,
+  Spinner,
+  activitySchema,
   type ActivityFormData,
+  CATEGORY_OPTIONS,
+  LEVEL_OPTIONS,
   type SchemaCategory,
+  type SchemaLevel,
 } from '../../../shared';
 import { tokens } from '../../../theme';
 import { useActivityDetail, useActivityMutations } from '../hooks';
-
 
 export default function ActivityForm() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
 
-  // SRP Hooks
   const { activity, isLoading: isLoadingActivity } = useActivityDetail(id);
-  const { createActivity, updateActivity, isMutating } = useActivityMutations(id);
+  const { createActivity, updateActivity } = useActivityMutations(id);
 
   const {
-    handleSubmit,
     control,
+    handleSubmit,
     reset,
+    formState: { isSubmitting, isValid, isDirty },
   } = useForm<ActivityFormData>({
     resolver: zodResolver(activitySchema),
+    mode: 'onTouched',
     defaultValues: {
       title: '',
       description: '',
-      category: 'BackEnd' as SchemaCategory,
-      level: 'All Levels',
+      category: 'BackEnd',
       date: '',
       city: '',
       venue: '',
+      level: 'All Levels',
       tags: [],
     },
   });
 
-  // Populate form values when editing an existing activity
+  // Populate form if editing existing activity
   useEffect(() => {
     if (activity) {
       reset({
-        title: activity.title ?? '',
-        description: activity.description ?? '',
-        category: (activity.category as SchemaCategory) ?? 'BackEnd',
-        level: activity.level ?? 'All Levels',
-        date: activity.date ? activity.date.split('T')[0] : '',
-        city: activity.city ?? '',
-        venue: activity.venue ?? '',
-        tags: activity.tags ?? [],
+        title: activity.title,
+        description: activity.description,
+        category: (activity.category as SchemaCategory) || 'BackEnd',
+        date: activity.date ? new Date(activity.date).toISOString().slice(0, 16) : '',
+        city: activity.city,
+        venue: activity.venue,
+        level: (activity.level as SchemaLevel) || 'All Levels',
+        tags: activity.tags || [],
       });
     }
   }, [activity, reset]);
 
-  const closeForm = () => navigate('/activities');
-
   const onSubmit = async (data: ActivityFormData) => {
-    if (activity && id) {
-      await updateActivity.mutateAsync({
-        ...activity,
-        ...data,
-        id,
-      });
-      closeForm();
-    } else {
-      createActivity.mutate(
-        {
+    try {
+      // Normalize date to ISO string for backend
+      const formattedDate = new Date(data.date).toISOString();
+
+      if (id && activity) {
+        await updateActivity.mutateAsync({
+          ...activity,
           ...data,
-          latitude: 30.0444, // Default Cairo coords
+          date: formattedDate,
+        });
+        navigate(`/activities/${activity.id}`);
+      } else {
+        const newId = await createActivity.mutateAsync({
+          ...data,
+          date: formattedDate,
+          latitude: 30.0444,
           longitude: 31.2357,
           isCancelled: false,
-        },
-        {
-          onSuccess: (newId) => {
-            navigate(`/activities/${newId}`);
-          },
+        } as any);
+
+        if (newId) {
+          navigate(`/activities/${newId}`);
+        } else {
+          navigate('/activities');
         }
-      );
+      }
+    } catch (error) {
+      console.error('Failed to save activity:', error);
+    }
+  };
+
+  const handleCancel = () => {
+    if (id) {
+      navigate(`/activities/${id}`);
+    } else {
+      navigate('/activities');
     }
   };
 
   if (isLoadingActivity) {
-    return <Spinner message="Loading meetup details..." minHeight={340} />;
+    return <Spinner message="Loading activity details..." minHeight="60vh" />;
   }
 
+  const isPending = createActivity.isPending || updateActivity.isPending || isSubmitting;
+  const isEditMode = Boolean(id);
+
   return (
-    <Box sx={{ maxWidth: 840, mx: 'auto', mb: 8, mt: 1 }}>
-      {/* ── Breadcrumb / Back Link ── */}
-      <Button
-        onClick={closeForm}
-        startIcon={<ArrowBackIcon sx={{ fontSize: 18 }} />}
-        sx={{
-          color: tokens.textSecondary,
-          mb: 2.5,
-          px: 1.5,
-          py: 0.6,
-          borderRadius: '10px',
-          fontSize: '0.85rem',
-          '&:hover': {
-            color: tokens.textPrimary,
-            bgcolor: 'rgba(255, 255, 255, 0.04)',
-          },
-        }}
-      >
-        Back to Meetups
-      </Button>
-
-      {/* ── Main Form Surface ── */}
-      <Paper
-        elevation={0}
-        sx={{
-          position: 'relative',
-          borderRadius: '24px',
-          bgcolor: tokens.surface,
-          border: `1px solid ${tokens.border}`,
-          boxShadow: tokens.shadowCard,
-          p: { xs: 2.5, sm: 4.5 },
-          overflow: 'hidden',
-          '&::before': {
-            content: '""',
-            position: 'absolute',
-            top: 0,
-            left: 0,
-            right: 0,
-            height: '3px',
-            background: `linear-gradient(90deg, ${tokens.primary}, ${tokens.accent}, ${tokens.teal})`,
-          },
-        }}
-      >
-        {/* ── Header ── */}
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 4 }}>
-          <Box
+    <Box sx={{ bgcolor: tokens.bg, minHeight: '100vh', py: { xs: 3, md: 5 } }}>
+      <Container maxWidth="md">
+        {/* Navigation Breadcrumb / Back button */}
+        <Box sx={{ mb: 3 }}>
+          <Button
+            component={Link}
+            to={isEditMode ? `/activities/${id}` : '/activities'}
+            startIcon={<ArrowBackIcon />}
             sx={{
-              width: 52,
-              height: 52,
-              borderRadius: '16px',
-              bgcolor: `${tokens.primary}18`,
-              border: `1px solid ${tokens.primary}40`,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              color: tokens.primary,
-              boxShadow: tokens.shadowGold,
-              flexShrink: 0,
+              color: tokens.textSecondary,
+              fontWeight: 600,
+              fontSize: '0.875rem',
+              '&:hover': {
+                color: tokens.primary,
+                bgcolor: 'rgba(255, 255, 255, 0.04)',
+              },
             }}
           >
-            {activity ? (
-              <EditNoteIcon sx={{ fontSize: 30 }} />
-            ) : (
-              <AddCircleIcon sx={{ fontSize: 28 }} />
-            )}
-          </Box>
-
-          <Box>
-            <Typography
-              variant="h5"
-              sx={{
-                fontWeight: 800,
-                color: tokens.textPrimary,
-                letterSpacing: '-0.02em',
-                lineHeight: 1.2,
-              }}
-            >
-              {activity ? 'Edit Tech Meetup' : 'Create New Tech Meetup'}
-            </Typography>
-            <Typography
-              variant="body2"
-              sx={{
-                color: tokens.textSecondary,
-                mt: 0.5,
-              }}
-            >
-              {activity
-                ? 'Update the agenda, speakers, topics, and logistics for this event.'
-                : 'Publish an upcoming session, hands-on workshop, or community summit.'}
-            </Typography>
-          </Box>
+            {isEditMode ? 'Back to Event' : 'Back to Events'}
+          </Button>
         </Box>
 
-        <Divider sx={{ borderColor: tokens.border, mb: 3.5 }} />
-
-        {/* ── Form with React Hook Form + Shared Form Components ── */}
-        <Box
-          component="form"
-          onSubmit={handleSubmit(onSubmit)}
-          sx={{ display: 'flex', flexDirection: 'column', gap: 3.2 }}
+        {/* Main Form Paper */}
+        <Paper
+          elevation={0}
+          sx={{
+            p: { xs: 3, sm: 4, md: 5 },
+            bgcolor: tokens.surface,
+            border: `1px solid ${tokens.border}`,
+            borderRadius: '24px',
+            boxShadow: tokens.shadowCard,
+            position: 'relative',
+            overflow: 'hidden',
+          }}
         >
-          {/* 1. Title */}
-          <TextInput
-            name="title"
-            control={control}
-            label="Event Title"
-            required
-            placeholder="e.g. Cairo .NET 9 & Microservices Summit"
-          />
-
-          {/* 2. Category & Level Grid */}
+          {/* Subtle Top Accent Glow */}
           <Box
             sx={{
-              display: 'grid',
-              gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr' },
-              gap: 2.5,
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              right: 0,
+              height: '3px',
+              background: `linear-gradient(90deg, ${tokens.primary}, ${tokens.accent})`,
             }}
-          >
-            <SelectInput
-              name="category"
-              control={control}
-              label="Technical Track"
-              options={CATEGORY_OPTIONS}
-            />
-
-            <SelectInput
-              name="level"
-              control={control}
-              label="Audience Level"
-              options={LEVEL_OPTIONS}
-            />
-          </Box>
-
-          {/* 3. Description */}
-          <TextArea
-            name="description"
-            control={control}
-            label="Detailed Agenda & Overview"
-            required
-            rows={4}
-            placeholder="Describe the key takeaways, speakers, prerequisites, and what developers will build or learn..."
           />
 
-          {/* 4. Interactive Tags Manager */}
-          <Controller
-            name="tags"
-            control={control}
-            render={({ field }) => (
-              <TagInput
-                value={field.value ?? []}
-                onChange={field.onChange}
-                suggestions={POPULAR_TAGS}
-              />
-            )}
-          />
-
-          {/* 5. Date & Schedule */}
-          <DateInput
-            name="date"
-            control={control}
-            label="Event Date"
-            required
-          />
-
-          {/* 6. Location: City & Venue */}
-          <Box
-            sx={{
-              display: 'grid',
-              gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr' },
-              gap: 2.5,
-            }}
-          >
-            <TextInput
-              name="city"
-              control={control}
-              label="City"
-              required
-              placeholder="e.g. Cairo, Alexandria, Giza, Assiut"
-            />
-
-            <TextInput
-              name="venue"
-              control={control}
-              label="Venue / Address"
-              required
-              placeholder="e.g. The GrEEK Campus, Downtown Cairo"
-            />
-          </Box>
-
-          <Divider sx={{ borderColor: tokens.border, my: 1 }} />
-
-          {/* ── Action Buttons ── */}
+          {/* Form Header */}
           <Box
             sx={{
               display: 'flex',
-              justifyContent: 'flex-end',
               alignItems: 'center',
+              justifyContent: 'space-between',
+              flexWrap: 'wrap',
               gap: 2,
+              mb: 4,
+              pb: 3,
+              borderBottom: `1px solid ${tokens.border}`,
             }}
           >
-            <Button
-              onClick={closeForm}
-              disabled={isMutating}
-              sx={{
-                borderRadius: '12px',
-                px: 3,
-                py: 1.1,
-                color: tokens.textSecondary,
-                border: `1px solid ${tokens.border}`,
-                fontSize: '0.9rem',
-                fontWeight: 600,
-                '&:hover': {
-                  color: tokens.textPrimary,
-                  borderColor: tokens.borderHover,
-                  bgcolor: 'rgba(255, 255, 255, 0.05)',
-                },
-              }}
-            >
-              Cancel
-            </Button>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+              <Box
+                sx={{
+                  width: 48,
+                  height: 48,
+                  borderRadius: '14px',
+                  bgcolor: `${tokens.primary}18`,
+                  color: tokens.primary,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  border: `1px solid ${tokens.primary}33`,
+                }}
+              >
+                {isEditMode ? <EditCalendarIcon /> : <EventNoteIcon />}
+              </Box>
 
-            <Button
-              type="submit"
-              variant="contained"
-              disabled={isMutating}
-              startIcon={
-                isMutating ? undefined : activity ? (
-                  <SaveIcon />
-                ) : (
-                  <RocketLaunchIcon />
-                )
-              }
+              <Box>
+                <Typography
+                  variant="h5"
+                  sx={{
+                    fontWeight: 800,
+                    color: tokens.textPrimary,
+                    letterSpacing: '-0.02em',
+                  }}
+                >
+                  {isEditMode ? 'Edit Meetup Event' : 'Create Meetup Event'}
+                </Typography>
+                <Typography variant="body2" sx={{ color: tokens.textSecondary, mt: 0.3 }}>
+                  {isEditMode
+                    ? 'Update event schedule, location, or details'
+                    : 'Publish a new developer meetup, workshop, or conference'}
+                </Typography>
+              </Box>
+            </Box>
+
+            <Chip
+              label={isEditMode ? 'Edit Mode' : 'New Meetup'}
               sx={{
-                borderRadius: '12px',
-                px: 4,
-                py: 1.2,
-                fontSize: '0.92rem',
+                bgcolor: isEditMode ? `${tokens.teal}18` : `${tokens.primary}18`,
+                color: isEditMode ? tokens.teal : tokens.primary,
+                border: `1px solid ${isEditMode ? tokens.teal : tokens.primary}40`,
                 fontWeight: 700,
-                bgcolor: tokens.primary,
-                color: tokens.bg,
-                boxShadow: tokens.shadowGold,
-                transition: 'all 0.2s ease-in-out',
-                '&:hover': {
-                  bgcolor: '#e08e0a',
-                  boxShadow: '0px 12px 36px 0px rgba(245, 158, 11, 0.38)',
-                  transform: 'translateY(-1px)',
-                },
-                '&:active': {
-                  transform: 'translateY(0)',
-                },
+                fontSize: '0.78rem',
+                borderRadius: '9999px',
+                px: 0.5,
               }}
-            >
-              {isMutating
-                ? activity
-                  ? 'Saving changes...'
-                  : 'Publishing meetup...'
-                : activity
-                ? 'Save Changes'
-                : 'Publish Meetup'}
-            </Button>
+            />
           </Box>
-        </Box>
-      </Paper>
+
+          {/* Form Body */}
+          <Box component="form" onSubmit={handleSubmit(onSubmit)} noValidate>
+            <Grid container spacing={3}>
+              {/* Event Title */}
+              <Grid size={{ xs: 12 }}>
+                <TextInput
+                  control={control}
+                  name="title"
+                  label="Event Title"
+                  placeholder="e.g. Modern .NET 9 Architecture & Clean APIs"
+                />
+              </Grid>
+
+              {/* Category & Experience Level */}
+              <Grid size={{ xs: 12, sm: 6 }}>
+                <SelectInput
+                  control={control}
+                  name="category"
+                  label="Category / Track"
+                  items={CATEGORY_OPTIONS}
+                />
+              </Grid>
+
+              <Grid size={{ xs: 12, sm: 6 }}>
+                <SelectInput
+                  control={control}
+                  name="level"
+                  label="Audience Level"
+                  items={LEVEL_OPTIONS}
+                />
+              </Grid>
+
+              {/* Description */}
+              <Grid size={{ xs: 12 }}>
+                <TextArea
+                  control={control}
+                  name="description"
+                  label="Event Description"
+                  rows={4}
+                  placeholder="Provide an overview of the event, what developers will learn, and agenda details..."
+                />
+              </Grid>
+
+              {/* Date & Time */}
+              <Grid size={{ xs: 12 }}>
+                <DateInput
+                  control={control}
+                  name="date"
+                  label="Date & Time"
+                />
+              </Grid>
+
+              {/* City & Venue */}
+              <Grid size={{ xs: 12, sm: 6 }}>
+                <TextInput
+                  control={control}
+                  name="city"
+                  label="City"
+                  placeholder="e.g. Cairo, Alexandria, Giza"
+                />
+              </Grid>
+
+              <Grid size={{ xs: 12, sm: 6 }}>
+                <TextInput
+                  control={control}
+                  name="venue"
+                  label="Venue / Host Space"
+                  placeholder="e.g. Greek Campus, Co-working Hub"
+                />
+              </Grid>
+
+              {/* Dynamic Topic Tags */}
+              <Grid size={{ xs: 12 }}>
+                <TagInput
+                  control={control}
+                  name="tags"
+                  label="Technical Topics & Tags"
+                  placeholder="Type a tag (e.g. C#, React, Docker) and press Enter"
+                />
+              </Grid>
+
+              {/* Action Buttons */}
+              <Grid size={{ xs: 12 }}>
+                <Box
+                  sx={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'flex-end',
+                    gap: 2,
+                    pt: 2,
+                    borderTop: `1px solid ${tokens.border}`,
+                  }}
+                >
+                  <Button
+                    variant="outlined"
+                    onClick={handleCancel}
+                    disabled={isPending}
+                    startIcon={<CancelIcon />}
+                    sx={{
+                      borderRadius: '12px',
+                      px: 3,
+                      py: 1.1,
+                      color: tokens.textSecondary,
+                      borderColor: tokens.border,
+                      fontWeight: 600,
+                      '&:hover': {
+                        borderColor: tokens.borderHover,
+                        bgcolor: 'rgba(255, 255, 255, 0.04)',
+                        color: tokens.textPrimary,
+                      },
+                    }}
+                  >
+                    Cancel
+                  </Button>
+
+                  <Button
+                    type="submit"
+                    variant="contained"
+                    disabled={isPending || !isValid || (isEditMode && !isDirty)}
+                    startIcon={
+                      isPending ? (
+                        <CircularProgress size={18} color="inherit" />
+                      ) : (
+                        <SaveIcon />
+                      )
+                    }
+                    sx={{
+                      borderRadius: '12px',
+                      px: 4,
+                      py: 1.1,
+                      bgcolor: tokens.primary,
+                      color: tokens.bg,
+                      fontWeight: 700,
+                      fontSize: '0.9rem',
+                      boxShadow: tokens.shadowGold,
+                      '&:hover': {
+                        bgcolor: '#e08e0a',
+                      },
+                      '&:disabled': {
+                        bgcolor: 'rgba(255, 255, 255, 0.08)',
+                        color: tokens.textMuted,
+                      },
+                    }}
+                  >
+                    {isPending
+                      ? 'Submitting...'
+                      : isEditMode
+                      ? 'Update Event'
+                      : 'Create Event'}
+                  </Button>
+                </Box>
+              </Grid>
+            </Grid>
+          </Box>
+        </Paper>
+      </Container>
     </Box>
   );
 }

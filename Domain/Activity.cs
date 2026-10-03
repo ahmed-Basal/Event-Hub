@@ -2,13 +2,9 @@ using Domain.Common;
 
 namespace Domain;
 
-/// <summary>
-/// Rich Domain Model representing a developer activity / meetup.
-/// Encapsulates all state mutations, invariants, and business rules.
-/// </summary>
 public class Activity
 {
-    // ── 1. Encapsulated Properties (Private Setters) ───────────────────
+
     public string ID { get; private set; } = Guid.NewGuid().ToString();
     public string Title { get; private set; } = string.Empty;
     public string Slug { get; private set; } = string.Empty;
@@ -23,10 +19,8 @@ public class Activity
     public string Level { get; private set; } = "All Levels";
     public List<string> Tags { get; private set; } = [];
 
-    // ── 2. Parameterless constructor for EF Core ───────────────────────
     private Activity() { }
 
-    // ── 3. Factory Method (Enforces valid creation invariants) ──────────
     public static Activity Create(
         string title,
         string description,
@@ -66,11 +60,6 @@ public class Activity
         return activity;
     }
 
-    // ── 4. Domain Behaviors & Business Methods ─────────────────────────
-
-    /// <summary>
-    /// Updates the event title and automatically recalculates the URL slug.
-    /// </summary>
     public void UpdateTitle(string newTitle)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(newTitle, nameof(newTitle));
@@ -78,9 +67,6 @@ public class Activity
         Slug = SlugHelper.GenerateSlug(newTitle);
     }
 
-    /// <summary>
-    /// Updates the core event details and synchronizes the slug if title changed.
-    /// </summary>
     public void UpdateDetails(
         string title,
         string description,
@@ -101,9 +87,6 @@ public class Activity
         }
     }
 
-    /// <summary>
-    /// Updates event venue and geographical coordinates.
-    /// </summary>
     public void UpdateLocation(string city, string venue, double latitude, double longitude)
     {
         City = city?.Trim() ?? string.Empty;
@@ -112,25 +95,16 @@ public class Activity
         Longitude = longitude;
     }
 
-    /// <summary>
-    /// Cancels the scheduled activity.
-    /// </summary>
     public void Cancel()
     {
         IsCancelled = true;
     }
 
-    /// <summary>
-    /// Reactivates a previously cancelled activity.
-    /// </summary>
     public void Reactivate()
     {
         IsCancelled = false;
     }
 
-    /// <summary>
-    /// Adds a topic tag if not already present.
-    /// </summary>
     public void AddTag(string tag)
     {
         if (string.IsNullOrWhiteSpace(tag)) return;
@@ -141,9 +115,6 @@ public class Activity
         }
     }
 
-    /// <summary>
-    /// Removes a topic tag.
-    /// </summary>
     public void RemoveTag(string tag)
     {
         if (string.IsNullOrWhiteSpace(tag)) return;
@@ -151,9 +122,6 @@ public class Activity
         Tags.RemoveAll(t => t.Equals(clean, StringComparison.OrdinalIgnoreCase));
     }
 
-    /// <summary>
-    /// Replaces the tag collection with a new unique set.
-    /// </summary>
     public void SetTags(IEnumerable<string> tags)
     {
         Tags.Clear();

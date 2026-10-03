@@ -4,7 +4,6 @@ import Backdrop from '@mui/material/Backdrop';
 import { keyframes } from '@mui/material/styles';
 import { tokens } from '../../../theme';
 
-// Smooth Orbit Animations
 const spinClockwise = keyframes`
   0% { transform: rotate(0deg); }
   100% { transform: rotate(360deg); }
@@ -63,7 +62,7 @@ export default function Spinner({
         userSelect: 'none',
       }}
     >
-      {/* Tech Orbit / Glowing Radar Container */}
+
       <Box
         sx={{
           position: 'relative',
@@ -74,7 +73,7 @@ export default function Spinner({
           alignItems: 'center',
         }}
       >
-        {/* Outer Orbital Ring */}
+
         <Box
           sx={{
             position: 'absolute',
@@ -88,7 +87,6 @@ export default function Spinner({
           }}
         />
 
-        {/* Middle Counter-Rotating Ring */}
         <Box
           sx={{
             position: 'absolute',
@@ -102,7 +100,6 @@ export default function Spinner({
           }}
         />
 
-        {/* Inner Glowing Core */}
         <Box
           sx={{
             width: size * 0.28,
@@ -114,7 +111,6 @@ export default function Spinner({
         />
       </Box>
 
-      {/* Pulsing Modern Tech Typography */}
       {message && (
         <Typography
           variant="body2"

@@ -1,14 +1,13 @@
-// ============================================================
-// Design Tokens — Figma Events Egypt Design Tokens
-// ============================================================
+
+
 export const tokens = {
   bg: '#0B0F19',
   surface: '#161B26',
   surface2: '#1B2230',
   surface3: '#111722',
-  primary: '#F59E0B',       // Egyptian Amber Gold
-  accent: '#FF4655',        // Sunset Coral
-  teal: '#06B6D4',          // Nile Turquoise
+  primary: '#F59E0B',
+  accent: '#FF4655',
+  teal: '#06B6D4',
   border: 'rgba(255, 255, 255, 0.08)',
   borderHover: 'rgba(255, 255, 255, 0.14)',
   textPrimary: '#F8FAFC',

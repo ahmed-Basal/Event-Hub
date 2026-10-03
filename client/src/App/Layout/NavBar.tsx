@@ -17,11 +17,10 @@ import NotificationsNoneIcon from '@mui/icons-material/NotificationsNone';
 import SearchIcon from '@mui/icons-material/Search';
 import LocationOnIcon from '@mui/icons-material/LocationOn';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
-import AddIcon from '@mui/icons-material/Add';
 import MenuIcon from '@mui/icons-material/Menu';
 import { NavLink } from 'react-router';
 import { tokens } from '../../theme';
-import { MenuItemLink } from '../../shared';
+import MenuItemLink from '../../shared/components/navigation/MenuItemLink';
 
 const CITIES = ['Cairo', 'Alexandria', 'Giza', 'El Gouna', 'Dahab', 'Sahel'];
 
@@ -45,7 +44,7 @@ export default function NavBar() {
             minHeight: { xs: 64, md: 72 },
           }}
         >
-          {/* ── Brand Logo ──────────────────────────────── */}
+          
           <Box
             component={NavLink}
             to="/"
@@ -57,7 +56,7 @@ export default function NavBar() {
               flexShrink: 0,
             }}
           >
-            {/* Icon square */}
+            
             <Box
               sx={{
                 width: 38,
@@ -78,7 +77,7 @@ export default function NavBar() {
               }}
             >
               {'</>'}
-              {/* Red dot */}
+              
               <Box
                 sx={{
                   position: 'absolute',
@@ -92,7 +91,7 @@ export default function NavBar() {
               />
             </Box>
 
-            {/* Brand text */}
+            
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: '-2px', lineHeight: 1 }}>
               <Typography
                 sx={{
@@ -121,7 +120,7 @@ export default function NavBar() {
             </Box>
           </Box>
 
-          {/* ── City Selector ────────────────────────────── */}
+          
           <Chip
             icon={<LocationOnIcon sx={{ fontSize: '14px !important', color: `${tokens.textSecondary} !important` }} />}
             label={
@@ -170,7 +169,7 @@ export default function NavBar() {
             ))}
           </Menu>
 
-          {/* ── Search Bar ───────────────────────────────── */}
+          
           <Box
             sx={{
               display: { xs: 'none', md: 'flex' },
@@ -201,9 +200,9 @@ export default function NavBar() {
             />
           </Box>
 
-          {/* ── Nav Actions ──────────────────────────────── */}
+          
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-            {/* Explore link */}
+            
             <Button
               component={NavLink}
               to="/activities"
@@ -220,7 +219,7 @@ export default function NavBar() {
               Explore
             </Button>
 
-            {/* Errors link */}
+            
             <Button
               component={NavLink}
               to="/errors"
@@ -237,26 +236,26 @@ export default function NavBar() {
               Errors
             </Button>
 
-            {/* Create Activity button */}
             <Button
               component={NavLink}
               to="/createActivity"
-              variant="outlined"
-              size="small"
-              startIcon={<AddIcon />}
+              variant="contained"
               sx={{
-                display: { xs: 'none', sm: 'flex' },
-                borderColor: tokens.border,
-                color: tokens.textSecondary,
-                fontSize: '0.8rem',
+                display: { xs: 'none', md: 'flex' },
+                bgcolor: tokens.primary,
+                color: tokens.bg,
+                fontWeight: 700,
+                fontSize: '0.82rem',
+                borderRadius: '10px',
                 px: 2,
-                '&:hover': { borderColor: tokens.primary, color: tokens.primary },
+                py: 0.7,
+                boxShadow: tokens.shadowGold,
+                '&:hover': { bgcolor: '#e08e0a' },
               }}
             >
-              Create Activity
+              Create Meetup
             </Button>
 
-            {/* Notifications */}
             <Tooltip title="Notifications">
               <IconButton
                 size="small"
@@ -277,7 +276,7 @@ export default function NavBar() {
               </IconButton>
             </Tooltip>
 
-            {/* User Avatar */}
+            
             <Tooltip title="Profile">
               <Avatar
                 sx={{
@@ -297,7 +296,7 @@ export default function NavBar() {
               </Avatar>
             </Tooltip>
 
-            {/* Mobile menu icon */}
+            
             <IconButton
               sx={{ display: { xs: 'flex', md: 'none' }, color: tokens.textSecondary }}
               onClick={(e) => setMobileAnchor(e.currentTarget)}
@@ -305,7 +304,7 @@ export default function NavBar() {
               <MenuIcon />
             </IconButton>
 
-            {/* Mobile Navigation Dropdown */}
+            
             <Menu
               anchorEl={mobileAnchor}
               open={Boolean(mobileAnchor)}
@@ -329,11 +328,11 @@ export default function NavBar() {
               <MenuItemLink to="/activities" onClick={() => setMobileAnchor(null)}>
                 Explore
               </MenuItemLink>
-              <MenuItemLink to="/createActivity" onClick={() => setMobileAnchor(null)}>
-                Create Activity
-              </MenuItemLink>
               <MenuItemLink to="/errors" onClick={() => setMobileAnchor(null)}>
                 Errors
+              </MenuItemLink>
+              <MenuItemLink to="/createActivity" onClick={() => setMobileAnchor(null)}>
+                Create Meetup
               </MenuItemLink>
             </Menu>
           </Box>

@@ -16,7 +16,7 @@ const sleep = (delay: number) => {
 agent.interceptors.response.use(
     async response => {
         if (import.meta.env.DEV) {
-            await sleep(1000);
+           // await sleep(100000);
         }
         return response;
     },
@@ -31,7 +31,11 @@ agent.interceptors.response.use(
         switch (status) {
             case 400:
                 if (config?.method === 'get' && data?.errors && Object.prototype.hasOwnProperty.call(data.errors, 'id')) {
-                    router.navigate('/not-found');
+                    if (router?.navigate) {
+                        router.navigate('/not-found');
+                    } else {
+                        window.location.href = '/not-found';
+                    }
                     break;
                 }
                 if (data?.errors) {
@@ -54,15 +58,17 @@ agent.interceptors.response.use(
                 break;
 
             case 404:
-                router.navigate('/not-found');
+                if (router?.navigate) {
+                    router.navigate('/not-found');
+                } else {
+                    window.location.href = '/not-found';
+                }
                 break;
 
             case 500: {
                 const method = config?.method?.toLowerCase();
                 const isMutation = method && ['post', 'put', 'delete', 'patch'].includes(method);
 
-                // Senior Pattern: On mutations (submitting forms / actions), do NOT navigate away!
-                // Keep the user on the page with their entered form data intact, and alert with Trace ID.
                 if (isMutation) {
                     const traceSuffix = data?.traceId ? ` (Trace ID: ${data.traceId})` : '';
                     toast.error(`Server Error: ${data?.message || 'Operation failed'}${traceSuffix}`);
@@ -75,7 +81,11 @@ agent.interceptors.response.use(
                 } catch {
                     // Ignore storage exceptions if private browsing / quota exceeded
                 }
-                router.navigate('/server-error', { state: { error: data } });
+                if (router?.navigate) {
+                    router.navigate('/server-error', { state: { error: data } });
+                } else {
+                    window.location.href = '/server-error';
+                }
                 break;
             }
 

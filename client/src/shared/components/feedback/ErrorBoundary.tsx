@@ -16,10 +16,6 @@ interface State {
   error?: Error;
 }
 
-/**
- * Global / Component-level Error Boundary to catch render errors gracefully.
- * Adheres to SRP: catches uncaught rendering errors and renders fallback UI.
- */
 export class ErrorBoundary extends Component<Props, State> {
   public override state: State = {
     hasError: false,

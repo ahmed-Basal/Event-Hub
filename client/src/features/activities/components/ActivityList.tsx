@@ -8,12 +8,6 @@ export interface ActivityListProps {
   filters?: ActivityFilterValues;
 }
 
-/**
- * ActivityList
- * SRP & DIP:
- * Relies on the `useActivitiesList` abstraction hook rather than directly querying APIs.
- * Supports filtering passed from parent dashboard (State Lifting).
- */
 export default function ActivityList({ filters }: ActivityListProps) {
   const { activities, isPending } = useActivitiesList(filters);
 

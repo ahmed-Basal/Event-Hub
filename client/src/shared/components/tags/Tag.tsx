@@ -10,27 +10,27 @@ import type { TagSize, TagVariant } from '../../types';
 export type { TagSize, TagVariant };
 
 export interface TagProps {
-  /** The text string of the tag */
+
   tag: string;
-  /** Index for deterministic color palette hashing */
+
   index?: number;
-  /** Size variant */
+
   size?: TagSize;
-  /** Visual variant */
+
   variant?: TagVariant;
-  /** Explicit font-size override for backward-compatibility */
+
   fontSize?: string | number;
-  /** Custom leading symbol/icon; pass null to hide */
+
   leadingSymbol?: React.ReactNode;
-  /** Callback fired when the remove/delete icon is clicked */
+
   onDelete?: () => void;
-  /** Click handler for the tag */
+
   onClick?: (e: React.MouseEvent<HTMLElement>) => void;
-  /** Disabled state */
+
   disabled?: boolean;
-  /** Custom MUI sx overrides */
+
   sx?: SxProps<Theme>;
-  /** Optional class name */
+
   className?: string;
 }
 
@@ -75,10 +75,6 @@ const SIZE_CONFIGS: Record<
   },
 };
 
-/**
- * Reusable developer tag component with gradient borders, monospace typography,
- * and high-contrast dark theme aesthetics.
- */
 export const Tag: React.FC<TagProps> = ({
   tag,
   index = 0,
@@ -97,7 +93,6 @@ export const Tag: React.FC<TagProps> = ({
   const isClickable = Boolean(onClick) && !disabled;
   const isDeletable = Boolean(onDelete) && !disabled;
 
-  // Base background & border logic depending on variant
   let backgroundStyle: string;
   let borderStyle: string;
   let textColor: string = palette.text;
@@ -169,7 +164,7 @@ export const Tag: React.FC<TagProps> = ({
         ...sx,
       }}
     >
-      {/* Leading hashtag or custom symbol */}
+
       {leadingSymbol !== null && (
         <Box
           component="span"
@@ -188,12 +183,10 @@ export const Tag: React.FC<TagProps> = ({
         </Box>
       )}
 
-      {/* Tag Text */}
       <Box component="span" sx={{ whiteSpace: 'nowrap' }}>
         {tag}
       </Box>
 
-      {/* Delete / Remove Action Button */}
       {isDeletable && (
         <IconButton
           component="span"

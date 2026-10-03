@@ -3,23 +3,20 @@ import { Box, Typography, type SxProps, type Theme } from '@mui/material';
 import { tokens } from '../../../theme';
 
 export interface EmptyStateProps {
-  /** Optional icon or emoji element */
+
   icon?: React.ReactNode;
-  /** Primary heading */
+
   title: string;
-  /** Secondary description */
+
   message?: string;
-  /** Optional CTA action button or node */
+
   action?: React.ReactNode;
-  /** Minimum container height */
+
   minHeight?: number | string;
-  /** Custom MUI sx styling overrides */
+
   sx?: SxProps<Theme>;
 }
 
-/**
- * Reusable empty state display for lists, search results, and empty tabs.
- */
 export const EmptyState: React.FC<EmptyStateProps> = ({
   icon = '🎭',
   title,

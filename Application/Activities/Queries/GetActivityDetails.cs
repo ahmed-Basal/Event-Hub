@@ -26,7 +26,10 @@ public static class GetActivityDetails
     {
         public async Task<Result<Activity>> Handle(Query request, CancellationToken cancellationToken)
         {
-            var activity = await context.Activities.FindAsync([request.ID], cancellationToken);
+            var activity = await context.Activities.FirstOrDefaultAsync(
+                x => x.ID == request.ID || x.Slug == request.ID,
+                cancellationToken
+            );
 
             if (activity == null)
             {

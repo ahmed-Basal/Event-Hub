@@ -1,9 +1,10 @@
-import { useParams, Link } from 'react-router';
-import Grid from '@mui/material/Grid';
-import Box from '@mui/material/Box';
-import Typography from '@mui/material/Typography';
-import Button from '@mui/material/Button';
+import { Link, useParams } from 'react-router';
+
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import Box from '@mui/material/Box';
+import Button from '@mui/material/Button';
+import Grid from '@mui/material/Grid';
+import Typography from '@mui/material/Typography';
 import ActivityDetailsChats from '../components/ActivityDetailsChats';
 import ActivityDetailsInfo from '../components/ActivityDetailsInfo';
 import ActivityDetailsSideBar from '../components/ActivityDetailsSideBar';
@@ -12,11 +13,6 @@ import { Spinner } from '../../../shared';
 import { tokens } from '../../../theme';
 import { useActivityDetail } from '../hooks';
 
-/**
- * ActivityDetailsPage
- * SRP: Fetches only the single activity using useActivityDetail(id).
- * Composes focused subcomponents (Header, Info, Chats, Sidebar).
- */
 export default function ActivityDetailsPage() {
   const { id } = useParams<{ id: string }>();
   const { activity, isLoading: isLoadingActivity } = useActivityDetail(id);
@@ -70,7 +66,7 @@ export default function ActivityDetailsPage() {
 
   return (
     <Box sx={{ pb: 8 }}>
-      {/* ── Top Navigation Breadcrumb ── */}
+
       <Button
         component={Link}
         to="/activities"
@@ -91,7 +87,6 @@ export default function ActivityDetailsPage() {
         Back to Meetups
       </Button>
 
-      {/* ── Two Column Details Layout ── */}
       <Grid container spacing={3.5}>
         <Grid size={{ xs: 12, md: 8 }}>
           <ActivityDetailsHeader activity={activity} />

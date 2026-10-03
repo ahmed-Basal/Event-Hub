@@ -10,9 +10,9 @@ import {
 import {
   CalendarMonth as CalendarMonthIcon,
   LocationOn as LocationOnIcon,
-  Edit as EditIcon,
   EventBusy as EventBusyIcon,
   CheckCircle as CheckCircleIcon,
+  Edit as EditIcon,
 } from '@mui/icons-material';
 import { Link } from 'react-router';
 import { formatDate, type Activity } from '../../../shared';
@@ -53,7 +53,7 @@ export default function ActivityDetailsHeader({ activity }: Props) {
         bgcolor: tokens.surface,
       }}
     >
-      {/* ── Cancelled Ribbon/Badge ── */}
+
       {isCancelled && (
         <Box
           sx={{
@@ -76,7 +76,6 @@ export default function ActivityDetailsHeader({ activity }: Props) {
         </Box>
       )}
 
-      {/* ── Hero Image with Gradients ── */}
       <Box sx={{ position: 'relative', height: { xs: 260, md: 360 }, width: '100%' }}>
         <CardMedia
           component="img"
@@ -91,7 +90,6 @@ export default function ActivityDetailsHeader({ activity }: Props) {
           }}
         />
 
-        {/* Cinematic Backdrop Gradient */}
         <Box
           sx={{
             position: 'absolute',
@@ -100,7 +98,6 @@ export default function ActivityDetailsHeader({ activity }: Props) {
           }}
         />
 
-        {/* Top Badges (Category & Host) */}
         <Box
           sx={{
             position: 'absolute',
@@ -126,7 +123,6 @@ export default function ActivityDetailsHeader({ activity }: Props) {
           />
         </Box>
 
-        {/* Header Text Overlay */}
         <Box
           sx={{
             position: 'absolute',
@@ -176,7 +172,6 @@ export default function ActivityDetailsHeader({ activity }: Props) {
         </Box>
       </Box>
 
-      {/* ── Sub-bar: Host Info & Actions ── */}
       <Box
         sx={{
           p: { xs: 2.5, md: '20px 36px' },
@@ -188,7 +183,7 @@ export default function ActivityDetailsHeader({ activity }: Props) {
           gap: 2.5,
         }}
       >
-        {/* Host Avatar & Details */}
+
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
           <Avatar
             sx={{
@@ -213,7 +208,6 @@ export default function ActivityDetailsHeader({ activity }: Props) {
           </Box>
         </Box>
 
-        {/* Dynamic Action Buttons */}
         <Box
           sx={{
             display: 'flex',
@@ -256,23 +250,22 @@ export default function ActivityDetailsHeader({ activity }: Props) {
               </Button>
 
               <Button
-                variant="contained"
                 component={Link}
                 to={`/manage/${activity?.id}`}
+                variant="contained"
                 disabled={isCancelled}
                 startIcon={<EditIcon />}
                 sx={{
                   borderRadius: '12px',
-                  px: 3,
+                  px: 2.5,
                   py: 1.1,
                   fontSize: '0.88rem',
-                  fontWeight: 700,
+                  fontWeight: 600,
                   bgcolor: tokens.primary,
                   color: tokens.bg,
                   boxShadow: tokens.shadowGold,
                   '&:hover': {
                     bgcolor: '#e08e0a',
-                    boxShadow: '0 12px 30px rgba(245, 158, 11, 0.35)',
                   },
                 }}
               >

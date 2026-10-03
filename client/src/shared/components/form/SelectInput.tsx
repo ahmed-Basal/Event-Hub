@@ -1,99 +1,106 @@
-import MenuItem from '@mui/material/MenuItem';
+import { useController, type UseControllerProps, type FieldValues } from 'react-hook-form';
 import TextField, { type TextFieldProps } from '@mui/material/TextField';
-import { useController, type Control, type FieldValues, type Path } from 'react-hook-form';
-import { formFieldSx } from './formFieldSx';
+import MenuItem from '@mui/material/MenuItem';
+import { tokens } from '../../../theme';
+import type { SelectOption } from '../../types';
 
-export interface SelectOption {
-  value: string;
-  label: string;
-}
+export type SelectInputItem = string | SelectOption | { text: string; value: string };
 
-export type SelectInputProps<T extends FieldValues = FieldValues> = Omit<
-  TextFieldProps,
-  'name' | 'select'
-> & {
-  name?: Path<T>;
-  control?: Control<T>;
-  options: readonly (SelectOption | string)[];
-};
+export type SelectInputProps<T extends FieldValues> = UseControllerProps<T> &
+  Omit<TextFieldProps, 'name' | 'defaultValue'> & {
+    label: string;
+    items: readonly SelectInputItem[] | SelectInputItem[];
+  };
 
-export function SelectInput<T extends FieldValues = FieldValues>({
-  name,
-  control,
-  options,
-  sx,
-  children,
+export default function SelectInput<T extends FieldValues>({
+  items,
   ...props
 }: SelectInputProps<T>) {
-  if (control && name) {
-    return (
-      <ControlledSelectInput
-        name={name}
-        control={control}
-        options={options}
-        sx={sx}
-        {...props}
-      />
-    );
-  }
-
-  const renderedOptions = options.map((opt) => {
-    const value = typeof opt === 'string' ? opt : opt.value;
-    const label = typeof opt === 'string' ? opt : opt.label;
-    return (
-      <MenuItem key={value} value={value}>
-        {label}
-      </MenuItem>
-    );
-  });
+  const { field, fieldState } = useController({ ...props, defaultValue: ('' as any) });
 
   return (
     <TextField
-      select
-      fullWidth
-      sx={[formFieldSx, ...(Array.isArray(sx) ? sx : sx ? [sx] : [])]}
       {...props}
-    >
-      {children ?? renderedOptions}
-    </TextField>
-  );
-}
-
-function ControlledSelectInput<T extends FieldValues>({
-  name,
-  control,
-  options,
-  sx,
-  helperText,
-  ...props
-}: SelectInputProps<T> & { name: Path<T>; control: Control<T> }) {
-  const {
-    field,
-    fieldState: { error },
-  } = useController({ name, control });
-
-  return (
-    <TextField
       {...field}
-      value={field.value ?? ''}
       select
-      error={Boolean(error)}
-      helperText={error?.message ?? helperText}
+      value={field.value ?? ''}
       fullWidth
-      sx={[formFieldSx, ...(Array.isArray(sx) ? sx : sx ? [sx] : [])]}
-      {...props}
+      variant="outlined"
+      error={Boolean(fieldState.error)}
+      helperText={fieldState.error?.message}
+      slotProps={{
+        select: {
+          MenuProps: {
+            slotProps: {
+              paper: {
+                sx: {
+                  bgcolor: tokens.surface2,
+                  border: `1px solid ${tokens.border}`,
+                  borderRadius: '12px',
+                  boxShadow: tokens.shadowDropdown,
+                  '& .MuiMenuItem-root': {
+                    fontSize: '0.9rem',
+                    borderRadius: '8px',
+                    mx: 0.5,
+                    my: 0.25,
+                    '&.Mui-selected': {
+                      bgcolor: `${tokens.primary}20`,
+                      color: tokens.primary,
+                      fontWeight: 600,
+                    },
+                    '&:hover': {
+                      bgcolor: `${tokens.primary}12`,
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      }}
+      sx={{
+        '& .MuiOutlinedInput-root': {
+          borderRadius: '12px',
+          bgcolor: 'rgba(255, 255, 255, 0.02)',
+          transition: 'border-color 0.2s, box-shadow 0.2s',
+          '& fieldset': {
+            borderColor: tokens.border,
+          },
+          '&:hover fieldset': {
+            borderColor: tokens.borderHover,
+          },
+          '&.Mui-focused fieldset': {
+            borderColor: tokens.primary,
+          },
+        },
+        '& .MuiInputLabel-root': {
+          color: tokens.textSecondary,
+          '&.Mui-focused': {
+            color: tokens.primary,
+          },
+        },
+        ...props.sx,
+      }}
     >
-      {options.map((opt) => {
-        const value = typeof opt === 'string' ? opt : opt.value;
-        const label = typeof opt === 'string' ? opt : opt.label;
+      {items.map((item) => {
+        let value = '';
+        let text = '';
+        if (typeof item === 'string') {
+          value = item;
+          text = item;
+        } else if ('label' in item) {
+          value = item.value;
+          text = item.label;
+        } else if ('text' in item) {
+          value = item.value;
+          text = item.text;
+        }
         return (
           <MenuItem key={value} value={value}>
-            {label}
+            {text}
           </MenuItem>
         );
       })}
     </TextField>
   );
 }
-
-export default SelectInput;

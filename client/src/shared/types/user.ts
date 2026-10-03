@@ -40,5 +40,4 @@ export interface Comment {
   createdAt?: string;
 }
 
-/** Alias for Comment to avoid collision with standard DOM Comment */
 export type ActivityComment = Comment;
