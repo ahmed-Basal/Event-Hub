@@ -2,7 +2,7 @@ import Box from '@mui/material/Box';
 import NavBar from '../../../App/Layout/NavBar';
 import { tokens } from '../../../theme';
 import { useHomeData } from '../hooks';
-import { HeroSection, StatsBar, UpcomingEvents } from '../components';
+import { HeroSection, TrackFilterBar, UpcomingEvents } from '../components';
 
 export default function HomePage() {
   const { featuredActivity, upcomingActivities, stats } = useHomeData();
@@ -22,7 +22,7 @@ export default function HomePage() {
 
       <HeroSection featuredActivity={featuredActivity} />
 
-      <StatsBar stats={stats} />
+
 
       <UpcomingEvents activities={upcomingActivities} />
     </Box>
