@@ -28,6 +28,9 @@ export const activitySchema = z.object({
   date: requiredString('Date'),
   city: requiredString('City'),
   venue: requiredString('Venue'),
+  image: z.string().optional(),
+  latitude: z.number().optional(),
+  longitude: z.number().optional(),
   level: LevelEnum.optional(),
   tags: z.array(z.string()).optional(),
 });

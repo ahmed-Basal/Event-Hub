@@ -109,7 +109,7 @@ export default function FeaturedEventCard({ activity }: FeaturedEventCardProps) 
             sx={{
               height: 200,
               position: 'relative',
-              backgroundImage: `url(/images/categoryImages/${catKey}.jpg)`,
+              backgroundImage: `url(${activity.image || `/images/categoryImages/${catKey}.jpg`})`,
               backgroundSize: 'cover',
               backgroundPosition: 'center',
             }}

@@ -1,8 +1,8 @@
 import type { LocationIQAutocompleteParams, LocationIQResult } from '../types/location';
 
-const LOCATIONIQ_API_KEY =
+export const LOCATIONIQ_API_KEY =
   (import.meta.env.VITE_LOCATIONIQ_API_KEY as string | undefined) ||
-  'pk.9ee8cd456c9ddcee4ec9f897552787cc';
+  'pk.45e9ac96fc4487ad1f59f38cc6e357e2';
 
 const AUTOCOMPLETE_ENDPOINT = 'https://api.locationiq.com/v1/autocomplete';
 
@@ -51,6 +51,34 @@ export const locationIqApi = {
         return [];
       }
       return [];
+    }
+  },
+
+  async reverse({
+    lat,
+    lon,
+    acceptLanguage = 'ar,en',
+    signal,
+  }: {
+    lat: number;
+    lon: number;
+    acceptLanguage?: string;
+    signal?: AbortSignal;
+  }): Promise<LocationIQResult | null> {
+    const params = new URLSearchParams({
+      key: LOCATIONIQ_API_KEY,
+      lat: String(lat),
+      lon: String(lon),
+      format: 'json',
+      'accept-language': acceptLanguage,
+    });
+
+    try {
+      const response = await fetch(`https://us1.locationiq.com/v1/reverse?${params.toString()}`, { signal });
+      if (!response.ok) return null;
+      return (await response.json()) as LocationIQResult;
+    } catch {
+      return null;
     }
   },
 };

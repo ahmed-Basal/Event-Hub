@@ -35,19 +35,30 @@ public static class EditActivity
             if (activity == null) return Result<Unit>.NotFound("Activity not found");
 
             var dto = request.ActivityDto;
+            var category = !string.IsNullOrWhiteSpace(dto.Category) ? dto.Category.Trim() : activity.Category;
+            var image = !string.IsNullOrWhiteSpace(dto.Image)
+                ? dto.Image.Trim()
+                : (!string.IsNullOrWhiteSpace(activity.Image)
+                    ? activity.Image
+                    : $"/images/categoryImages/{category.ToLowerInvariant()}.jpg");
+
+            var latitude = dto.Latitude != 0 ? dto.Latitude : activity.Latitude;
+            var longitude = dto.Longitude != 0 ? dto.Longitude : activity.Longitude;
+
             activity.UpdateDetails(
                 dto.Title,
                 dto.Description,
-                dto.Category,
+                category,
                 dto.Date,
                 dto.Level,
+                image,
                 dto.Tags
             );
             activity.UpdateLocation(
                 dto.City,
                 dto.Venue,
-                dto.Latitude,
-                dto.Longitude
+                latitude,
+                longitude
             );
 
             var result = await context.SaveChangesAsync(cancellationToken) > 0;

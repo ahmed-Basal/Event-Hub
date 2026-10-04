@@ -1,5 +1,4 @@
-import { useState } from 'react';
-import { Box, Paper, Typography, Button, Collapse } from '@mui/material';
+import { Box, Paper, Typography, Button } from '@mui/material';
 import {
   CalendarMonth,
   Place,
@@ -23,11 +22,18 @@ interface Props {
 }
 
 export default function ActivityDetailsInfo({ activity }: Props) {
-  const [mapOpen, setMapOpen] = useState(false);
+  const latNum = Number(activity?.latitude) || 30.0444;
+  const lonNum = Number(activity?.longitude) || 31.2357;
+  const googleMapsUrl = `https://www.google.com/maps/search/?api=1&query=${latNum},${lonNum}`;
+
+  const scrollToMap = () => {
+    document.getElementById('event-location-map')?.scrollIntoView({ behavior: 'smooth' });
+  };
 
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3, mb: 3 }}>
 
+      {/* Meetup Description Card */}
       <Paper
         elevation={0}
         sx={{
@@ -85,6 +91,7 @@ export default function ActivityDetailsInfo({ activity }: Props) {
         )}
       </Paper>
 
+      {/* Logistics Overview Grid */}
       <Box
         sx={{
           display: 'grid',
@@ -111,7 +118,7 @@ export default function ActivityDetailsInfo({ activity }: Props) {
           icon={<Place sx={{ fontSize: 24 }} />}
           color={tokens.accent}
           label="Venue & Location"
-          value={activity?.venue}
+          value={activity?.venue || 'Location TBA'}
           subtitle={
             <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%', mt: 0.5 }}>
               <Typography variant="caption" sx={{ color: tokens.textSecondary }}>
@@ -119,30 +126,30 @@ export default function ActivityDetailsInfo({ activity }: Props) {
               </Typography>
               <Button
                 size="small"
-                startIcon={<MapOutlined sx={{ fontSize: 16 }} />}
+                startIcon={<MapOutlined sx={{ fontSize: 14 }} />}
                 onClick={(e) => {
                   e.stopPropagation();
-                  setMapOpen((prev) => !prev);
+                  scrollToMap();
                 }}
                 sx={{
                   py: 0.2,
                   px: 1,
                   borderRadius: '6px',
-                  bgcolor: mapOpen ? `${tokens.primary}25` : `${tokens.primary}15`,
+                  bgcolor: `${tokens.primary}15`,
                   color: tokens.primary,
-                  fontSize: '0.75rem',
+                  fontSize: '0.72rem',
                   fontWeight: 600,
                   textTransform: 'none',
                   '&:hover': {
-                    bgcolor: `${tokens.primary}30`,
+                    bgcolor: `${tokens.primary}25`,
                   },
                 }}
               >
-                {mapOpen ? 'Hide Map' : 'Show Map'}
+                View on Map ↓
               </Button>
             </Box>
           }
-          onClick={() => setMapOpen((prev) => !prev)}
+          onClick={scrollToMap}
         />
 
         {activity?.level && (
@@ -164,47 +171,115 @@ export default function ActivityDetailsInfo({ activity }: Props) {
         />
       </Box>
 
-      <Collapse in={mapOpen} timeout="auto" unmountOnExit>
-        <Paper
-          elevation={0}
+      {/* Dedicated Interactive Event Map Card */}
+      <Paper
+        id="event-location-map"
+        elevation={0}
+        sx={{
+          p: { xs: 2.5, sm: 3 },
+          borderRadius: '20px',
+          bgcolor: tokens.surface,
+          border: `1px solid ${tokens.border}`,
+          boxShadow: tokens.shadowCard,
+          position: 'relative',
+          overflow: 'hidden',
+        }}
+      >
+        <Box
           sx={{
-            p: 2,
-            borderRadius: '20px',
-            bgcolor: tokens.surface,
-            border: `1px solid ${tokens.border}`,
-            boxShadow: tokens.shadowCard,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            flexWrap: 'wrap',
+            gap: 1.5,
+            mb: 2,
           }}
         >
-          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 1.5, px: 0.5 }}>
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-              <Place sx={{ fontSize: 20, color: tokens.primary }} />
-              <Typography variant="subtitle2" sx={{ fontWeight: 700, color: tokens.textPrimary }}>
-                {activity?.venue} — {activity?.city}
-              </Typography>
-            </Box>
-            <Button
-              size="small"
-              onClick={() => setMapOpen(false)}
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.2 }}>
+            <Box
               sx={{
-                color: tokens.textMuted,
-                textTransform: 'none',
-                fontSize: '0.8rem',
-                '&:hover': { color: tokens.primary },
+                width: 36,
+                height: 36,
+                borderRadius: '10px',
+                bgcolor: `${tokens.accent}18`,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                color: tokens.accent,
               }}
             >
-              Close Map
+              <Place sx={{ fontSize: 20 }} />
+            </Box>
+            <Box>
+              <Typography variant="h6" sx={{ fontWeight: 700, color: tokens.textPrimary, lineHeight: 1.2 }}>
+                Event Location &amp; Venue
+              </Typography>
+              <Typography variant="caption" sx={{ color: tokens.textSecondary, fontWeight: 500 }}>
+                {activity?.venue ? `${activity.venue} — ${activity?.city || 'Egypt'}` : `${activity?.city || 'Egypt'}`}
+              </Typography>
+            </Box>
+          </Box>
+
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+            <Typography
+              variant="caption"
+              sx={{
+                display: { xs: 'none', sm: 'inline-block' },
+                bgcolor: `${tokens.primary}15`,
+                color: tokens.primary,
+                border: `1px solid ${tokens.border}`,
+                borderRadius: '8px',
+                px: 1.2,
+                py: 0.4,
+                fontFamily: 'monospace',
+                fontWeight: 600,
+                fontSize: '0.72rem',
+              }}
+            >
+              📍 {latNum.toFixed(4)}, {lonNum.toFixed(4)}
+            </Typography>
+
+            <Button
+              size="small"
+              component="a"
+              href={googleMapsUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              sx={{
+                color: tokens.primary,
+                bgcolor: `${tokens.primary}15`,
+                border: `1px solid ${tokens.border}`,
+                borderRadius: '8px',
+                textTransform: 'none',
+                fontSize: '0.78rem',
+                fontWeight: 600,
+                px: 1.5,
+                py: 0.5,
+                '&:hover': {
+                  bgcolor: `${tokens.primary}25`,
+                },
+              }}
+            >
+              Open in Google Maps ↗
             </Button>
           </Box>
-          <MapComponent
-            latitude={activity?.latitude}
-            longitude={activity?.longitude}
-            venue={activity?.venue}
-            city={activity?.city}
-            height={340}
-            borderRadius="14px"
-          />
-        </Paper>
-      </Collapse>
+        </Box>
+
+        <MapComponent
+          latitude={latNum}
+          longitude={lonNum}
+          venue={activity?.venue}
+          city={activity?.city}
+          height={380}
+          zoom={15}
+          interactive={true}
+          showMarker={true}
+          showTileSwitcher={true}
+          showDirectionsLink={true}
+          tileTheme="voyager"
+          borderRadius="14px"
+        />
+      </Paper>
     </Box>
   );
 }

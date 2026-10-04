@@ -59,21 +59,23 @@ export default function NavBar() {
             
             <Box
               sx={{
-                width: 38,
-                height: 38,
-                borderRadius: '12px',
+                width: 40,
+                height: 40,
+                borderRadius: '14px',
                 bgcolor: tokens.primary,
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
                 boxShadow: tokens.shadowGold,
-                fontSize: '1.1rem',
-                fontWeight: 800,
+                fontSize: '1.15rem',
+                fontWeight: 900,
                 color: tokens.bg,
                 fontFamily: 'monospace',
                 letterSpacing: '-1px',
                 userSelect: 'none',
                 position: 'relative',
+                transition: 'transform 0.2s',
+                '&:hover': { transform: 'scale(1.05)' },
               }}
             >
               {'</>'}
@@ -87,6 +89,7 @@ export default function NavBar() {
                   height: 8,
                   borderRadius: '50%',
                   bgcolor: tokens.accent,
+                  boxShadow: tokens.shadowCoral,
                 }}
               />
             </Box>
@@ -95,10 +98,10 @@ export default function NavBar() {
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: '-2px', lineHeight: 1 }}>
               <Typography
                 sx={{
-                  fontSize: '1.1rem',
-                  fontWeight: 700,
+                  fontSize: '1.15rem',
+                  fontWeight: 800,
                   color: tokens.textPrimary,
-                  letterSpacing: '-0.01em',
+                  letterSpacing: '-0.02em',
                   lineHeight: 1.2,
                   fontFamily: "'Inter', sans-serif",
                 }}
@@ -107,38 +110,40 @@ export default function NavBar() {
               </Typography>
               <Typography
                 sx={{
-                  fontSize: '0.6rem',
-                  fontWeight: 600,
+                  fontSize: '0.62rem',
+                  fontWeight: 700,
                   color: tokens.primary,
                   textTransform: 'uppercase',
-                  letterSpacing: '0.08em',
+                  letterSpacing: '0.1em',
                   lineHeight: 1,
                 }}
               >
-                Egypt
+                Egypt 🇪🇬
               </Typography>
             </Box>
           </Box>
 
           
           <Chip
-            icon={<LocationOnIcon sx={{ fontSize: '14px !important', color: `${tokens.textSecondary} !important` }} />}
+            icon={<LocationOnIcon sx={{ fontSize: '14px !important', color: `${tokens.primary} !important` }} />}
             label={
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.3 }}>
-                <span>{city}</span>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.4 }}>
+                <span style={{ fontWeight: 600 }}>{city}</span>
                 <KeyboardArrowDownIcon sx={{ fontSize: 14, color: tokens.textMuted }} />
               </Box>
             }
             onClick={(e) => setCityAnchor(e.currentTarget)}
             sx={{
-              bgcolor: 'rgba(255,255,255,0.03)',
+              bgcolor: tokens.surface2,
               border: `1px solid ${tokens.border}`,
               color: tokens.textSecondary,
               borderRadius: '9999px',
-              fontSize: '0.8rem',
+              fontSize: '0.82rem',
               cursor: 'pointer',
+              py: 0.5,
               display: { xs: 'none', md: 'flex' },
-              '&:hover': { borderColor: tokens.borderHover, bgcolor: 'rgba(255,255,255,0.06)' },
+              transition: 'all 0.2s',
+              '&:hover': { borderColor: tokens.borderHover, bgcolor: tokens.surface3, color: tokens.textPrimary },
             }}
           />
           <Menu
@@ -148,11 +153,14 @@ export default function NavBar() {
             slotProps={{
               paper: {
                 sx: {
-                  mt: 1,
-                  bgcolor: tokens.surface2,
+                  mt: 1.5,
+                  bgcolor: tokens.surface,
                   border: `1px solid ${tokens.border}`,
-                  borderRadius: '14px',
+                  borderRadius: '16px',
                   minWidth: 160,
+                  boxShadow: tokens.shadowDropdown,
+                  backdropFilter: 'blur(16px)',
+                  p: 0.5,
                 },
               },
             }}
@@ -162,7 +170,7 @@ export default function NavBar() {
                 key={c}
                 selected={c === city}
                 onClick={() => { setCity(c); setCityAnchor(null); }}
-                sx={{ borderRadius: '8px', mx: 0.5, fontSize: '0.875rem' }}
+                sx={{ borderRadius: '10px', mx: 0.5, fontSize: '0.875rem', fontWeight: 500 }}
               >
                 {c}
               </MenuItem>
@@ -174,25 +182,25 @@ export default function NavBar() {
             sx={{
               display: { xs: 'none', md: 'flex' },
               flex: 1,
-              maxWidth: 380,
+              maxWidth: 400,
               alignItems: 'center',
-              gap: 1,
-              bgcolor: 'rgba(255,255,255,0.03)',
+              gap: 1.2,
+              bgcolor: tokens.surface2,
               border: `1px solid ${searchFocused ? tokens.primary : tokens.border}`,
               borderRadius: '9999px',
-              px: 2,
-              py: 0.6,
-              transition: 'border-color 0.2s, box-shadow 0.2s',
-              boxShadow: searchFocused ? `0 0 0 2px ${tokens.primary}33` : 'none',
+              px: 2.2,
+              py: 0.7,
+              transition: 'all 0.2s cubic-bezier(0.16, 1, 0.3, 1)',
+              boxShadow: searchFocused ? `0 0 0 3px ${tokens.primaryGlow}` : 'none',
             }}
           >
-            <SearchIcon sx={{ fontSize: 17, color: tokens.textMuted }} />
+            <SearchIcon sx={{ fontSize: 18, color: searchFocused ? tokens.primary : tokens.textMuted, transition: 'color 0.2s' }} />
             <InputBase
               placeholder="Search events, topics, cities..."
               onFocus={() => setSearchFocused(true)}
               onBlur={() => setSearchFocused(false)}
               sx={{
-                fontSize: '0.85rem',
+                fontSize: '0.875rem',
                 color: tokens.textPrimary,
                 flex: 1,
                 '& input::placeholder': { color: tokens.textMuted, opacity: 1 },

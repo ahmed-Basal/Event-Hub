@@ -26,6 +26,32 @@ public static class DbInitializer
             await context.SaveChangesAsync();
         }
 
+        var activitiesWithoutImage = await context.Activities.Where(a => string.IsNullOrEmpty(a.Image)).ToListAsync();
+        if (activitiesWithoutImage.Count != 0)
+        {
+            foreach (var act in activitiesWithoutImage)
+            {
+                var cat = (act.Category ?? "backend").ToLowerInvariant();
+                act.UpdateImage($"/images/categoryImages/{cat}.jpg");
+            }
+            await context.SaveChangesAsync();
+        }
+
+        var activitiesWithoutCoords = await context.Activities.Where(a => a.Latitude == 0 && a.Longitude == 0).ToListAsync();
+        if (activitiesWithoutCoords.Count != 0)
+        {
+            foreach (var act in activitiesWithoutCoords)
+            {
+                act.UpdateLocation(
+                    string.IsNullOrWhiteSpace(act.City) ? "Cairo" : act.City,
+                    string.IsNullOrWhiteSpace(act.Venue) ? "The Greek Campus, Downtown Cairo" : act.Venue,
+                    30.0444,
+                    31.2357
+                );
+            }
+            await context.SaveChangesAsync();
+        }
+
         if (await context.Activities.AnyAsync()) return;
 
         var activities = new List<Activity>
@@ -39,6 +65,7 @@ public static class DbInitializer
                 venue: "The Greek Campus, Downtown Cairo",
                 latitude: 30.0444,
                 longitude: 31.2357,
+                image: "/images/categoryImages/backend.jpg",
                 level: "Advanced",
                 tags: [".NET 9", "PostgreSQL", "Clean Architecture", "Redis", "Microservices"]
             ),
@@ -51,6 +78,7 @@ public static class DbInitializer
                 venue: "Smart Village ITIDA Tech Hub, 6th of October",
                 latitude: 30.0736,
                 longitude: 31.0185,
+                image: "/images/categoryImages/cybersecurity.jpg",
                 level: "Intermediate",
                 tags: ["OWASP Top 10", "Ethical Hacking", "Burp Suite", "API Security", "Penetration Testing"]
             ),
@@ -63,6 +91,7 @@ public static class DbInitializer
                 venue: "Bibliotheca Alexandrina Conference Hall, Al Shatby",
                 latitude: 31.2089,
                 longitude: 29.9092,
+                image: "/images/categoryImages/frontend.jpg",
                 level: "Intermediate",
                 tags: ["React 19", "Next.js", "TypeScript", "TailwindCSS", "State Management"]
             ),
@@ -75,6 +104,7 @@ public static class DbInitializer
                 venue: "Nile City Towers, Corniche El Nil, Bulaq",
                 latitude: 30.0719,
                 longitude: 31.2291,
+                image: "/images/categoryImages/dataanalysis.jpg",
                 level: "Beginner",
                 tags: ["Power BI", "SQL", "Python", "Pandas", "Data Cleaning"]
             ),
@@ -87,6 +117,7 @@ public static class DbInitializer
                 venue: "Maadi Tech Park, Investment Zone, Maadi",
                 latitude: 29.9602,
                 longitude: 31.2915,
+                image: "/images/categoryImages/devops.jpg",
                 level: "Advanced",
                 tags: ["Docker", "Kubernetes", "CI/CD", "Terraform", "GitHub Actions"]
             ),
@@ -99,6 +130,7 @@ public static class DbInitializer
                 venue: "American University in Cairo (AUC), New Cairo Campus",
                 latitude: 30.0194,
                 longitude: 31.4998,
+                image: "/images/categoryImages/cybersecurity.jpg",
                 level: "Advanced",
                 tags: ["OAuth 2.0", "OpenID Connect", "JWT", "Zero Trust", "Cloud Security"]
             ),
@@ -111,6 +143,7 @@ public static class DbInitializer
                 venue: "District Workspace, Sheraton Heliopolis",
                 latitude: 30.0982,
                 longitude: 31.3644,
+                image: "/images/categoryImages/frontend.jpg",
                 level: "Beginner",
                 tags: ["UI/UX", "Material-UI", "Figma to Code", "Component Architecture"]
             ),
@@ -123,6 +156,7 @@ public static class DbInitializer
                 venue: "Mansoura University IT Center, Mansoura",
                 latitude: 31.0425,
                 longitude: 31.3553,
+                image: "/images/categoryImages/dataanalysis.jpg",
                 level: "Intermediate",
                 tags: ["Machine Learning", "Scikit-Learn", "Data Visualization", "Jupyter"]
             ),
@@ -135,6 +169,7 @@ public static class DbInitializer
                 venue: "Assiut Innovation & Tech Park, Assiut",
                 latitude: 27.1809,
                 longitude: 31.1837,
+                image: "/images/categoryImages/devops.jpg",
                 level: "Beginner",
                 tags: ["Docker", "Linux", "Bash Scripting", "Nginx", "DevOps Fundamentals"]
             )

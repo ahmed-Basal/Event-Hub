@@ -16,6 +16,7 @@ public class Activity
     public string Venue { get; private set; } = string.Empty;
     public double Latitude { get; private set; }
     public double Longitude { get; private set; }
+    public string Image { get; private set; } = string.Empty;
     public string Level { get; private set; } = "All Levels";
     public List<string> Tags { get; private set; } = [];
 
@@ -30,6 +31,7 @@ public class Activity
         string venue,
         double latitude,
         double longitude,
+        string? image = null,
         string level = "All Levels",
         IEnumerable<string>? tags = null,
         string? id = null)
@@ -48,6 +50,7 @@ public class Activity
             Venue = venue?.Trim() ?? string.Empty,
             Latitude = latitude,
             Longitude = longitude,
+            Image = image?.Trim() ?? string.Empty,
             Level = string.IsNullOrWhiteSpace(level) ? "All Levels" : level.Trim(),
             IsCancelled = false
         };
@@ -67,12 +70,18 @@ public class Activity
         Slug = SlugHelper.GenerateSlug(newTitle);
     }
 
+    public void UpdateImage(string? image)
+    {
+        Image = image?.Trim() ?? string.Empty;
+    }
+
     public void UpdateDetails(
         string title,
         string description,
         string category,
         DateTime date,
         string level,
+        string? image = null,
         IEnumerable<string>? tags = null)
     {
         UpdateTitle(title);
@@ -80,6 +89,11 @@ public class Activity
         Category = category?.Trim() ?? string.Empty;
         Date = date;
         Level = string.IsNullOrWhiteSpace(level) ? "All Levels" : level.Trim();
+
+        if (image != null)
+        {
+            UpdateImage(image);
+        }
 
         if (tags != null)
         {

@@ -22,6 +22,7 @@ export interface Activity {
   venue: string;
   latitude: number;
   longitude: number;
+  image?: string;
   isCancelled: boolean;
   level?: ActivityLevel | string;
   tags?: string[];

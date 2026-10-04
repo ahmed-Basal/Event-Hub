@@ -208,27 +208,28 @@ export default function LocationInput<T extends FieldValues>({
               display: 'flex',
               alignItems: 'flex-start',
               gap: 1.5,
-              py: 1,
-              px: 1.5,
-              borderRadius: '8px',
+              py: 1.2,
+              px: 2,
+              borderRadius: '10px',
               mx: 0.5,
-              my: 0.25,
+              my: 0.3,
               cursor: 'pointer',
-              transition: 'background 0.15s',
+              transition: 'all 0.15s ease',
               '&:hover, &.Mui-focused': {
-                bgcolor: `${tokens.primary}14`,
+                bgcolor: `${tokens.primary}18`,
+                transform: 'translateX(2px)',
               },
             }}
           >
             <LocationOnIcon
-              sx={{ color: tokens.primary, mt: 0.2, fontSize: '1.1rem', flexShrink: 0 }}
+              sx={{ color: tokens.primary, mt: 0.2, fontSize: '1.15rem', flexShrink: 0 }}
             />
             <Box sx={{ minWidth: 0, flex: 1 }}>
               <Typography
                 variant="body2"
                 sx={{
                   color: tokens.textPrimary,
-                  fontWeight: 500,
+                  fontWeight: 600,
                   lineHeight: 1.3,
                   overflow: 'hidden',
                   textOverflow: 'ellipsis',
@@ -247,6 +248,7 @@ export default function LocationInput<T extends FieldValues>({
                     textOverflow: 'ellipsis',
                     whiteSpace: 'nowrap',
                     display: 'block',
+                    mt: 0.2,
                   }}
                 >
                   {secondaryAddress}
@@ -263,17 +265,18 @@ export default function LocationInput<T extends FieldValues>({
               bgcolor: tokens.surface,
               backgroundImage: 'none',
               border: `1px solid ${tokens.border}`,
-              borderRadius: '12px',
+              borderRadius: '16px',
               boxShadow: tokens.shadowDropdown,
-              mt: 0.5,
+              mt: 1,
+              backdropFilter: 'blur(16px)',
               '& .MuiAutocomplete-listbox': {
-                p: 0.5,
-                maxHeight: 280,
+                p: 0.8,
+                maxHeight: 300,
               },
               '& .MuiAutocomplete-option': {
                 p: 0,
                 '&[aria-selected="true"]': {
-                  bgcolor: `${tokens.primary}20`,
+                  bgcolor: `${tokens.primary}25`,
                 },
               },
             },
@@ -296,7 +299,7 @@ export default function LocationInput<T extends FieldValues>({
                 <>
                   {loading && (
                     <CircularProgress
-                      size={16}
+                      size={18}
                       sx={{ color: tokens.primary, mr: 1 }}
                     />
                   )}
@@ -307,9 +310,9 @@ export default function LocationInput<T extends FieldValues>({
           }}
           sx={{
             '& .MuiOutlinedInput-root': {
-              borderRadius: '12px',
-              bgcolor: 'rgba(255, 255, 255, 0.02)',
-              transition: 'border-color 0.2s, box-shadow 0.2s',
+              borderRadius: '14px',
+              bgcolor: tokens.surface2,
+              transition: 'all 0.2s cubic-bezier(0.16, 1, 0.3, 1)',
               '& fieldset': {
                 borderColor: tokens.border,
               },
@@ -318,6 +321,7 @@ export default function LocationInput<T extends FieldValues>({
               },
               '&.Mui-focused fieldset': {
                 borderColor: tokens.primary,
+                boxShadow: `0 0 0 3px ${tokens.primaryGlow}`,
               },
             },
             '& .MuiInputLabel-root': {

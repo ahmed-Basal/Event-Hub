@@ -28,15 +28,24 @@ public static class CreateActivity
         public async Task<Result<string>> Handle(Command request, CancellationToken cancellationToken)
         {
             var dto = request.ActivityDto;
+            var category = !string.IsNullOrWhiteSpace(dto.Category) ? dto.Category.Trim() : "BackEnd";
+            var image = !string.IsNullOrWhiteSpace(dto.Image)
+                ? dto.Image.Trim()
+                : $"/images/categoryImages/{category.ToLowerInvariant()}.jpg";
+
+            var latitude = dto.Latitude != 0 ? dto.Latitude : 30.0444;
+            var longitude = dto.Longitude != 0 ? dto.Longitude : 31.2357;
+
             var activity = Activity.Create(
                 title: dto.Title,
                 description: dto.Description,
-                category: dto.Category,
+                category: category,
                 date: dto.Date,
                 city: dto.City,
                 venue: dto.Venue,
-                latitude: dto.Latitude,
-                longitude: dto.Longitude,
+                latitude: latitude,
+                longitude: longitude,
+                image: image,
                 level: dto.Level,
                 tags: dto.Tags
             );

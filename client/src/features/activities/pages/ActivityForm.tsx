@@ -1,20 +1,11 @@
 import { useEffect, useState } from 'react';
-import { useNavigate, useParams, Link } from 'react-router';
+import { useNavigate, useParams } from 'react-router';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import Box from '@mui/material/Box';
 import Container from '@mui/material/Container';
 import Paper from '@mui/material/Paper';
-import Typography from '@mui/material/Typography';
-import Button from '@mui/material/Button';
 import Grid from '@mui/material/Grid';
-import CircularProgress from '@mui/material/CircularProgress';
-import Chip from '@mui/material/Chip';
-import ArrowBackIcon from '@mui/icons-material/ArrowBack';
-import EventNoteIcon from '@mui/icons-material/EventNote';
-import EditCalendarIcon from '@mui/icons-material/EditCalendar';
-import SaveIcon from '@mui/icons-material/Save';
-import CancelIcon from '@mui/icons-material/Cancel';
 
 import {
   TextInput,
@@ -22,8 +13,6 @@ import {
   SelectInput,
   DateInput,
   TagInput,
-  LocationInput,
-  MapComponent,
   Spinner,
   activitySchema,
   type ActivityFormData,
@@ -34,6 +23,12 @@ import {
 } from '../../../shared';
 import { tokens } from '../../../theme';
 import { useActivityDetail, useActivityMutations } from '../hooks';
+import {
+  ActivityFormHeader,
+  ActivityCoverImageField,
+  ActivityLocationField,
+  ActivityFormActions,
+} from '../components/form';
 
 export default function ActivityForm() {
   const { id } = useParams<{ id: string }>();
@@ -42,11 +37,15 @@ export default function ActivityForm() {
   const { activity, isLoading: isLoadingActivity } = useActivityDetail(id);
   const { createActivity, updateActivity } = useActivityMutations(id);
 
+  const [selectedImage, setSelectedImage] = useState<string>('');
+  const [mapCoords, setMapCoords] = useState<[number, number]>([30.0444, 31.2357]);
+
   const {
     control,
     handleSubmit,
     reset,
     watch,
+    setValue,
     formState: { isSubmitting, isValid, isDirty },
   } = useForm<ActivityFormData>({
     resolver: zodResolver(activitySchema),
@@ -58,19 +57,20 @@ export default function ActivityForm() {
       date: '',
       city: '',
       venue: '',
+      image: '',
+      latitude: 30.0444,
+      longitude: 31.2357,
       level: 'All Levels',
       tags: [],
     },
   });
 
-  const [mapCoords, setMapCoords] = useState<[number, number]>([
-    activity?.latitude || 30.0444,
-    activity?.longitude || 31.2357,
-  ]);
+  const watchedImage = watch('image');
 
   // Populate form if editing existing activity
   useEffect(() => {
     if (activity) {
+      const initialImg = activity.image || '';
       reset({
         title: activity.title,
         description: activity.description,
@@ -78,35 +78,49 @@ export default function ActivityForm() {
         date: activity.date ? new Date(activity.date).toISOString().slice(0, 16) : '',
         city: activity.city,
         venue: activity.venue,
+        image: initialImg,
+        latitude: activity.latitude || 30.0444,
+        longitude: activity.longitude || 31.2357,
         level: (activity.level as SchemaLevel) || 'All Levels',
         tags: activity.tags || [],
       });
-      if (activity.latitude && activity.longitude) {
-        setMapCoords([activity.latitude, activity.longitude]);
+      setSelectedImage(initialImg);
+
+      const lat = Number(activity.latitude);
+      const lon = Number(activity.longitude);
+      if (!isNaN(lat) && !isNaN(lon) && (lat !== 0 || lon !== 0)) {
+        setMapCoords([lat, lon]);
       }
     }
   }, [activity, reset]);
 
   const onSubmit = async (data: ActivityFormData) => {
     try {
-      // Normalize date to ISO string for backend
       const formattedDate = new Date(data.date).toISOString();
+      const finalImage =
+        data.image ||
+        selectedImage ||
+        `/images/categoryImages/${(data.category || 'backend').toLowerCase()}.jpg`;
+      const finalLat = mapCoords[0] || 30.0444;
+      const finalLon = mapCoords[1] || 31.2357;
 
       if (id && activity) {
         await updateActivity.mutateAsync({
           ...activity,
           ...data,
           date: formattedDate,
-          latitude: mapCoords[0],
-          longitude: mapCoords[1],
+          image: finalImage,
+          latitude: finalLat,
+          longitude: finalLon,
         });
         navigate(`/activities/${activity.id}`);
       } else {
         const newId = await createActivity.mutateAsync({
           ...data,
           date: formattedDate,
-          latitude: mapCoords[0],
-          longitude: mapCoords[1],
+          image: finalImage,
+          latitude: finalLat,
+          longitude: finalLon,
           isCancelled: false,
         } as any);
 
@@ -139,25 +153,7 @@ export default function ActivityForm() {
   return (
     <Box sx={{ bgcolor: tokens.bg, minHeight: '100vh', py: { xs: 3, md: 5 } }}>
       <Container maxWidth="md">
-        {/* Navigation Breadcrumb / Back button */}
-        <Box sx={{ mb: 3 }}>
-          <Button
-            component={Link}
-            to={isEditMode ? `/activities/${id}` : '/activities'}
-            startIcon={<ArrowBackIcon />}
-            sx={{
-              color: tokens.textSecondary,
-              fontWeight: 600,
-              fontSize: '0.875rem',
-              '&:hover': {
-                color: tokens.primary,
-                bgcolor: 'rgba(255, 255, 255, 0.04)',
-              },
-            }}
-          >
-            {isEditMode ? 'Back to Event' : 'Back to Events'}
-          </Button>
-        </Box>
+        <ActivityFormHeader isEditMode={isEditMode} activityId={id} />
 
         {/* Main Form Paper */}
         <Paper
@@ -183,69 +179,6 @@ export default function ActivityForm() {
               background: `linear-gradient(90deg, ${tokens.primary}, ${tokens.accent})`,
             }}
           />
-
-          {/* Form Header */}
-          <Box
-            sx={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              flexWrap: 'wrap',
-              gap: 2,
-              mb: 4,
-              pb: 3,
-              borderBottom: `1px solid ${tokens.border}`,
-            }}
-          >
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-              <Box
-                sx={{
-                  width: 48,
-                  height: 48,
-                  borderRadius: '14px',
-                  bgcolor: `${tokens.primary}18`,
-                  color: tokens.primary,
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  border: `1px solid ${tokens.primary}33`,
-                }}
-              >
-                {isEditMode ? <EditCalendarIcon /> : <EventNoteIcon />}
-              </Box>
-
-              <Box>
-                <Typography
-                  variant="h5"
-                  sx={{
-                    fontWeight: 800,
-                    color: tokens.textPrimary,
-                    letterSpacing: '-0.02em',
-                  }}
-                >
-                  {isEditMode ? 'Edit Meetup Event' : 'Create Meetup Event'}
-                </Typography>
-                <Typography variant="body2" sx={{ color: tokens.textSecondary, mt: 0.3 }}>
-                  {isEditMode
-                    ? 'Update event schedule, location, or details'
-                    : 'Publish a new developer meetup, workshop, or conference'}
-                </Typography>
-              </Box>
-            </Box>
-
-            <Chip
-              label={isEditMode ? 'Edit Mode' : 'New Meetup'}
-              sx={{
-                bgcolor: isEditMode ? `${tokens.teal}18` : `${tokens.primary}18`,
-                color: isEditMode ? tokens.teal : tokens.primary,
-                border: `1px solid ${isEditMode ? tokens.teal : tokens.primary}40`,
-                fontWeight: 700,
-                fontSize: '0.78rem',
-                borderRadius: '9999px',
-                px: 0.5,
-              }}
-            />
-          </Box>
 
           {/* Form Body */}
           <Box component="form" onSubmit={handleSubmit(onSubmit)} noValidate>
@@ -279,6 +212,17 @@ export default function ActivityForm() {
                 />
               </Grid>
 
+              {/* Cover Image Upload & Direct URL */}
+              <Grid size={{ xs: 12 }}>
+                <ActivityCoverImageField
+                  control={control}
+                  setValue={setValue}
+                  selectedImage={selectedImage}
+                  setSelectedImage={setSelectedImage}
+                  watchedImage={watchedImage}
+                />
+              </Grid>
+
               {/* Description */}
               <Grid size={{ xs: 12 }}>
                 <TextArea
@@ -299,51 +243,14 @@ export default function ActivityForm() {
                 />
               </Grid>
 
-              {/* City & Venue */}
-              <Grid size={{ xs: 12, sm: 6 }}>
-                <LocationInput
-                  control={control}
-                  name="city"
-                  label="City"
-                  placeholder="Search for a city..."
-                  countrycodes="eg"
-                  onSelectLocation={(loc) => {
-                    const lat = parseFloat(loc.lat);
-                    const lon = parseFloat(loc.lon);
-                    if (!isNaN(lat) && !isNaN(lon)) {
-                      setMapCoords([lat, lon]);
-                    }
-                  }}
-                />
-              </Grid>
-
-              <Grid size={{ xs: 12, sm: 6 }}>
-                <TextInput
-                  control={control}
-                  name="venue"
-                  label="Venue / Host Space"
-                  placeholder="e.g. Greek Campus, Co-working Hub"
-                />
-              </Grid>
-
-              {/* Map Preview for Selected Location */}
-              <Grid size={{ xs: 12 }}>
-                <Box sx={{ mt: 0.5, mb: 1 }}>
-                  <Typography
-                    variant="caption"
-                    sx={{ color: tokens.textSecondary, fontWeight: 600, display: 'block', mb: 1 }}
-                  >
-                    📍 Location Map Preview
-                  </Typography>
-                  <MapComponent
-                    position={mapCoords}
-                    venue={watch('venue') || 'Selected Venue'}
-                    city={watch('city') || 'Egypt'}
-                    height={220}
-                    zoom={13}
-                  />
-                </Box>
-              </Grid>
+              {/* City, Venue & Interactive Leaflet Map */}
+              <ActivityLocationField
+                control={control}
+                setValue={setValue}
+                watch={watch}
+                mapCoords={mapCoords}
+                setMapCoords={setMapCoords}
+              />
 
               {/* Dynamic Topic Tags */}
               <Grid size={{ xs: 12 }}>
@@ -355,76 +262,15 @@ export default function ActivityForm() {
                 />
               </Grid>
 
-              {/* Action Buttons */}
+              {/* Form Action Buttons */}
               <Grid size={{ xs: 12 }}>
-                <Box
-                  sx={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'flex-end',
-                    gap: 2,
-                    pt: 2,
-                    borderTop: `1px solid ${tokens.border}`,
-                  }}
-                >
-                  <Button
-                    variant="outlined"
-                    onClick={handleCancel}
-                    disabled={isPending}
-                    startIcon={<CancelIcon />}
-                    sx={{
-                      borderRadius: '12px',
-                      px: 3,
-                      py: 1.1,
-                      color: tokens.textSecondary,
-                      borderColor: tokens.border,
-                      fontWeight: 600,
-                      '&:hover': {
-                        borderColor: tokens.borderHover,
-                        bgcolor: 'rgba(255, 255, 255, 0.04)',
-                        color: tokens.textPrimary,
-                      },
-                    }}
-                  >
-                    Cancel
-                  </Button>
-
-                  <Button
-                    type="submit"
-                    variant="contained"
-                    disabled={isPending || !isValid || (isEditMode && !isDirty)}
-                    startIcon={
-                      isPending ? (
-                        <CircularProgress size={18} color="inherit" />
-                      ) : (
-                        <SaveIcon />
-                      )
-                    }
-                    sx={{
-                      borderRadius: '12px',
-                      px: 4,
-                      py: 1.1,
-                      bgcolor: tokens.primary,
-                      color: tokens.bg,
-                      fontWeight: 700,
-                      fontSize: '0.9rem',
-                      boxShadow: tokens.shadowGold,
-                      '&:hover': {
-                        bgcolor: '#e08e0a',
-                      },
-                      '&:disabled': {
-                        bgcolor: 'rgba(255, 255, 255, 0.08)',
-                        color: tokens.textMuted,
-                      },
-                    }}
-                  >
-                    {isPending
-                      ? 'Submitting...'
-                      : isEditMode
-                      ? 'Update Event'
-                      : 'Create Event'}
-                  </Button>
-                </Box>
+                <ActivityFormActions
+                  isPending={isPending}
+                  isEditMode={isEditMode}
+                  isValid={isValid}
+                  isDirty={isDirty}
+                  onCancel={handleCancel}
+                />
               </Grid>
             </Grid>
           </Box>
