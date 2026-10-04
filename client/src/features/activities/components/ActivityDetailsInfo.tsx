@@ -1,4 +1,5 @@
-import { Box, Paper, Typography } from '@mui/material';
+import { useState } from 'react';
+import { Box, Paper, Typography, Button, Collapse } from '@mui/material';
 import {
   CalendarMonth,
   Place,
@@ -6,11 +7,13 @@ import {
   LocalOffer,
   Article,
   AccessTime,
+  MapOutlined,
 } from '@mui/icons-material';
 import {
   formatDate,
   TagList,
   LogisticsCard,
+  MapComponent,
   type Activity,
 } from '../../../shared';
 import { tokens } from '../../../theme';
@@ -20,6 +23,8 @@ interface Props {
 }
 
 export default function ActivityDetailsInfo({ activity }: Props) {
+  const [mapOpen, setMapOpen] = useState(false);
+
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3, mb: 3 }}>
 
@@ -107,7 +112,37 @@ export default function ActivityDetailsInfo({ activity }: Props) {
           color={tokens.accent}
           label="Venue & Location"
           value={activity?.venue}
-          subtitle={activity?.city ? `${activity.city}, Egypt` : 'Egypt'}
+          subtitle={
+            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%', mt: 0.5 }}>
+              <Typography variant="caption" sx={{ color: tokens.textSecondary }}>
+                {activity?.city ? `${activity.city}, Egypt` : 'Egypt'}
+              </Typography>
+              <Button
+                size="small"
+                startIcon={<MapOutlined sx={{ fontSize: 16 }} />}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setMapOpen((prev) => !prev);
+                }}
+                sx={{
+                  py: 0.2,
+                  px: 1,
+                  borderRadius: '6px',
+                  bgcolor: mapOpen ? `${tokens.primary}25` : `${tokens.primary}15`,
+                  color: tokens.primary,
+                  fontSize: '0.75rem',
+                  fontWeight: 600,
+                  textTransform: 'none',
+                  '&:hover': {
+                    bgcolor: `${tokens.primary}30`,
+                  },
+                }}
+              >
+                {mapOpen ? 'Hide Map' : 'Show Map'}
+              </Button>
+            </Box>
+          }
+          onClick={() => setMapOpen((prev) => !prev)}
         />
 
         {activity?.level && (
@@ -128,6 +163,48 @@ export default function ActivityDetailsInfo({ activity }: Props) {
           subtitle="Curated Egyptian developer track"
         />
       </Box>
+
+      <Collapse in={mapOpen} timeout="auto" unmountOnExit>
+        <Paper
+          elevation={0}
+          sx={{
+            p: 2,
+            borderRadius: '20px',
+            bgcolor: tokens.surface,
+            border: `1px solid ${tokens.border}`,
+            boxShadow: tokens.shadowCard,
+          }}
+        >
+          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 1.5, px: 0.5 }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+              <Place sx={{ fontSize: 20, color: tokens.primary }} />
+              <Typography variant="subtitle2" sx={{ fontWeight: 700, color: tokens.textPrimary }}>
+                {activity?.venue} — {activity?.city}
+              </Typography>
+            </Box>
+            <Button
+              size="small"
+              onClick={() => setMapOpen(false)}
+              sx={{
+                color: tokens.textMuted,
+                textTransform: 'none',
+                fontSize: '0.8rem',
+                '&:hover': { color: tokens.primary },
+              }}
+            >
+              Close Map
+            </Button>
+          </Box>
+          <MapComponent
+            latitude={activity?.latitude}
+            longitude={activity?.longitude}
+            venue={activity?.venue}
+            city={activity?.city}
+            height={340}
+            borderRadius="14px"
+          />
+        </Paper>
+      </Collapse>
     </Box>
   );
 }

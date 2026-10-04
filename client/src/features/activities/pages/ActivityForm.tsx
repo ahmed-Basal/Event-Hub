@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate, useParams, Link } from 'react-router';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -22,6 +22,8 @@ import {
   SelectInput,
   DateInput,
   TagInput,
+  LocationInput,
+  MapComponent,
   Spinner,
   activitySchema,
   type ActivityFormData,
@@ -44,6 +46,7 @@ export default function ActivityForm() {
     control,
     handleSubmit,
     reset,
+    watch,
     formState: { isSubmitting, isValid, isDirty },
   } = useForm<ActivityFormData>({
     resolver: zodResolver(activitySchema),
@@ -60,6 +63,11 @@ export default function ActivityForm() {
     },
   });
 
+  const [mapCoords, setMapCoords] = useState<[number, number]>([
+    activity?.latitude || 30.0444,
+    activity?.longitude || 31.2357,
+  ]);
+
   // Populate form if editing existing activity
   useEffect(() => {
     if (activity) {
@@ -73,6 +81,9 @@ export default function ActivityForm() {
         level: (activity.level as SchemaLevel) || 'All Levels',
         tags: activity.tags || [],
       });
+      if (activity.latitude && activity.longitude) {
+        setMapCoords([activity.latitude, activity.longitude]);
+      }
     }
   }, [activity, reset]);
 
@@ -86,14 +97,16 @@ export default function ActivityForm() {
           ...activity,
           ...data,
           date: formattedDate,
+          latitude: mapCoords[0],
+          longitude: mapCoords[1],
         });
         navigate(`/activities/${activity.id}`);
       } else {
         const newId = await createActivity.mutateAsync({
           ...data,
           date: formattedDate,
-          latitude: 30.0444,
-          longitude: 31.2357,
+          latitude: mapCoords[0],
+          longitude: mapCoords[1],
           isCancelled: false,
         } as any);
 
@@ -288,11 +301,19 @@ export default function ActivityForm() {
 
               {/* City & Venue */}
               <Grid size={{ xs: 12, sm: 6 }}>
-                <TextInput
+                <LocationInput
                   control={control}
                   name="city"
                   label="City"
-                  placeholder="e.g. Cairo, Alexandria, Giza"
+                  placeholder="Search for a city..."
+                  countrycodes="eg"
+                  onSelectLocation={(loc) => {
+                    const lat = parseFloat(loc.lat);
+                    const lon = parseFloat(loc.lon);
+                    if (!isNaN(lat) && !isNaN(lon)) {
+                      setMapCoords([lat, lon]);
+                    }
+                  }}
                 />
               </Grid>
 
@@ -303,6 +324,25 @@ export default function ActivityForm() {
                   label="Venue / Host Space"
                   placeholder="e.g. Greek Campus, Co-working Hub"
                 />
+              </Grid>
+
+              {/* Map Preview for Selected Location */}
+              <Grid size={{ xs: 12 }}>
+                <Box sx={{ mt: 0.5, mb: 1 }}>
+                  <Typography
+                    variant="caption"
+                    sx={{ color: tokens.textSecondary, fontWeight: 600, display: 'block', mb: 1 }}
+                  >
+                    📍 Location Map Preview
+                  </Typography>
+                  <MapComponent
+                    position={mapCoords}
+                    venue={watch('venue') || 'Selected Venue'}
+                    city={watch('city') || 'Egypt'}
+                    height={220}
+                    zoom={13}
+                  />
+                </Box>
               </Grid>
 
               {/* Dynamic Topic Tags */}

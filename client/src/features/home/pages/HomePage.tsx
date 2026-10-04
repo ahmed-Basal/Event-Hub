@@ -2,10 +2,10 @@ import Box from '@mui/material/Box';
 import NavBar from '../../../App/Layout/NavBar';
 import { tokens } from '../../../theme';
 import { useHomeData } from '../hooks';
-import { HeroSection, TrackFilterBar, UpcomingEvents } from '../components';
+import { HeroSection, UpcomingEvents } from '../components';
 
 export default function HomePage() {
-  const { featuredActivity, upcomingActivities, stats } = useHomeData();
+  const { featuredActivity, upcomingActivities } = useHomeData();
 
   return (
     <Box

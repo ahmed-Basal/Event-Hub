@@ -2,10 +2,11 @@ import { useController, type UseControllerProps, type FieldValues } from 'react-
 import TextField, { type TextFieldProps } from '@mui/material/TextField';
 import { tokens } from '../../../theme';
 
-export type TextInputProps<T extends FieldValues> = UseControllerProps<T> &
-  Omit<TextFieldProps, 'name' | 'defaultValue'> & {
-    label: string;
-  };
+export interface TextInputProps<T extends FieldValues>
+  extends UseControllerProps<T>,
+    Omit<TextFieldProps, 'name' | 'defaultValue'> {
+  label: string;
+}
 
 export default function TextInput<T extends FieldValues>(props: TextInputProps<T>) {
   const { field, fieldState } = useController({ ...props, defaultValue: ('' as any) });

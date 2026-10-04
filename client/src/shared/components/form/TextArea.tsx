@@ -2,11 +2,12 @@ import { useController, type UseControllerProps, type FieldValues } from 'react-
 import TextField, { type TextFieldProps } from '@mui/material/TextField';
 import { tokens } from '../../../theme';
 
-export type TextAreaProps<T extends FieldValues> = UseControllerProps<T> &
-  Omit<TextFieldProps, 'name' | 'defaultValue'> & {
-    label: string;
-    rows?: number;
-  };
+export interface TextAreaProps<T extends FieldValues>
+  extends UseControllerProps<T>,
+    Omit<TextFieldProps, 'name' | 'defaultValue'> {
+  label: string;
+  rows?: number;
+}
 
 export default function TextArea<T extends FieldValues>({ rows = 4, ...props }: TextAreaProps<T>) {
   const { field, fieldState } = useController({ ...props, defaultValue: ('' as any) });

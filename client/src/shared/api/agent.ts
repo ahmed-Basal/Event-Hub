@@ -7,7 +7,7 @@ const agent = axios.create({
     baseURL,
 });
 
-const sleep = (delay: number) => {
+export const sleep = (delay: number) => {
     return new Promise(resolve => {
         setTimeout(resolve, delay);
     });

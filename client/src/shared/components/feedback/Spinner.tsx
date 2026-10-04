@@ -33,7 +33,7 @@ const textShimmer = keyframes`
   100% { opacity: 0.6; }
 `;
 
-interface SpinnerProps {
+export interface SpinnerProps {
   message?: string;
   size?: number;
   minHeight?: string | number;

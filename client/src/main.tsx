@@ -6,6 +6,8 @@ import { RouterProvider } from 'react-router'
 import { router } from './App/Router/Router'
 import { ThemeProvider } from '@mui/material/styles'
 import CssBaseline from '@mui/material/CssBaseline'
+import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider'
+import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns'
 import lammaMubarmegeen from './theme/theme'
 import '@fontsource/inter/400.css'
 import '@fontsource/inter/500.css'
@@ -33,14 +35,16 @@ const queryClient = new QueryClient({
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <ErrorBoundary>
-      <ThemeProvider theme={lammaMubarmegeen}>
-        <CssBaseline />
-        <QueryClientProvider client={queryClient}>
-          <ReactQueryDevtools />
-          <ToastContainer position="bottom-right" hideProgressBar theme="colored" />
-          <RouterProvider router={router} />
-        </QueryClientProvider>
-      </ThemeProvider>
+      <LocalizationProvider dateAdapter={AdapterDateFns}>
+        <ThemeProvider theme={lammaMubarmegeen}>
+          <CssBaseline />
+          <QueryClientProvider client={queryClient}>
+            <ReactQueryDevtools />
+            <ToastContainer position="bottom-right" hideProgressBar theme="colored" />
+            <RouterProvider router={router} />
+          </QueryClientProvider>
+        </ThemeProvider>
+      </LocalizationProvider>
     </ErrorBoundary>
   </StrictMode>,
 )

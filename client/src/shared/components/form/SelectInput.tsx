@@ -6,11 +6,12 @@ import type { SelectOption } from '../../types';
 
 export type SelectInputItem = string | SelectOption | { text: string; value: string };
 
-export type SelectInputProps<T extends FieldValues> = UseControllerProps<T> &
-  Omit<TextFieldProps, 'name' | 'defaultValue'> & {
-    label: string;
-    items: readonly SelectInputItem[] | SelectInputItem[];
-  };
+export interface SelectInputProps<T extends FieldValues>
+  extends UseControllerProps<T>,
+    Omit<TextFieldProps, 'name' | 'defaultValue'> {
+  label: string;
+  items: readonly SelectInputItem[] | SelectInputItem[];
+}
 
 export default function SelectInput<T extends FieldValues>({
   items,

@@ -8,10 +8,14 @@ import AddIcon from '@mui/icons-material/Add';
 import { TagList } from '../tags/TagList';
 import { tokens } from '../../../theme';
 
-export type TagInputProps<T extends FieldValues> = UseControllerProps<T> & {
+import type { SxProps, Theme } from '@mui/material/styles';
+
+export interface TagInputProps<T extends FieldValues> extends UseControllerProps<T> {
   label: string;
   placeholder?: string;
-};
+  disabled?: boolean;
+  sx?: SxProps<Theme>;
+}
 
 export default function TagInput<T extends FieldValues>({
   label,
