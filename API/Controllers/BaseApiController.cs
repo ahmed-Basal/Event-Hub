@@ -16,6 +16,7 @@ public class BaseApiController : ControllerBase
         if (result == null) return NotFound();
 
         if (!result.IsSuccess && result.Code == 404) return NotFound();
+        if (!result.IsSuccess && result.Code == 401) return Unauthorized(result.Error);
 
         if (result.IsSuccess) return Ok(result.Value);
 

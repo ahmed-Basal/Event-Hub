@@ -1,7 +1,7 @@
-import { lazy, Suspense } from 'react';
+import { lazy } from 'react';
 import { createBrowserRouter, Navigate } from 'react-router';
 import App from '../Layout/App';
-import Spinner from '../../shared/components/feedback/Spinner';
+import RequireAuth from './RequireAuth';
 
 const HomePage = lazy(() => import('../../features/home/pages/HomePage'));
 const ActivityDashboard = lazy(() => import('../../features/activities/pages/ActivityDashboard'));
@@ -10,89 +10,38 @@ const ActivityForm = lazy(() => import('../../features/activities/pages/Activity
 const TestErrors = lazy(() => import('../../shared/components/errors/TestErrors'));
 const NotFound = lazy(() => import('../../shared/components/errors/NotFound'));
 const ServerError = lazy(() => import('../../shared/components/errors/ServerError'));
+const LoginPage = lazy(() => import('../../features/account/pages/LoginPage'));
+const RegisterPage = lazy(() => import('../../features/account/pages/RegisterPage'));
 
 export const router = createBrowserRouter([
   {
     path: '/',
     element: <App />,
-    errorElement: (
-      <Suspense fallback={<Spinner message="Loading..." minHeight="60vh" />}>
-        <ServerError />
-      </Suspense>
-    ),
+    errorElement: <ServerError />,
     children: [
+      // Public landing & events
+      { path: '', element: <HomePage /> },
+      { path: 'activities', element: <ActivityDashboard /> },
+      { path: 'activities/:id', element: <ActivityDetailsPage /> },
+      { path: 'activities/:id/:slug', element: <ActivityDetailsPage /> },
+
+      // Authentication routes
+      { path: 'login', element: <LoginPage /> },
+      { path: 'register', element: <RegisterPage /> },
+
+      // Protected routes (require login)
       {
-        path: '',
-        element: (
-          <Suspense fallback={<Spinner message="Loading Egypt Tech Events..." minHeight="60vh" />}>
-            <HomePage />
-          </Suspense>
-        ),
+        element: <RequireAuth />,
+        children: [
+          { path: 'createActivity', element: <ActivityForm key="create" /> },
+          { path: 'manage/:id', element: <ActivityForm /> },
+        ],
       },
-      {
-        path: 'activities',
-        element: (
-          <Suspense fallback={<Spinner message="Loading meetups..." minHeight="60vh" />}>
-            <ActivityDashboard />
-          </Suspense>
-        ),
-      },
-      {
-        path: 'activities/:id',
-        element: (
-          <Suspense fallback={<Spinner message="Loading event details..." minHeight="60vh" />}>
-            <ActivityDetailsPage />
-          </Suspense>
-        ),
-      },
-      {
-        path: 'activities/:id/:slug',
-        element: (
-          <Suspense fallback={<Spinner message="Loading event details..." minHeight="60vh" />}>
-            <ActivityDetailsPage />
-          </Suspense>
-        ),
-      },
-      {
-        path: 'createActivity',
-        element: (
-          <Suspense fallback={<Spinner message="Loading event studio..." minHeight="60vh" />}>
-            <ActivityForm key="create" />
-          </Suspense>
-        ),
-      },
-      {
-        path: 'manage/:id',
-        element: (
-          <Suspense fallback={<Spinner message="Loading event studio..." minHeight="60vh" />}>
-            <ActivityForm />
-          </Suspense>
-        ),
-      },
-      {
-        path: 'errors',
-        element: (
-          <Suspense fallback={<Spinner message="Loading..." minHeight="60vh" />}>
-            <TestErrors />
-          </Suspense>
-        ),
-      },
-      {
-        path: 'not-found',
-        element: (
-          <Suspense fallback={<Spinner message="Loading..." minHeight="60vh" />}>
-            <NotFound />
-          </Suspense>
-        ),
-      },
-      {
-        path: 'server-error',
-        element: (
-          <Suspense fallback={<Spinner message="Loading..." minHeight="60vh" />}>
-            <ServerError />
-          </Suspense>
-        ),
-      },
+
+      // Diagnostics & Error pages
+      { path: 'errors', element: <TestErrors /> },
+      { path: 'not-found', element: <NotFound /> },
+      { path: 'server-error', element: <ServerError /> },
       { path: '*', element: <Navigate replace to="/not-found" /> },
     ],
   },

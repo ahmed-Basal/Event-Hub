@@ -14,5 +14,7 @@ public class MappingProfiles : Profile
 
         CreateMap<EditActivityDto, Activity>()
             .ForMember(dest => dest.Slug, opt => opt.MapFrom(src => SlugHelper.GenerateSlug(src.Title)));
+
+        CreateMap<Activity, ActivityDto>();
     }
 }

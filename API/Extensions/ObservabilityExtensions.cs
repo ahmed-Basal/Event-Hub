@@ -1,3 +1,4 @@
+using API.Options;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
@@ -8,10 +9,9 @@ namespace API.Extensions;
 
 public static class ObservabilityExtensions
 {
-
     public static WebApplicationBuilder AddSerilogLogging(this WebApplicationBuilder builder)
     {
-        var seqUrl = builder.Configuration["Seq:ServerUrl"] ?? "http://localhost:5341";
+        var seqOptions = builder.Configuration.GetSection(SeqOptions.SectionName).Get<SeqOptions>() ?? new SeqOptions();
 
         Log.Logger = new LoggerConfiguration()
             .MinimumLevel.Information()
@@ -23,7 +23,7 @@ public static class ObservabilityExtensions
             .Enrich.WithThreadId()
             .WriteTo.Console(outputTemplate:
                 "[{Timestamp:HH:mm:ss} {Level:u3}] {SourceContext}{NewLine}{Message:lj}{NewLine}{Exception}")
-            .WriteTo.Seq(seqUrl)
+            .WriteTo.Seq(seqOptions.ServerUrl)
             .CreateLogger();
 
         builder.Host.UseSerilog();
@@ -34,13 +34,21 @@ public static class ObservabilityExtensions
         this IServiceCollection services,
         IConfiguration config)
     {
-        var serviceName = config["OpenTelemetry:ServiceName"] ?? "Reactivities.API";
-        var seqOtlpEndpoint = config["OpenTelemetry:SeqOtlpEndpoint"] ?? "http://localhost:5341/ingest/otlp/v1/traces";
-        var jaegerOtlpEndpoint = config["OpenTelemetry:JaegerOtlpEndpoint"] ?? "http://localhost:4317";
+        services.AddOptions<SeqOptions>()
+            .BindConfiguration(SeqOptions.SectionName)
+            .ValidateDataAnnotations()
+            .ValidateOnStart();
+
+        services.AddOptions<OpenTelemetryOptions>()
+            .BindConfiguration(OpenTelemetryOptions.SectionName)
+            .ValidateDataAnnotations()
+            .ValidateOnStart();
+
+        var otelOptions = config.GetSection(OpenTelemetryOptions.SectionName).Get<OpenTelemetryOptions>() ?? new OpenTelemetryOptions();
 
         services.AddOpenTelemetry()
             .ConfigureResource(resource =>
-                resource.AddService(serviceName: serviceName, serviceVersion: "1.0.0"))
+                resource.AddService(serviceName: otelOptions.ServiceName, serviceVersion: "1.0.0"))
             .WithTracing(tracing => tracing
                 .AddSource("Reactivities.Application")
                 .AddAspNetCoreInstrumentation(opts =>
@@ -48,18 +56,19 @@ public static class ObservabilityExtensions
                     opts.RecordException = true;
                     opts.Filter = ctx =>
                         !ctx.Request.Path.StartsWithSegments("/health") &&
-                        !ctx.Request.Path.StartsWithSegments("/metrics");
+                        !ctx.Request.Path.StartsWithSegments("/metrics") &&
+                        !ctx.Request.Path.StartsWithSegments("/openapi");
                 })
                 .AddHttpClientInstrumentation()
                 .AddEntityFrameworkCoreInstrumentation()
                 .AddOtlpExporter("seq", opts =>
                 {
-                    opts.Endpoint = new Uri(seqOtlpEndpoint);
+                    opts.Endpoint = new Uri(otelOptions.SeqOtlpEndpoint);
                     opts.Protocol = OpenTelemetry.Exporter.OtlpExportProtocol.HttpProtobuf;
                 })
                 .AddOtlpExporter("jaeger", opts =>
                 {
-                    opts.Endpoint = new Uri(jaegerOtlpEndpoint);
+                    opts.Endpoint = new Uri(otelOptions.JaegerOtlpEndpoint);
                     opts.Protocol = OpenTelemetry.Exporter.OtlpExportProtocol.Grpc;
                 }))
             .WithMetrics(metrics => metrics

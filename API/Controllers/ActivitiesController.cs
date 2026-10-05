@@ -9,13 +9,13 @@ namespace API.Controllers;
 public class ActivitiesController : BaseApiController
 {
     [HttpGet]
-    public async Task<ActionResult<List<Activity>>> GetActivities(CancellationToken ct)
+    public async Task<ActionResult<List<ActivityDto>>> GetActivities(CancellationToken ct)
     {
         return HandleResult(await Mediator.Send(new GetActivityList.Query(), ct));
     }
 
     [HttpGet("{id}")]
-    public async Task<ActionResult<Activity>> GetActivity(string id, CancellationToken ct)
+    public async Task<ActionResult<ActivityDto>> GetActivity(string id, CancellationToken ct)
     {
        return HandleResult(await Mediator.Send(new GetActivityDetails.Query { ID = id }, ct));
     }

@@ -1,5 +1,7 @@
+using Application.Activities.DTO;
 using Application.Core;
-using Domain;
+using AutoMapper;
+using AutoMapper.QueryableExtensions;
 using FluentValidation;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
@@ -9,7 +11,7 @@ namespace Application.Activities.Queries;
 
 public static class GetActivityDetails
 {
-    public class Query : IRequest<Result<Activity>>
+    public class Query : IRequest<Result<ActivityDto>>
     {
         public required string ID { get; set; }
     }
@@ -22,20 +24,20 @@ public static class GetActivityDetails
         }
     }
 
-    public class Handler(DevMeetDbContext context) : IRequestHandler<Query, Result<Activity>>
+    public class Handler(DevMeetDbContext context, IMapper mapper) : IRequestHandler<Query, Result<ActivityDto>>
     {
-        public async Task<Result<Activity>> Handle(Query request, CancellationToken cancellationToken)
+        public async Task<Result<ActivityDto>> Handle(Query request, CancellationToken cancellationToken)
         {
-            var activity = await context.Activities.FirstOrDefaultAsync(
-                x => x.ID == request.ID || x.Slug == request.ID,
-                cancellationToken
-            );
+            var activity = await context.Activities
+                .Where(x => x.ID == request.ID || x.Slug == request.ID)
+                .ProjectTo<ActivityDto>(mapper.ConfigurationProvider)
+                .FirstOrDefaultAsync(cancellationToken);
 
             if (activity == null)
             {
-                return Result<Activity>.NotFound("Activity not found");
+                return Result<ActivityDto>.NotFound("Activity not found");
             }
-            return Result<Activity>.Success(activity);
+            return Result<ActivityDto>.Success(activity);
         }
     }
 }

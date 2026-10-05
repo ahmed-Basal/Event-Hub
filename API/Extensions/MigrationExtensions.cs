@@ -50,7 +50,8 @@ public static class MigrationExtensions
             ");
 
             await context.Database.MigrateAsync();
-            await DbInitializer.SeedData(context);
+            var userManager = services.GetRequiredService<Microsoft.AspNetCore.Identity.UserManager<Domain.User>>();
+            await DbInitializer.SeedData(context, userManager);
         }
         catch (Exception ex)
         {

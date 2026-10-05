@@ -5,6 +5,22 @@ import { router } from "../../App/Router/Router";
 const baseURL = import.meta.env.VITE_API_URL || '/api';
 const agent = axios.create({
     baseURL,
+    withCredentials: true,
+});
+
+agent.interceptors.request.use(config => {
+    const userJson = localStorage.getItem('user');
+    if (userJson) {
+        try {
+            const user = JSON.parse(userJson);
+            if (user?.token) {
+                config.headers.Authorization = `Bearer ${user.token}`;
+            }
+        } catch {
+            // ignore JSON parse error
+        }
+    }
+    return config;
 });
 
 export const sleep = (delay: number) => {
@@ -54,7 +70,9 @@ agent.interceptors.response.use(
                 break;
 
             case 401:
-                toast.error("Unauthorised");
+                if (config?.url !== '/account') {
+                    toast.error("Unauthorised");
+                }
                 break;
 
             case 404:

@@ -1,11 +1,13 @@
+import { Suspense } from 'react';
+import { Outlet, useLocation, ScrollRestoration } from 'react-router';
 import Container from '@mui/material/Container';
 import Box from '@mui/material/Box';
-import NavBar from './NavBar';
-import Footer from './Footer';
-import { Outlet, useLocation } from 'react-router';
+import NavBar from './pages/NavBar';
+import Footer from './pages/Footer';
+import Spinner from '../../shared/components/feedback/Spinner';
 import { tokens } from '../../theme';
 
-function App() {
+export default function App() {
   const location = useLocation();
   const isHome = location.pathname === '/';
 
@@ -18,21 +20,29 @@ function App() {
         flexDirection: 'column',
       }}
     >
-      {isHome ? (
-        <Outlet />
-      ) : (
-        <>
-          <NavBar />
-          <Box sx={{ flex: 1 }}>
-            <Container maxWidth="xl" sx={{ mt: 3 }}>
+      <ScrollRestoration />
+      <NavBar />
+
+      <Box
+        component="main"
+        sx={{
+          flex: 1,
+          display: 'flex',
+          flexDirection: 'column',
+        }}
+      >
+        <Suspense fallback={<Spinner message="Loading..." minHeight="60vh" />}>
+          {isHome ? (
+            <Outlet />
+          ) : (
+            <Container maxWidth="xl" sx={{ py: 3, flex: 1, display: 'flex', flexDirection: 'column' }}>
               <Outlet />
             </Container>
-          </Box>
-          <Footer />
-        </>
-      )}
+          )}
+        </Suspense>
+      </Box>
+
+      <Footer />
     </Box>
   );
 }
-
-export default App;
