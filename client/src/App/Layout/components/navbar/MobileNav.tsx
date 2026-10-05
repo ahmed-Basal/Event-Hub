@@ -4,7 +4,7 @@ import Menu from '@mui/material/Menu';
 import MenuItem from '@mui/material/MenuItem';
 import Divider from '@mui/material/Divider';
 import MenuIcon from '@mui/icons-material/Menu';
-import MenuItemLink from '../../../../shared/components/navigation/MenuItemLink';
+import MenuItemLink from './MenuItemLink';
 import { tokens } from '../../../../theme';
 import type { User } from '../../../../shared';
 

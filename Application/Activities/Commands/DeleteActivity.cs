@@ -1,7 +1,7 @@
 using Application.Core;
+using Application.Interfaces;
 using FluentValidation;
 using MediatR;
-using Persistence;
 
 namespace Application.Activities.Commands;
 
@@ -20,7 +20,7 @@ public static class DeleteActivity
         }
     }
 
-    public class Handler(DevMeetDbContext context) : IRequestHandler<Command, Result<Unit>>
+    public class Handler(IAppDbContext context) : IRequestHandler<Command, Result<Unit>>
     {
         public async Task<Result<Unit>> Handle(Command request, CancellationToken cancellationToken)
         {
@@ -29,7 +29,7 @@ public static class DeleteActivity
 
             if (activity == null) return Result<Unit>.NotFound("Activity not found");
 
-            context.Remove(activity);
+            context.Activities.Remove(activity);
 
             var result = await context.SaveChangesAsync(cancellationToken) > 0;
             if (!result) return Result<Unit>.Failure("Failed to delete activity", 400);

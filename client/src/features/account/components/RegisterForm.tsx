@@ -17,7 +17,7 @@ import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
 import EmailOutlinedIcon from '@mui/icons-material/EmailOutlined';
 import { tokens } from '../../../theme';
 import TextInput from '../../../shared/components/form/TextInput';
-import { registerSchema, type RegisterSchema } from '../../../shared/schemas';
+import { registerSchema, type RegisterSchema } from '../schemas';
 import { useAccount } from '../hooks/useAccount';
 
 interface RegisterFormProps {

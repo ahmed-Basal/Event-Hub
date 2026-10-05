@@ -7,17 +7,16 @@ import LinkedInIcon from '@mui/icons-material/LinkedIn';
 import TwitterIcon from '@mui/icons-material/Twitter';
 import WhatsAppIcon from '@mui/icons-material/WhatsApp';
 import { tokens } from '../../../../theme';
-
-const WHATSAPP_URL = 'https://wa.me/201016659869';
-
-const SOCIALS = [
-  { icon: <WhatsAppIcon sx={{ fontSize: 20 }} />, href: WHATSAPP_URL, label: 'WhatsApp' },
-  { icon: <GitHubIcon sx={{ fontSize: 20 }} />, href: 'https://github.com', label: 'GitHub' },
-  { icon: <LinkedInIcon sx={{ fontSize: 20 }} />, href: 'https://linkedin.com', label: 'LinkedIn' },
-  { icon: <TwitterIcon sx={{ fontSize: 20 }} />, href: 'https://twitter.com', label: 'X (Twitter)' },
-];
+import config from '../../../../config';
 
 export default function FooterBrand() {
+  const socials = [
+    { icon: <WhatsAppIcon sx={{ fontSize: 20 }} />, href: config.contact.whatsappUrl, label: 'WhatsApp' },
+    { icon: <GitHubIcon sx={{ fontSize: 20 }} />, href: config.socials.github, label: 'GitHub' },
+    { icon: <LinkedInIcon sx={{ fontSize: 20 }} />, href: config.socials.linkedin, label: 'LinkedIn' },
+    { icon: <TwitterIcon sx={{ fontSize: 20 }} />, href: config.socials.twitter, label: 'X (Twitter)' },
+  ];
+
   return (
     <Box sx={{ maxWidth: 360 }}>
       {/* Brand Header */}
@@ -50,7 +49,7 @@ export default function FooterBrand() {
               lineHeight: 1.1,
             }}
           >
-            لمه مبرمجين
+            {config.app.name}
           </Typography>
           <Typography
             sx={{
@@ -61,7 +60,7 @@ export default function FooterBrand() {
               letterSpacing: '0.12em',
             }}
           >
-            Egypt Dev Community 🇪🇬
+            {config.app.badge}
           </Typography>
         </Box>
       </Box>
@@ -75,13 +74,12 @@ export default function FooterBrand() {
           mb: 3,
         }}
       >
-        The premier platform for Egyptian software engineers, architects, and tech enthusiasts.
-        Attend hands-on meetups, connect with mentors, and share knowledge across Egypt.
+        {config.app.tagline}
       </Typography>
 
       {/* Social Media Links */}
       <Stack direction="row" spacing={1.2}>
-        {SOCIALS.map((s) => (
+        {socials.map((s) => (
           <IconButton
             key={s.label}
             component="a"

@@ -1,0 +1,45 @@
+{
+  "api": {
+    "baseUrl": "https://localhost:7223/api",
+    "timeoutMs": 15000
+  },
+  "app": {
+    "name": "لمه مبرمجين",
+    "nameEn": "DevMeet Egypt",
+    "tagline": "Connect, Learn & Grow with Egyptian Tech Communities",
+    "badge": "Egypt Dev Community 🇪🇬",
+    "defaultCity": "Cairo",
+    "supportedCities": [
+      "Cairo",
+      "Alexandria",
+      "Giza",
+      "El Gouna",
+      "Dahab",
+      "Sahel",
+      "Mansoura",
+      "Assiut"
+    ]
+  },
+  "contact": {
+    "email": "ahmedbassl913@devmeet.com",
+    "phone": "01016659869",
+    "address": "The Greek Campus, Downtown Cairo, Egypt",
+    "workingHours": "Sat - Thu: 9:00 AM - 6:00 PM"
+  },
+  "socials": {
+    "github": "https://github.com/ahmed-Basal",
+    "linkedin": "https://www.linkedin.com/in/ahmed-saad-2234b1408/?isSelfProfile=true",
+    "twitter": "https://twitter.com",
+    "facebook": "https://facebook.com"
+  },
+  "features": {
+    "enableRegistration": true,
+    "enableCitySelector": true,
+    "enableNewsletter": true,
+    "enableMapIntegration": true,
+    "maintenanceMode": false
+  },
+  "keys": {
+    "locationIqApiKey": "pk.45e9ac96fc4487ad1f59f38cc6e357e2"
+  }
+}

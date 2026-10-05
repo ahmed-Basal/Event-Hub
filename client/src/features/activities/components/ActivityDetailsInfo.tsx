@@ -11,10 +11,10 @@ import {
 import {
   formatDate,
   TagList,
-  LogisticsCard,
   MapComponent,
   type Activity,
 } from '../../../shared';
+import LogisticsCard from './LogisticsCard';
 import { tokens } from '../../../theme';
 
 interface Props {

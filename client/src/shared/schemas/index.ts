@@ -1,2 +1,2 @@
-export * from './activitySchema';
-export * from './accountSchema';
+export * from '../../features/activities/schemas';
+export * from '../../features/account/schemas';

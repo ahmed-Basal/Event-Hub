@@ -35,6 +35,9 @@ app.UseAuthorization();
 
 app.MapControllers();
 
-await app.MigrateAndSeedAsync();
+if (app.Environment.IsDevelopment() || app.Configuration.GetValue<bool>("ApplyMigrationsOnStartup"))
+{
+    await app.MigrateAndSeedAsync();
+}
 
 app.Run();

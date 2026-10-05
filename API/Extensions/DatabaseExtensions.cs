@@ -22,6 +22,8 @@ public static class DatabaseExtensions
             options.UseNpgsql(dbOptions.DefaultConnection);
         });
 
+        services.AddScoped<Application.Interfaces.IAppDbContext>(sp => sp.GetRequiredService<DevMeetDbContext>());
+
         return services;
     }
 }

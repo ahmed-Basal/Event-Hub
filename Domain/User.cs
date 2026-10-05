@@ -10,5 +10,6 @@ public class User : IdentityUser
     public string? Picture { get; set; }
 
 
+    public ICollection<ActivityAttendee> Activities { get; set; } = new HashSet<ActivityAttendee>();
 
 }

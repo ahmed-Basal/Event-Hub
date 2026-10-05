@@ -6,12 +6,13 @@ import MenuItem from '@mui/material/MenuItem';
 import LocationOnIcon from '@mui/icons-material/LocationOn';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import { tokens } from '../../../../theme';
-
-const CITIES = ['Cairo', 'Alexandria', 'Giza', 'El Gouna', 'Dahab', 'Sahel'];
+import config from '../../../../config';
 
 export default function CitySelector() {
-  const [city, setCity] = useState('Cairo');
+  const [city, setCity] = useState(config.app.defaultCity || 'Cairo');
   const [cityAnchor, setCityAnchor] = useState<null | HTMLElement>(null);
+
+  if (!config.features.enableCitySelector) return null;
 
   return (
     <>
@@ -56,7 +57,7 @@ export default function CitySelector() {
           },
         }}
       >
-        {CITIES.map((c) => (
+        {config.app.supportedCities.map((c) => (
           <MenuItem
             key={c}
             selected={c === city}

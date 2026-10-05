@@ -4,11 +4,11 @@ import Grid from '@mui/material/Grid';
 import Typography from '@mui/material/Typography';
 
 import {
-  LocationInput,
   MapComponent,
   type ActivityFormData,
   type LocationIQResult,
 } from '../../../../shared';
+import LocationInput from './LocationInput';
 import { tokens } from '../../../../theme';
 
 export interface ActivityLocationFieldProps {

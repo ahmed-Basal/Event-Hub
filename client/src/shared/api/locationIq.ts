@@ -1,8 +1,9 @@
 import type { LocationIQAutocompleteParams, LocationIQResult } from '../types/location';
+import config from '../../config';
 
-export const LOCATIONIQ_API_KEY =
-  (import.meta.env.VITE_LOCATIONIQ_API_KEY as string | undefined) ||
-  'pk.45e9ac96fc4487ad1f59f38cc6e357e2';
+export const LOCATIONIQ_API_KEY = config.keys.locationIqApiKey;
+
+export const getLocationIqKey = () => config.keys.locationIqApiKey;
 
 const AUTOCOMPLETE_ENDPOINT = 'https://api.locationiq.com/v1/autocomplete';
 
@@ -20,7 +21,7 @@ export const locationIqApi = {
     if (!trimmed || trimmed.length < 3) return [];
 
     const params = new URLSearchParams({
-      key: LOCATIONIQ_API_KEY,
+      key: config.keys.locationIqApiKey,
       q: trimmed,
       limit: String(limit),
       dedupe: '1',
@@ -66,7 +67,7 @@ export const locationIqApi = {
     signal?: AbortSignal;
   }): Promise<LocationIQResult | null> {
     const params = new URLSearchParams({
-      key: LOCATIONIQ_API_KEY,
+      key: config.keys.locationIqApiKey,
       lat: String(lat),
       lon: String(lon),
       format: 'json',

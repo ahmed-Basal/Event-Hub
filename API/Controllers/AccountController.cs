@@ -1,18 +1,23 @@
 using Application.Account.Commands;
 using Application.Account.DTO;
 using Application.Account.Queries;
+using Infrastructure.Security;
+using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Options;
 
 namespace API.Controllers;
 
-public class AccountController : BaseApiController
+public class AccountController(ISender mediator, IOptions<JwtOptions> jwtOptions) : BaseApiController
 {
+    private readonly JwtOptions _jwtOptions = jwtOptions.Value;
+
     [AllowAnonymous]
     [HttpPost("login")]
     public async Task<ActionResult<UserDto>> Login(LoginDto loginDto, CancellationToken ct)
     {
-        var result = await Mediator.Send(new Login.Command { LoginDto = loginDto }, ct);
+        var result = await mediator.Send(new Login.Command { LoginDto = loginDto }, ct);
         if (result.IsSuccess && result.Value is not null && !string.IsNullOrEmpty(result.Value.Token))
         {
             SetTokenCookie(result.Value.Token);
@@ -24,7 +29,7 @@ public class AccountController : BaseApiController
     [HttpPost("register")]
     public async Task<ActionResult<UserDto>> Register(RegisterDto registerDto, CancellationToken ct)
     {
-        var result = await Mediator.Send(new Register.Command { RegisterDto = registerDto }, ct);
+        var result = await mediator.Send(new Register.Command { RegisterDto = registerDto }, ct);
         if (result.IsSuccess && result.Value is not null && !string.IsNullOrEmpty(result.Value.Token))
         {
             SetTokenCookie(result.Value.Token);
@@ -36,7 +41,7 @@ public class AccountController : BaseApiController
     [HttpGet]
     public async Task<ActionResult<UserDto>> GetCurrentUser(CancellationToken ct)
     {
-        return HandleResult(await Mediator.Send(new GetCurrentUser.Query(), ct));
+        return HandleResult(await mediator.Send(new GetCurrentUser.Query(), ct));
     }
 
     [HttpPost("logout")]
@@ -56,7 +61,7 @@ public class AccountController : BaseApiController
         var cookieOptions = new CookieOptions
         {
             HttpOnly = true,
-            Expires = DateTime.UtcNow.AddDays(7),
+            Expires = DateTime.UtcNow.AddDays(_jwtOptions.ExpirationInDays),
             SameSite = SameSiteMode.None,
             Secure = true,
             IsEssential = true

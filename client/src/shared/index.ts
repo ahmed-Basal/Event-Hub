@@ -5,12 +5,12 @@ export { EmptyState, type EmptyStateProps } from './components/feedback/EmptySta
 export { ErrorBoundary, type ErrorBoundaryProps, type ErrorBoundaryState } from './components/feedback/ErrorBoundary';
 export { default as ErrorMessage, type ErrorMessageProps } from './components/feedback/ErrorMessage';
 
-export { default as MenuItemLink, type MenuItemLinkProps } from './components/navigation/MenuItemLink';
+export { default as MenuItemLink, type MenuItemLinkProps } from '../App/Layout/components/navbar/MenuItemLink';
 
 export { Tag, type TagProps } from './components/tags/Tag';
 export { TagList, type TagListProps } from './components/tags/TagList';
 
-export { default as LogisticsCard, type LogisticsCardProps } from './components/logistics/LogisticsCard';
+export { default as LogisticsCard, type LogisticsCardProps } from '../features/activities/components/LogisticsCard';
 
 export * from './components/form';
 export * from './components/map';

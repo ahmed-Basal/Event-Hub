@@ -17,6 +17,8 @@ import { ToastContainer } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
 import { ErrorBoundary } from './shared'
 
+import { loadAppConfig } from './config'
+
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
@@ -32,19 +34,25 @@ const queryClient = new QueryClient({
   },
 })
 
-createRoot(document.getElementById('root')!).render(
-  <StrictMode>
-    <ErrorBoundary>
-      <LocalizationProvider dateAdapter={AdapterDateFns}>
-        <ThemeProvider theme={lammaMubarmegeen}>
-          <CssBaseline />
-          <QueryClientProvider client={queryClient}>
-            <ReactQueryDevtools />
-            <ToastContainer position="bottom-right" hideProgressBar theme="colored" />
-            <RouterProvider router={router} />
-          </QueryClientProvider>
-        </ThemeProvider>
-      </LocalizationProvider>
-    </ErrorBoundary>
-  </StrictMode>,
-)
+async function bootstrap() {
+  await loadAppConfig();
+
+  createRoot(document.getElementById('root')!).render(
+    <StrictMode>
+      <ErrorBoundary>
+        <LocalizationProvider dateAdapter={AdapterDateFns}>
+          <ThemeProvider theme={lammaMubarmegeen}>
+            <CssBaseline />
+            <QueryClientProvider client={queryClient}>
+              <ReactQueryDevtools />
+              <ToastContainer position="bottom-right" hideProgressBar theme="colored" />
+              <RouterProvider router={router} />
+            </QueryClientProvider>
+          </ThemeProvider>
+        </LocalizationProvider>
+      </ErrorBoundary>
+    </StrictMode>,
+  );
+}
+
+bootstrap();

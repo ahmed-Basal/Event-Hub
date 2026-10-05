@@ -1,4 +1,5 @@
 using Domain;
+using Infrastructure;
 using Microsoft.AspNetCore.Identity;
 using Persistence;
 
@@ -24,21 +25,13 @@ public static class IdentityServiceExtensions
         .AddSignInManager<SignInManager<User>>()
         .AddDefaultTokenProviders();
 
-        services.AddHttpContextAccessor();
-        services.AddScoped<Application.Interfaces.IUserAccessor, API.Services.UserAccessor>();
-        services.AddScoped<Application.Interfaces.ITokenService, API.Services.TokenService>();
-        services.AddScoped<API.Services.TokenService>();
-
-        services.AddOptions<API.Options.JwtOptions>()
-            .BindConfiguration(API.Options.JwtOptions.SectionName)
-            .ValidateDataAnnotations()
-            .ValidateOnStart();
+        services.AddInfrastructureServices(config);
 
         services.AddAuthentication(Microsoft.AspNetCore.Authentication.JwtBearer.JwtBearerDefaults.AuthenticationScheme)
             .AddJwtBearer();
 
         services.AddOptions<Microsoft.AspNetCore.Authentication.JwtBearer.JwtBearerOptions>(Microsoft.AspNetCore.Authentication.JwtBearer.JwtBearerDefaults.AuthenticationScheme)
-            .Configure<Microsoft.Extensions.Options.IOptions<API.Options.JwtOptions>>((opt, jwtOptions) =>
+            .Configure<Microsoft.Extensions.Options.IOptions<Infrastructure.Security.JwtOptions>>((opt, jwtOptions) =>
             {
                 var key = new Microsoft.IdentityModel.Tokens.SymmetricSecurityKey(System.Text.Encoding.UTF8.GetBytes(jwtOptions.Value.TokenKey));
                 opt.TokenValidationParameters = new Microsoft.IdentityModel.Tokens.TokenValidationParameters

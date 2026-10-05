@@ -2,6 +2,7 @@ import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import { NavLink } from 'react-router';
 import { tokens } from '../../../../theme';
+import config from '../../../../config';
 
 export default function BrandLogo() {
   return (
@@ -63,7 +64,7 @@ export default function BrandLogo() {
             fontFamily: "'Inter', sans-serif",
           }}
         >
-          لمه مبرمجين
+          {config.app.name}
         </Typography>
         <Typography
           sx={{

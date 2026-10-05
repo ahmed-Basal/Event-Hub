@@ -3,9 +3,10 @@ import Typography from '@mui/material/Typography';
 import Chip from '@mui/material/Chip';
 import PhoneIcon from '@mui/icons-material/Phone';
 import { tokens } from '../../../../theme';
+import { config } from '../../../../config';
 
-const PHONE_NUMBER = '01016659869';
-const TEL_URL = 'tel:+201016659869';
+const PHONE_NUMBER = config.contact.phone;
+const TEL_URL = config.contact.phoneTel;
 
 export default function FooterBottom() {
   return (

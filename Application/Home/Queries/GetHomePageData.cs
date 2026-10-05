@@ -1,8 +1,8 @@
 using Application.Core;
 using Application.Home.DTO;
+using Application.Interfaces;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
-using Persistence;
 
 namespace Application.Home.Queries;
 
@@ -10,7 +10,7 @@ public static class GetHomePageData
 {
     public class Query : IRequest<Result<HomePageDto>> { }
 
-    public class Handler(DevMeetDbContext context) : IRequestHandler<Query, Result<HomePageDto>>
+    public class Handler(IAppDbContext context) : IRequestHandler<Query, Result<HomePageDto>>
     {
         public async Task<Result<HomePageDto>> Handle(Query request, CancellationToken cancellationToken)
         {

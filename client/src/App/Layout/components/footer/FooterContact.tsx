@@ -10,10 +10,11 @@ import EmailOutlinedIcon from '@mui/icons-material/EmailOutlined';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import { toast } from 'react-toastify';
 import { tokens } from '../../../../theme';
+import { config } from '../../../../config';
 
-const PHONE_NUMBER = '01016659869';
-const WHATSAPP_URL = 'https://wa.me/201016659869';
-const TEL_URL = 'tel:+201016659869';
+const PHONE_NUMBER = config.contact.phone;
+const WHATSAPP_URL = config.contact.whatsappUrl;
+const TEL_URL = config.contact.phoneTel;
 
 export default function FooterContact() {
   const [email, setEmail] = useState('');

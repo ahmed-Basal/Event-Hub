@@ -8,4 +8,18 @@ export default defineConfig({
     port: 3000,
   },
   plugins: [react(), mkcert()],
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks(id: string) {
+          if (id.includes('node_modules')) {
+            if (id.includes('@mui')) return 'vendor-mui';
+            if (id.includes('leaflet')) return 'vendor-leaflet';
+            if (id.includes('@tanstack')) return 'vendor-query';
+          }
+        },
+      },
+    },
+    chunkSizeWarningLimit: 900,
+  },
 })

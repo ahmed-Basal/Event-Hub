@@ -2,8 +2,8 @@ import { Suspense } from 'react';
 import { Outlet, useLocation, ScrollRestoration } from 'react-router';
 import Container from '@mui/material/Container';
 import Box from '@mui/material/Box';
-import NavBar from './pages/NavBar';
-import Footer from './pages/Footer';
+import NavBar from './NavBar';
+import Footer from './Footer';
 import Spinner from '../../shared/components/feedback/Spinner';
 import { tokens } from '../../theme';
 

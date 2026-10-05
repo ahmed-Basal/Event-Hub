@@ -12,15 +12,17 @@ import {
   TextArea,
   SelectInput,
   DateInput,
-  TagInput,
   Spinner,
+} from '../../../shared';
+import {
   activitySchema,
   type ActivityFormData,
   CATEGORY_OPTIONS,
   LEVEL_OPTIONS,
   type SchemaCategory,
   type SchemaLevel,
-} from '../../../shared';
+} from '../schemas';
+import { TagInput } from '../components/form';
 import { tokens } from '../../../theme';
 import { useActivityDetail, useActivityMutations } from '../hooks';
 import {

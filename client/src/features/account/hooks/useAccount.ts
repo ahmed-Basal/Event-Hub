@@ -4,7 +4,8 @@ import { toast } from 'react-toastify';
 import { accountApi } from '../api/accountApi';
 import { accountKeys } from '../api/accountKeys';
 import type { User } from '../../../shared';
-import type { LoginSchema, RegisterSchema } from '../../../shared/schemas';
+import type { LoginSchema, RegisterSchema } from '../schemas';
+import config from '../../../config';
 
 export function useAccount() {
   const queryClient = useQueryClient();
@@ -19,17 +20,17 @@ export function useAccount() {
     queryKey: accountKeys.currentUser(),
     queryFn: async () => {
       // First check if token/user cached in localStorage or cookie exists
-      const stored = localStorage.getItem('user');
+      const stored = localStorage.getItem(config.storage.userKey);
       const user = await accountApi.currentUser();
       if (user) {
-        localStorage.setItem('user', JSON.stringify(user));
+        localStorage.setItem(config.storage.userKey, JSON.stringify(user));
         return user;
       }
       if (stored) {
         try {
           return JSON.parse(stored) as User;
         } catch {
-          localStorage.removeItem('user');
+          localStorage.removeItem(config.storage.userKey);
         }
       }
       return null;
@@ -41,7 +42,7 @@ export function useAccount() {
   const loginMutation = useMutation({
     mutationFn: (creds: LoginSchema) => accountApi.login(creds),
     onSuccess: (user) => {
-      localStorage.setItem('user', JSON.stringify(user));
+      localStorage.setItem(config.storage.userKey, JSON.stringify(user));
       queryClient.setQueryData(accountKeys.currentUser(), user);
       toast.success(`Welcome back, ${user.displayName}! 👋`);
       const from = (location.state as any)?.from?.pathname || '/activities';
@@ -58,7 +59,7 @@ export function useAccount() {
   const registerMutation = useMutation({
     mutationFn: (creds: RegisterSchema) => accountApi.register(creds),
     onSuccess: (user) => {
-      localStorage.setItem('user', JSON.stringify(user));
+      localStorage.setItem(config.storage.userKey, JSON.stringify(user));
       queryClient.setQueryData(accountKeys.currentUser(), user);
       toast.success(`Account created successfully! Welcome, ${user.displayName}! 🚀`);
       navigate('/activities', { replace: true });
@@ -73,7 +74,7 @@ export function useAccount() {
 
   const logout = async () => {
     await accountApi.logout();
-    localStorage.removeItem('user');
+    localStorage.removeItem(config.storage.userKey);
     queryClient.setQueryData(accountKeys.currentUser(), null);
     queryClient.invalidateQueries({ queryKey: accountKeys.all });
     toast.info('Logged out successfully');

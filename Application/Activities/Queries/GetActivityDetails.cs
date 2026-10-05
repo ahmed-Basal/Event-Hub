@@ -1,11 +1,11 @@
 using Application.Activities.DTO;
 using Application.Core;
+using Application.Interfaces;
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
 using FluentValidation;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
-using Persistence;
 
 namespace Application.Activities.Queries;
 
@@ -24,7 +24,7 @@ public static class GetActivityDetails
         }
     }
 
-    public class Handler(DevMeetDbContext context, IMapper mapper) : IRequestHandler<Query, Result<ActivityDto>>
+    public class Handler(IAppDbContext context, IMapper mapper) : IRequestHandler<Query, Result<ActivityDto>>
     {
         public async Task<Result<ActivityDto>> Handle(Query request, CancellationToken cancellationToken)
         {

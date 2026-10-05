@@ -1,26 +1,29 @@
 import axios, { type AxiosError, type AxiosResponse } from "axios";
 import { toast } from "react-toastify";
 import { router } from "../../App/Router/Router";
+import { config } from "../../config";
 
-const baseURL = import.meta.env.VITE_API_URL || '/api';
 const agent = axios.create({
-    baseURL,
+    baseURL: config.apiUrl,
     withCredentials: true,
 });
 
-agent.interceptors.request.use(config => {
-    const userJson = localStorage.getItem('user');
+agent.interceptors.request.use(reqConfig => {
+    if (!reqConfig.baseURL) {
+        reqConfig.baseURL = config.apiUrl;
+    }
+    const userJson = localStorage.getItem(config.storage.userKey);
     if (userJson) {
         try {
             const user = JSON.parse(userJson);
             if (user?.token) {
-                config.headers.Authorization = `Bearer ${user.token}`;
+                reqConfig.headers.Authorization = `Bearer ${user.token}`;
             }
         } catch {
             // ignore JSON parse error
         }
     }
-    return config;
+    return reqConfig;
 });
 
 export const sleep = (delay: number) => {

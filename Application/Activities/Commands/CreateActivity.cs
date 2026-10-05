@@ -1,11 +1,11 @@
 using Application.Activities.DTO;
 using Application.Activities.Validators;
 using Application.Core;
+using Application.Interfaces;
 using AutoMapper;
 using Domain;
 using FluentValidation;
 using MediatR;
-using Persistence;
 
 namespace Application.Activities.Commands;
 
@@ -23,7 +23,7 @@ public static class CreateActivity
         }
     }
 
-    public class Handler(DevMeetDbContext context) : IRequestHandler<Command, Result<string>>
+    public class Handler(IAppDbContext context) : IRequestHandler<Command, Result<string>>
     {
         public async Task<Result<string>> Handle(Command request, CancellationToken cancellationToken)
         {
