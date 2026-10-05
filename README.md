@@ -4,6 +4,9 @@
 [![React Version](https://img.shields.io/badge/React-19.2-61DAFB?style=for-the-badge&logo=react&logoColor=black)](https://react.dev/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-6.0-3178C6?style=for-the-badge&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
 [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-17%20%7C%2016-4169E1?style=for-the-badge&logo=postgresql&logoColor=white)](https://www.postgresql.org/)
+[![Security Headers](https://img.shields.io/badge/OWASP-A%2B%20Security-2ea44f?style=for-the-badge&logo=owasp&logoColor=white)](https://owasp.org/)
+[![HSTS Preload](https://img.shields.io/badge/HSTS-Preload%20Ready-blue?style=for-the-badge&logo=letsencrypt&logoColor=white)](https://hstspreload.org/)
+[![Rate Limiting](https://img.shields.io/badge/Rate%20Limiting-Sliding%20Window-orange?style=for-the-badge&logo=fastapi&logoColor=white)](https://learn.microsoft.com/en-us/aspnet/core/performance/rate-limit)
 [![Docker Compose](https://img.shields.io/badge/Docker%20Compose-Ready-2496ED?style=for-the-badge&logo=docker&logoColor=white)](https://www.docker.com/)
 [![OpenTelemetry](https://img.shields.io/badge/OpenTelemetry-OTLP-F5A800?style=for-the-badge&logo=opentelemetry&logoColor=white)](https://opentelemetry.io/)
 [![Prometheus](https://img.shields.io/badge/Prometheus-Monitoring-E6522C?style=for-the-badge&logo=prometheus&logoColor=white)](https://prometheus.io/)
@@ -16,26 +19,28 @@
 
 > **DevMeet Egypt** (Reactivities) is an enterprise-grade full-stack web application designed for organizing, discovering, and managing developer meetups, tech conferences, hackathons, and workshops across Egypt (Cairo, Giza, Alexandria, Mansoura, Assiut).
 > 
-> Engineered from the ground up using **Clean Architecture** (Onion Architecture), **Domain-Driven Design (DDD)** rich domain models, and the **CQRS** pattern with **MediatR** on ASP.NET Core, paired with a modern **React 19 Single Page Application (SPA)** powered by **Vite**, **TypeScript**, **Material UI v9**, and **TanStack React Query v5**.
+> Engineered from the ground up using **Clean Architecture** (Onion Architecture), **Domain-Driven Design (DDD)** rich domain models, **Interface Segregation & Inversion of Control**, and the **CQRS** pattern with **MediatR** on ASP.NET Core, paired with a modern **React 19 Single Page Application (SPA)** powered by **Vite**, **TypeScript**, **Material UI v9**, and **TanStack React Query v5**.
 >
-> Features a production-ready **Cloud-Native Observability Stack** integrating **OpenTelemetry (OTLP)**, **Prometheus**, **Grafana**, **Jaeger Distributed Tracing**, and **Seq Structured Logging**, orchestrated seamlessly with **Docker Compose**.
+> Hardened with a **Defense-in-Depth Security System** (HSTS Preload, Strict HTTPS Redirection, HttpOnly Secure Cookie Policy, OWASP Security Headers, and ASP.NET Core Sliding & Fixed Window Rate Limiting) and backed by a production-ready **Cloud-Native Observability Stack** (OpenTelemetry, Prometheus, Grafana, Jaeger, Seq) orchestrated seamlessly via **Docker Compose**.
 
 ---
 
 ## 📑 Table of Contents
 
 - [Architectural Highlights](#-architectural-highlights)
+- [Enterprise Defense-in-Depth Security](#-enterprise-defense-in-depth-security)
+  - [1. HTTP Strict Transport Security (HSTS) & HTTPS-Only](#1-http-strict-transport-security-hsts--https-only)
+  - [2. HttpOnly & Secure Cookie Policy](#2-httponly--secure-cookie-policy)
+  - [3. Multi-Tier Rate Limiting (Sliding & Fixed Windows)](#3-multi-tier-rate-limiting-sliding--fixed-windows)
+  - [4. OWASP Defense-in-Depth Security Headers](#4-owasp-defense-in-depth-security-headers)
 - [System Architecture & Diagrams](#-system-architecture--diagrams)
-  - [1. Onion Architecture & Layers](#1-onion-architecture--layers)
-  - [2. Observability & Telemetry Pipeline](#2-observability--telemetry-pipeline)
-  - [3. CQRS & Error Handling Pipeline](#3-cqrs--error-handling-pipeline)
-  - [4. Frontend State & Routing Flow](#4-frontend-state--routing-flow)
+  - [1. Clean Architecture & Layers](#1-clean-architecture--layers)
+  - [2. Security & Request Pipeline Flow](#2-security--request-pipeline-flow)
+  - [3. Observability & Telemetry Pipeline](#3-observability--telemetry-pipeline)
+  - [4. CQRS Execution & Error Handling Flow](#4-cqrs-execution--error-handling-flow)
+  - [5. Frontend State & Routing Flow](#5-frontend-state--routing-flow)
 - [Domain-Driven Design (DDD) Model](#-domain-driven-design-ddd-model)
 - [Enterprise Observability Stack](#-enterprise-observability-stack)
-  - [Distributed Tracing (OpenTelemetry + Jaeger)](#distributed-tracing-opentelemetry--jaeger)
-  - [Metrics & Scraping (Prometheus + Grafana)](#metrics--scraping-prometheus--grafana)
-  - [Structured Logging (Serilog + Seq)](#structured-logging-serilog--seq)
-  - [Custom MediatR Telemetry Behaviors](#custom-mediatr-telemetry-behaviors)
 - [Resilient Error Handling System](#-resilient-error-handling-system)
 - [Tech Stack & Ecosystem](#-tech-stack--ecosystem)
 - [Project Directory Structure](#-project-directory-structure)
@@ -56,76 +61,183 @@
 
 | Pillar | Implementation |
 | :--- | :--- |
-| **Clean Architecture** | Strict dependency flow where Domain has zero external dependencies, Application encapsulates all use cases, and Infrastructure/API depend solely inward. |
-| **Domain-Driven Design (DDD)** | Rich `Activity` entity with private setters, encapsulation, domain invariants, business mutation methods, and automatic SEO-friendly slug generation. |
-| **CQRS Pattern** | Complete separation of read operations (Queries) and write operations (Commands) using **MediatR**. |
+| **Strict Clean Architecture** | Clean 4-layer architecture (`Domain` ➔ `Application` ➔ `Infrastructure` & `Persistence` ➔ `API`). Domain has zero dependencies. `Application` defines abstractions (`IAppDbContext`, `IUserAccessor`), and outer layers implement them. |
+| **Domain-Driven Design (DDD)** | Rich `Activity` entity with private setters, business invariants, domain actions (`CancelActivity()`, `ReactivateActivity()`), and automated SEO-friendly slug generation. |
+| **Interface Inversion** | Application layer does not reference Persistence or Infrastructure. Persistence implements `IAppDbContext` and Infrastructure implements `IUserAccessor` & `ITokenService`. |
+| **CQRS Pattern** | Complete separation of read operations (Queries) and write operations (Commands) using **MediatR** without Service Locator anti-patterns. |
+| **Defense-in-Depth Security** | Multi-tier security engine: HSTS preload policy, 308 permanent HTTPS redirection, strict HttpOnly/Secure cookie policy, OWASP defense headers, and IP-partitioned rate limiting. |
+| **Rate Limiting Engine** | ASP.NET Core built-in rate limiter featuring a Sliding Window limiter (100 req/min per IP) and strict Fixed Window limiter (10 req/min) for auth endpoints to prevent brute-force attacks. |
 | **Full Observability (OTLP)** | **OpenTelemetry** traces & metrics for ASP.NET Core, EF Core, HttpClient, and custom MediatR pipeline behaviors exported to **Jaeger**, **Prometheus**, and **Seq**. |
 | **Prometheus & Grafana** | Automated metrics collection scraping `/metrics` every 15s with pre-provisioned Grafana datasources and dashboards. |
-| **Options Pattern** | Strongly-typed configuration (`DatabaseOptions`, `MediatorOptions`) bound via `services.AddOptions<T>()`. |
+| **Options Pattern** | Strongly-typed configuration (`DatabaseOptions`, `MediatorOptions`, `JwtOptions`) bound via `services.AddOptions<T>()`. |
 | **Fluent Validation Pipeline** | Cross-cutting MediatR `IPipelineBehavior` executing FluentValidation rules automatically before request handlers are reached. |
 | **Standardized Result Pattern** | Handlers return strongly-typed `Result<T>` objects, eliminating exceptions for control flow and mapping cleanly to HTTP 200, 400, or 404. |
 | **Enterprise Error Middleware** | Centralized `ExceptionMiddleware` transforming unhandled exceptions into structured `AppException` payloads with unique `TraceId`, and validation errors into RFC 7807 `ValidationProblemDetails`. |
-| **Client-Side Diagnostics** | Axios interceptors intelligent routing: preserves form state on failed mutations (showing Trace ID toasts), navigates to diagnostic `<ServerError />` pages on query failures, and redirects malformed IDs to `<NotFound />`. |
 | **Server-State Sync** | **TanStack Query v5** manages server state caching, background refetching, and instant cache invalidations on mutations. |
-| **Performance & Code-Splitting** | Route-level lazy loading (`React.lazy` and `<Suspense />`) in React Router, reducing initial bundle size and initial load time. |
-| **Reusable Form System** | Generic form inputs (`TextInput`, `TextArea`, `SelectInput`, `DateInput`) cutting page bundle sizes by up to 79%. |
+| **Performance & Code-Splitting** | Route-level lazy loading (`React.lazy` and `<Suspense />`) in React Router, reducing initial bundle size and load time. |
 | **Container-Native (Nginx)** | Multi-stage Docker builds for API (.NET 11) and Client (Nginx serving SPA with `/api/` reverse proxy pass). |
+
+---
+
+## 🔒 Enterprise Defense-in-Depth Security
+
+The API layer is fortified with a multi-layered security infrastructure implemented in [`API/Extensions/SecurityExtensions.cs`](file:///c:/Users/ahmed/OneDrive/Desktop/FullStackDotNEtREACT/API/Extensions/SecurityExtensions.cs):
+
+### 1. HTTP Strict Transport Security (HSTS) & HTTPS-Only
+- **Strict HSTS Configuration**:
+  ```csharp
+  services.AddHsts(options =>
+  {
+      options.Preload = true;
+      options.IncludeSubDomains = true;
+      options.MaxAge = TimeSpan.FromDays(365);
+      options.ExcludedHosts.Clear(); // Emitted across all environments
+  });
+  ```
+- **Automatic HTTPS Upgrade**: Emits `Strict-Transport-Security: max-age=31536000; includeSubDomains; preload`, instructing browsers to never communicate over plain HTTP.
+- **308 Permanent Redirection**: Insecure HTTP requests (port 5096) are upgraded permanently via HTTP 308 to `https://localhost:7223`.
+
+### 2. HttpOnly & Secure Cookie Policy
+- **Server-Wide Enforcement**:
+  ```csharp
+  services.Configure<CookiePolicyOptions>(options =>
+  {
+      options.HttpOnly = HttpOnlyPolicy.Always;
+      options.Secure = CookieSecurePolicy.Always;
+      options.MinimumSameSitePolicy = SameSiteMode.None;
+  });
+  ```
+- **XSS Mitigation**: Authentication cookies (`jwtToken`) are strictly inaccessible to JavaScript execution, neutralizing Cross-Site Scripting (XSS) token theft.
+- **Cross-Origin Compatibility**: `SameSiteMode.None` paired with `Secure = true` ensures seamless SPA authentication between `localhost:3000` and `localhost:7223` with `credentials: 'include'`.
+
+### 3. Multi-Tier Rate Limiting (Sliding & Fixed Windows)
+Powered by .NET 9 `Microsoft.AspNetCore.RateLimiting` & `System.Threading.RateLimiting`:
+
+1. **Global Sliding Window Limiter (Per Client IP)**:
+   - **Limit**: 100 requests per minute per IP address.
+   - **Segments**: 6 segments (10 seconds each) preventing boundary-burst traffic spikes.
+2. **Strict Auth Limiter (Fixed Window)**:
+   - **Limit**: 10 requests per minute applied to `/api/account/login` and `/api/account/register`.
+   - **Protection**: Neutralizes automated Brute-Force, Credential Stuffing, and DoS attacks.
+3. **RFC 7807 & RFC 6585 Compliance**:
+   - Rejections return `HTTP 429 Too Many Requests` with `Retry-After: <seconds>` and a standardized problem details JSON payload:
+     ```json
+     {
+       "type": "https://httpstatuses.com/429",
+       "title": "Too Many Requests",
+       "status": 429,
+       "detail": "Rate limit exceeded. Please try again after 53 seconds.",
+       "instance": "/api/account/login"
+     }
+     ```
+
+### 4. OWASP Defense-in-Depth Security Headers
+Every HTTP response carries enterprise-grade hardening headers:
+- `X-Content-Type-Options: nosniff` (Mitigates MIME-type confusion attacks).
+- `X-Frame-Options: DENY` (Clickjacking mitigation).
+- `Referrer-Policy: strict-origin-when-cross-origin`.
+- `X-XSS-Protection: 1; mode=block`.
+- `Permissions-Policy: camera=(), microphone=(), geolocation=()`.
 
 ---
 
 ## 🏛 System Architecture & Diagrams
 
-### 1. Onion Architecture & Layers
+### 1. Clean Architecture & Layers
 
 ```mermaid
 graph TD
-    subgraph UI ["Client (Frontend SPA)"]
+    subgraph UI ["Presentation Layer (Client SPA)"]
         React["React 19 SPA (Vite + TypeScript)"]
-        Router["React Router (Route-based Code Splitting)"]
-        TanStack["TanStack React Query v5 (Cache Layer)"]
-        Axios["Axios Agent + Response Interceptor"]
+        Router["React Router (Lazy Routes)"]
+        TanStack["TanStack React Query v5"]
+        Axios["Axios (Interceptors + Credentials)"]
         React --> Router --> TanStack --> Axios
     end
 
-    subgraph API_Layer ["API Layer (ASP.NET Core)"]
-        Controllers["Controllers (Activities, Home, Buggy)"]
-        Middleware["ExceptionMiddleware (RFC 7807 / AppException)"]
-        Observability["ObservabilityExtensions (OpenTelemetry + Serilog)"]
-        OptionsPattern["Options Pattern (DatabaseOptions, MediatorOptions)"]
+    subgraph API_Layer ["API & Host Layer (ASP.NET Core)"]
+        Controllers["Controllers (Activities, Account, Home, Buggy)"]
+        SecMiddleware["Security Pipeline (HSTS, HTTPS 308, CookiePolicy, RateLimiter)"]
+        ExceptionMW["ExceptionMiddleware (RFC 7807 & AppException)"]
+        SecMiddleware --> ExceptionMW --> Controllers
     end
 
-    subgraph App_Layer ["Application Layer (Use Cases & CQRS)"]
-        Queries["Queries (GetActivityList, GetActivityDetails, GetHomePageData)"]
-        Commands["Commands (CreateActivity, EditActivity, DeleteActivity)"]
-        Pipeline["MediatR Pipeline (Validation, Tracing, Metrics Behaviors)"]
-        Validators["FluentValidation (Create/Edit Validators)"]
+    subgraph App_Layer ["Application Layer (CQRS & Contracts)"]
+        Queries["Queries (GetActivityList, GetActivityDetails, GetCurrentUser)"]
+        Commands["Commands (CreateActivity, EditActivity, Login, Register)"]
+        Pipeline["MediatR Pipeline (Validation, Tracing, Metrics)"]
+        Interfaces["Interfaces (IAppDbContext, IUserAccessor, ITokenService)"]
+        Validators["FluentValidation Rules"]
         AutoMapper["AutoMapper Profiles"]
     end
 
-    subgraph Domain_Layer ["Domain Layer (Core)"]
-        Entities["Rich Entities (Activity)"]
-        Invariants["Domain Invariants & Slug Generator"]
+    subgraph Infra_Layer ["Infrastructure Layer"]
+        TokenSvc["TokenService (JWT Generation & Validation)"]
+        UserAcc["UserAccessor (HttpContext & Claims Parsing)"]
+        JwtOpts["IOptions<JwtOptions> Pattern"]
     end
 
     subgraph Persist_Layer ["Persistence Layer"]
-        DbContext["DevMeetDbContext (EF Core)"]
+        DbContext["DevMeetDbContext : IAppDbContext"]
         Migrations["EF Core Code-First Migrations"]
-        DbInit["DbInitializer (Egyptian Tech Hub Seeder)"]
+        DbInit["DbInitializer & Seed Data"]
+    end
+
+    subgraph Domain_Layer ["Domain Layer (Core - Zero Dependencies)"]
+        Entities["Rich Entities (Activity, AppUser, ActivityAttendee)"]
+        Invariants["Domain Invariants & Slug Generator"]
     end
 
     Database[("PostgreSQL 17 Database")]
 
-    Axios -->|"HTTP / HTTPS REST"| Middleware
-    Middleware --> Controllers
+    Axios -->|"HTTPS REST + Cookie"| SecMiddleware
     Controllers --> App_Layer
     App_Layer --> Domain_Layer
-    App_Layer --> Persist_Layer
+    Persist_Layer -.->|"Implements"| Interfaces
+    Infra_Layer -.->|"Implements"| Interfaces
     Persist_Layer --> Database
 ```
 
 ---
 
-### 2. Observability & Telemetry Pipeline
+### 2. Security & Request Pipeline Flow
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor Client as Browser Client
+    participant Kestrel as Kestrel Web Server
+    participant CORS as UseAppCors
+    participant HSTS as UseHsts & HTTPS Redirection
+    participant Headers as OWASP Headers Middleware
+    participant Cookie as UseCookiePolicy (HttpOnly)
+    participant RateLimit as UseRateLimiter (Sliding/Fixed)
+    participant Auth as UseAuthentication & Authorization
+    participant Controller as AccountController / ActivitiesController
+
+    Client->>Kestrel: HTTP / HTTPS Request
+    alt Insecure HTTP (Port 5096)
+        Kestrel->>HSTS: Detect HTTP
+        HSTS-->>Client: 308 Permanent Redirect (https://localhost:7223)
+    else Secure HTTPS (Port 7223)
+        Kestrel->>CORS: Evaluate CORS Policy
+        CORS->>HSTS: Add Strict-Transport-Security Header
+        HSTS->>Headers: Add nosniff, DENY, Referrer-Policy
+        Headers->>Cookie: Enforce HttpOnlyPolicy.Always
+        Cookie->>RateLimit: Check Rate Limit (Partition by IP)
+        alt Rate Limit Exceeded (> 100 req/min or > 10 req/min on Auth)
+            RateLimit-->>Client: 429 Too Many Requests (Retry-After Header + Problem Details JSON)
+        else Rate Limit OK
+            RateLimit->>Auth: Validate JWT / Identity Cookie
+            Auth->>Controller: Dispatch to Action / MediatR
+            Controller-->>Client: 200 OK + Secure HttpOnly Cookie
+        end
+    end
+```
+
+---
+
+### 3. Observability & Telemetry Pipeline
 
 ```mermaid
 graph LR
@@ -146,7 +258,7 @@ graph LR
 
 ---
 
-### 3. CQRS & Error Handling Pipeline
+### 4. CQRS Execution & Error Handling Flow
 
 ```mermaid
 sequenceDiagram
@@ -182,7 +294,7 @@ sequenceDiagram
 
 ---
 
-### 4. Frontend State & Routing Flow
+### 5. Frontend State & Routing Flow
 
 ```mermaid
 graph LR
@@ -202,6 +314,7 @@ graph LR
     subgraph Feedback ["Diagnostic Handling"]
         AxiosAgent -->|"2xx Success"| UpdateUI["Render UI Components"]
         AxiosAgent -->|"400 Validation"| Toast["Inline Form Validation Toast"]
+        AxiosAgent -->|"429 Rate Limited"| RateToast["Too Many Requests Toast"]
         AxiosAgent -->|"404 Missing"| NotFound["Navigate to /not-found"]
         AxiosAgent -->|"500 Exception"| ServerError["Navigate to /server-error"]
     end
@@ -211,7 +324,7 @@ graph LR
 
 ## 🏛 Domain-Driven Design (DDD) Model
 
-The application models its core business domain around the `Activity` aggregate root:
+The application models its core business domain around the `Activity` aggregate root and user identity relationships:
 
 ```csharp
 public class Activity
@@ -262,13 +375,6 @@ The application incorporates a complete, production-grade telemetry and observab
 - **Structured Enrichment**: Enriches every log entry with `MachineName`, `ProcessId`, `ThreadId`, and contextual properties.
 - **Seq Ingestion**: Ingests structured logs and trace correlations. Real-time log explorer accessible at **[http://localhost:8081](http://localhost:8081)**.
 
-### Custom MediatR Telemetry Behaviors
-```text
-Application/Core/
-├── TracingBehavior.cs     # Creates OTel Activity span for each MediatR handler
-└── MetricsBehavior.cs     # Tracks mediatr_requests_total and mediatr_request_duration_ms
-```
-
 ---
 
 ## 🛡 Resilient Error Handling System
@@ -289,6 +395,7 @@ DevMeet Egypt handles errors deterministically at both backend and frontend:
 3. **Axios Response Interceptors**:
    - `400 Bad Request`: Displays interactive toast notifications while preserving user form input.
    - `404 Not Found`: Automatic redirect to `<NotFound />`.
+   - `429 Too Many Requests`: Informs user of cooldown window based on `Retry-After`.
    - `500 Internal Server Error`: Safe state redirect to `<ServerError />` providing stack trace inspection in Development mode.
 
 ---
@@ -304,6 +411,7 @@ DevMeet Egypt handles errors deterministically at both backend and frontend:
 | **MediatR** | `14.2.0` | In-process mediator implementing CQRS handlers and behaviors |
 | **FluentValidation** | `12.1.1` | Strongly-typed business validation rules |
 | **AutoMapper** | `16.2.0` | Convention-based DTO and entity projection |
+| **ASP.NET Core RateLimiter** | Built-in | Sliding and Fixed Window rate limiting algorithms |
 | **OpenTelemetry .NET** | `1.19.1` | Cloud-native distributed tracing and metrics instrumentation |
 | **Serilog & Serilog.Sinks.Seq**| `10.0.0 / 9.1` | High-performance structured logging and Seq integration |
 
@@ -339,26 +447,29 @@ FullStackDotNEtREACT/
 │       └── provisioning/
 │           └── datasources/                  # Auto-configured Prometheus datasource
 │
-├── API/                                      # Web API Entry Point & HTTP Boundary
-│   ├── Controllers/                          # REST Controllers (Activities, Home, Buggy)
-│   ├── Extensions/                           # Modular Service Registrations
+├── API/                                      # Web API Host & Presentation Boundary
+│   ├── Controllers/                          # REST API Endpoints (Activities, Account, Home, Buggy)
+│   ├── Extensions/                           # Modular Architecture Extensions
 │   │   ├── ApplicationServiceExtensions.cs   # Fluent factory root orchestrator
-│   │   ├── ApplicationServiceFactory.cs      # Modular service assembly builder
+│   │   ├── ApplicationServiceFactory.cs      # Modular service assembly builder (.WithSecurity(), .WithDatabase())
+│   │   ├── SecurityExtensions.cs             # HSTS, HTTPS 308 Redirection, CookiePolicy, RateLimiter
 │   │   ├── ObservabilityExtensions.cs        # OpenTelemetry (Jaeger/Seq) & Serilog setup
 │   │   ├── DatabaseExtensions.cs             # DbContext & Npgsql connection setup
 │   │   ├── CqrsExtensions.cs                 # MediatR & pipeline behaviors
 │   │   ├── CorsExtensions.cs                 # CORS security policies
-│   │   ├── MappingExtensions.cs              # AutoMapper profiles
-│   │   └── MigrationExtensions.cs            # Automated startup migrations & seeding
+│   │   └── MappingExtensions.cs              # AutoMapper profiles
 │   ├── Middleware/
 │   │   └── ExceptionMiddleware.cs            # RFC 7807 & AppException middleware
-│   ├── Options/                              # Options Pattern (DatabaseOptions, MediatorOptions)
 │   ├── Dockerfile                            # Multi-stage container build (.NET 11 SDK + Runtime)
 │   ├── appsettings.json                      # Local development configuration
 │   └── appsettings.Docker.json               # Docker container network configuration
 │
-├── Application/                              # Business Logic & CQRS Layer
+├── Application/                              # Use Cases, CQRS & Domain Abstractions
+│   ├── Interfaces/                           # Core Abstractions (Inversion of Control)
+│   │   ├── IAppDbContext.cs                  # Database Context contract
+│   │   └── IUserAccessor.cs                  # User Identity accessor contract
 │   ├── Activities/                           # Commands, Queries, DTOs, and Validators
+│   ├── Account/                              # Login, Register, CurrentUser commands and validators
 │   ├── Home/                                 # Home Feature Slice (GetHomePageData query & DTO)
 │   └── Core/
 │       ├── TracingBehavior.cs                # OpenTelemetry Activity span behavior
@@ -367,22 +478,33 @@ FullStackDotNEtREACT/
 │       ├── Result.cs                         # Generic Result<T> failure/success pattern
 │       └── AppException.cs                   # Standardized error transfer model
 │
-├── Domain/                                   # Enterprise Business Entities (Zero Dependencies)
+├── Infrastructure/                           # External Concerns Implementation
+│   ├── Security/                             # Security implementations
+│   │   ├── TokenService.cs                   # JWT creation & signing (ITokenService)
+│   │   ├── UserAccessor.cs                   # HttpContext claims resolver (IUserAccessor)
+│   │   └── JwtOptions.cs                     # Options Pattern configuration
+│   └── Infrastructure.csproj
+│
+├── Domain/                                   # Core Business Entities (Zero Dependencies)
 │   ├── Activity.cs                           # Rich Domain Model with DDD invariants
+│   ├── AppUser.cs                            # Application Identity user entity
+│   ├── ActivityAttendee.cs                   # Join entity representing attendance
 │   └── Common/
 │       └── SlugHelper.cs                     # SEO-friendly slug generator
 │
 ├── Persistence/                              # Data Access & Entity Framework Layer
-│   ├── DevMeetDbContext.cs                   # DbContext with Activity entity configuration
+│   ├── DevMeetDbContext.cs                   # Implements IAppDbContext
 │   ├── DbInitializer.cs                      # Seed data engine (Egyptian Tech Events)
 │   └── Migrations/                           # Unified Code-First database migrations
 │
 └── client/                                   # Modern React 19 Frontend SPA
     ├── nginx.conf                            # Nginx reverse proxy configuration (/api/ -> api:8080)
     ├── Dockerfile                            # Multi-stage Node 22 build + Nginx Alpine runtime
+    ├── public/
+    │   └── config.json                       # Centralized runtime client configuration
     ├── src/
     │   ├── App/                              # Application Shell (Layout, Navbar, Router)
-    │   ├── features/                         # Feature Slices (activities, home, errors)
+    │   ├── features/                         # Feature Slices (activities, account, home, errors)
     │   ├── shared/                           # Reusable UI controls, Axios agent, Zod schemas
     │   └── theme/                            # Material UI theme tokens
     └── vite.config.ts                        # Vite configuration with React & mkcert
@@ -392,11 +514,21 @@ FullStackDotNEtREACT/
 
 ## 📡 API Reference & Endpoints
 
-### Core Endpoints
+### Authentication & Account (`/api/account`)
+> 🛡️ *Protected with Rate Limiting (`[EnableRateLimiting("auth")]` - Max 10 requests/min)*
+
+| Method | Endpoint | Description | Security |
+| :--- | :--- | :--- | :--- |
+| `POST` | `/api/account/login` | Authenticate user & issue HttpOnly secure cookie | Anonymous |
+| `POST` | `/api/account/register` | Register new developer account | Anonymous |
+| `GET` | `/api/account` | Retrieve current authenticated user profile | Authorized |
+| `POST` | `/api/account/logout` | Revoke & clear authentication cookies | Authorized |
+
+### Activities & Meetups (`/api/activities`)
+> 🛡️ *Protected with Global Sliding Window Limiter (Max 100 requests/min per IP)*
 
 | Method | Endpoint | Description | Status Code |
 | :--- | :--- | :--- | :--- |
-| `GET` | `/api/home` | Landing page data (featured meetup, upcoming list, live metrics) | `200 OK` |
 | `GET` | `/api/activities` | List all tech meetups & conferences | `200 OK` |
 | `GET` | `/api/activities/{id}` | Retrieve activity details by ID | `200 OK` / `404 Not Found` |
 | `POST` | `/api/activities` | Create a new tech event | `200 OK` (ID) / `400 Bad Request` |
@@ -425,7 +557,7 @@ When running under Docker Compose or local development, services are accessible 
 | **Frontend (Client)** | Docker | [http://localhost](http://localhost) | `80` | Served via Nginx with API proxy |
 | **Frontend (Client)** | Local | [https://localhost:3000](https://localhost:3000) | `3000` | Vite dev server (`mkcert` HTTPS) |
 | **Backend API** | Docker | [http://localhost:8085](http://localhost:8085) | `8085` | ASP.NET Core API |
-| **Backend API** | Local | [https://localhost:7223](https://localhost:7223) | `7223` | Kestrel HTTPS (`http://localhost:5096`) |
+| **Backend API** | Local | [https://localhost:7223](https://localhost:7223) | `7223` | Kestrel HTTPS (`http://localhost:5096` auto-redirects) |
 | **Grafana Dashboards** | Docker | [http://localhost:3001](http://localhost:3001) | `3001` | **User:** `admin` / **Pass:** `admin` |
 | **Jaeger Trace UI** | Docker | [http://localhost:16686](http://localhost:16686) | `16686` | OpenTelemetry distributed traces |
 | **Seq Log Explorer** | Docker | [http://localhost:8081](http://localhost:8081) | `8081` | Real-time structured log browser |
@@ -460,19 +592,18 @@ docker compose down
 #### Prerequisites
 - **.NET SDK 11.0 / 10.0** ([Download .NET](https://dotnet.microsoft.com/download))
 - **Node.js 20.x+** ([Download Node.js](https://nodejs.org/))
-- **PostgreSQL 16+** (Local Windows service or Docker container running on port `5432`)
+- **PostgreSQL 16+** (Local service or Docker container running on port `5432`)
 
 #### 1. Backend Setup
 1. Trust the development HTTPS certificate:
    ```bash
    dotnet dev-certs https --trust
    ```
-2. Verify database connection in [`API/appsettings.json`](file:///c:/Users/ahmed/OneDrive/Desktop/FullStackDotNEtREACT/API/appsettings.json).
-3. Start the API from the root directory:
+2. Start the API from the root directory:
    ```bash
-   dotnet run --project API
+   dotnet run --project API/API.csproj
    ```
-   > 💡 **Auto-Migration**: Pending EF Core migrations and sample Egypt tech meetups are applied automatically on startup via `MigrateAndSeedAsync()`.
+   > 💡 **Auto-Migration & Seeding**: Pending EF Core migrations, application roles, and sample Egypt tech meetups are applied automatically on startup via `MigrateAndSeedAsync()`.
 
 #### 2. Frontend Setup
 1. Open a new terminal and navigate to the `client` directory:
@@ -515,7 +646,7 @@ docker compose down
 - **Dynamic Tag Selector**: Add custom technical topic tags (`TagInput`).
 
 ### 5. Error Testing Laboratory (`/errors`)
-- **Interactive Workbench**: Test and verify client-side handling for 400 Bad Request, 401 Unauthorized, 404 Not Found, 500 Internal Server Error, and validation problem details.
+- **Interactive Workbench**: Test and verify client-side handling for 400 Bad Request, 401 Unauthorized, 404 Not Found, 429 Rate Limiting, 500 Internal Server Error, and validation problem details.
 
 ---
 
@@ -523,11 +654,11 @@ docker compose down
 
 ### Backend Commands (Root Directory)
 ```bash
-# Build the solution projects
+# Build all projects in the solution
 dotnet build API/API.csproj
 
 # Run the API with Hot Reload
-dotnet watch --project API
+dotnet watch --project API/API.csproj
 
 # Add a new Entity Framework migration
 dotnet ef migrations add <MigrationName> -p Persistence -s API -c DevMeetDbContext -o Migrations
@@ -569,28 +700,13 @@ docker compose down
 
 ---
 
-## 🗄 Database Migrations & Seeding
-
-The application manages schema changes through **Entity Framework Core Code-First Migrations**:
-
-- Located in [`Persistence/Migrations/`](file:///c:/Users/ahmed/OneDrive/Desktop/FullStackDotNEtREACT/Persistence/Migrations/).
-- Database configuration is automatically registered in [`DatabaseExtensions.cs`](file:///c:/Users/ahmed/OneDrive/Desktop/FullStackDotNEtREACT/API/Extensions/DatabaseExtensions.cs).
-- Populated with realistic Egyptian tech community events (Cairo DevFest, Alex Cloud Summit, Giza Cyber Security Con, Mansoura AI Hackathon, Assiut Tech Meetup) via [`DbInitializer.cs`](file:///c:/Users/ahmed/OneDrive/Desktop/FullStackDotNEtREACT/Persistence/DbInitializer.cs).
-
----
-
 ## ❓ Troubleshooting & FAQ
 
 ### Q1: In the logs, I see `relation "__EFMigrationsHistory" does not exist` on startup. Is this an error?
 **Answer:** No. On a fresh database, EF Core checks `__EFMigrationsHistory` to determine which migrations have been applied. Because the database was just created, PostgreSQL returns a 42P01 notice. EF Core **handles this internally**, immediately creates the history table, executes all migrations, and seeds initial data. This notice only appears once on initial database creation.
 
-### Q2: Port 5432 or Port 8080 is already in use. How do I fix it?
-**Answer:**
-- **Port 5432**: If you have a local PostgreSQL service running on Windows, stop it temporarily before starting Docker Compose:
-  ```powershell
-  Stop-Service postgresql-x64-18
-  ```
-- **Port 8080**: In Docker Compose, the API is mapped to host port **`8085`** (`8085:8080`), avoiding any conflict with existing local development servers or web services on port 8080.
+### Q2: How does the Rate Limiter behave under load?
+**Answer:** The API uses a Sliding Window limiter (100 req/min) for general traffic and Fixed Window limiter (10 req/min) for auth routes. When exceeded, the API returns `HTTP 429 Too Many Requests` along with a `Retry-After: <seconds>` header and an RFC 7807 JSON problem description.
 
 ### Q3: Why does my browser show a certificate warning on `https://localhost:3000`?
 **Answer:** The local frontend uses `mkcert` to provide valid HTTPS during development. If prompted, click **Advanced** -> **Proceed to localhost (unsafe)** or install the local CA certificate generated by `mkcert`.

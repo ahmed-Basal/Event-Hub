@@ -1,10 +1,12 @@
 using Application.Account.Commands;
 using Application.Account.DTO;
 using Application.Account.Queries;
+using API.Extensions;
 using Infrastructure.Security;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.Extensions.Options;
 
 namespace API.Controllers;
@@ -14,6 +16,7 @@ public class AccountController(ISender mediator, IOptions<JwtOptions> jwtOptions
     private readonly JwtOptions _jwtOptions = jwtOptions.Value;
 
     [AllowAnonymous]
+    [EnableRateLimiting(SecurityExtensions.AuthRateLimitPolicy)]
     [HttpPost("login")]
     public async Task<ActionResult<UserDto>> Login(LoginDto loginDto, CancellationToken ct)
     {
@@ -26,6 +29,7 @@ public class AccountController(ISender mediator, IOptions<JwtOptions> jwtOptions
     }
 
     [AllowAnonymous]
+    [EnableRateLimiting(SecurityExtensions.AuthRateLimitPolicy)]
     [HttpPost("register")]
     public async Task<ActionResult<UserDto>> Register(RegisterDto registerDto, CancellationToken ct)
     {

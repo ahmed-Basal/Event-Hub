@@ -53,12 +53,19 @@ public sealed class ApplicationServiceFactory
         return this;
     }
 
+    public ApplicationServiceFactory WithSecurity()
+    {
+        _services.AddAppSecurityServices(_config);
+        return this;
+    }
+
     public ApplicationServiceFactory WithAllDefaults()
     {
         return this
             .WithOpenApi()
             .WithDatabase()
             .WithIdentity()
+            .WithSecurity()
             .WithCqrs()
             .WithMapping()
             .WithCors()
