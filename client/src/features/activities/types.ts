@@ -11,6 +11,8 @@ export type ActivityLevel =
   | 'Advanced'
   | 'All Levels';
 
+import type { Attendee } from '../../shared';
+
 export interface Activity {
   id: string;
   title: string;
@@ -26,6 +28,9 @@ export interface Activity {
   isCancelled: boolean;
   level?: ActivityLevel | string;
   tags?: string[];
+  hostUsername?: string;
+  hostDisplayName?: string;
+  attendees?: Attendee[];
 }
 
 export type CreateActivityDto = Omit<Activity, 'id' | 'slug'> & {

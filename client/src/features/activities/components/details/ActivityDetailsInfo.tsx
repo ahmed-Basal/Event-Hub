@@ -13,9 +13,9 @@ import {
   TagList,
   MapComponent,
   type Activity,
-} from '../../../shared';
+} from '../../../../shared';
 import LogisticsCard from './LogisticsCard';
-import { tokens } from '../../../theme';
+import { tokens } from '../../../../theme';
 
 interface Props {
   activity: Activity;

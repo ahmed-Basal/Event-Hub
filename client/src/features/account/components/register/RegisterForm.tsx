@@ -15,10 +15,10 @@ import PersonOutlinedIcon from '@mui/icons-material/PersonOutlined';
 import AlternateEmailIcon from '@mui/icons-material/AlternateEmail';
 import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
 import EmailOutlinedIcon from '@mui/icons-material/EmailOutlined';
-import { tokens } from '../../../theme';
-import TextInput from '../../../shared/components/form/TextInput';
-import { registerSchema, type RegisterSchema } from '../schemas';
-import { useAccount } from '../hooks/useAccount';
+import { tokens } from '../../../../theme';
+import TextInput from '../../../../shared/components/form/TextInput';
+import { registerSchema, type RegisterSchema } from '../../schemas';
+import { useAccount } from '../../hooks/useAccount';
 
 interface RegisterFormProps {
   onSuccess?: () => void;

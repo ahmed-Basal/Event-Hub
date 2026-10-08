@@ -30,4 +30,21 @@ public class UserAccessor(IHttpContextAccessor httpContextAccessor, IAppDbContex
         return await appDbContext.Users.FirstOrDefaultAsync(u => u.Id == userId)
             ?? throw new UnauthorizedAccessException("User not found in database");
     }
+
+    public string? GetIpAddress()
+    {
+        var httpContext = httpContextAccessor.HttpContext;
+        if (httpContext == null) return null;
+
+        if (httpContext.Request.Headers.TryGetValue("X-Forwarded-For", out var forwarded))
+        {
+            return forwarded.ToString().Split(',')[0].Trim();
+        }
+        return httpContext.Connection.RemoteIpAddress?.ToString();
+    }
+
+    public string? GetRefreshToken()
+    {
+        return httpContextAccessor.HttpContext?.Request.Cookies["refreshToken"];
+    }
 }

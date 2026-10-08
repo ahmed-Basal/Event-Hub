@@ -17,8 +17,8 @@ import {
   Share as ShareIcon,
 } from '@mui/icons-material';
 import { Link } from 'react-router';
-import type { Attendee } from '../../../shared';
-import { tokens } from '../../../theme';
+import type { Attendee } from '../../../../shared';
+import { tokens } from '../../../../theme';
 
 const ATTENDEES: Attendee[] = [
   {

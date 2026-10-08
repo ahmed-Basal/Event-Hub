@@ -11,5 +11,5 @@ public class User : IdentityUser
 
 
     public ICollection<ActivityAttendee> Activities { get; set; } = new HashSet<ActivityAttendee>();
-
-}
+    public ICollection<RefreshToken> RefreshTokens { get; set; } = new List<RefreshToken>();
+}

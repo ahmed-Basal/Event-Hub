@@ -13,10 +13,10 @@ import Visibility from '@mui/icons-material/Visibility';
 import VisibilityOff from '@mui/icons-material/VisibilityOff';
 import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
 import EmailOutlinedIcon from '@mui/icons-material/EmailOutlined';
-import { tokens } from '../../../theme';
-import TextInput from '../../../shared/components/form/TextInput';
-import { loginSchema, type LoginSchema } from '../schemas';
-import { useAccount } from '../hooks/useAccount';
+import { tokens } from '../../../../theme';
+import TextInput from '../../../../shared/components/form/TextInput';
+import { loginSchema, type LoginSchema } from '../../schemas';
+import { useAccount } from '../../hooks/useAccount';
 
 interface LoginFormProps {
   onSuccess?: () => void;

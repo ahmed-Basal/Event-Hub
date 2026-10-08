@@ -2,9 +2,12 @@ import { useState } from 'react';
 import Box from '@mui/material/Box';
 import Container from '@mui/material/Container';
 import Grid from '@mui/material/Grid';
-import ActivityHeader from '../components/ActivityHeader';
-import ActivityList from '../components/ActivityList';
-import ActivityFilter, { type ActivityFilterValues } from '../components/ActivityFilter';
+import {
+  ActivityHeader,
+  ActivityList,
+  ActivityFilter,
+  type ActivityFilterValues,
+} from '../components/dashboard';
 import { tokens } from '../../../theme';
 
 export default function ActivityDashboard() {

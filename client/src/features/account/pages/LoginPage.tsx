@@ -2,7 +2,7 @@ import Container from '@mui/material/Container';
 import Paper from '@mui/material/Paper';
 import Box from '@mui/material/Box';
 import { tokens } from '../../../theme';
-import LoginForm from '../components/LoginForm';
+import { LoginForm } from '../components/login';
 
 export default function LoginPage() {
   return (

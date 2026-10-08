@@ -15,9 +15,9 @@ import {
   Edit as EditIcon,
 } from '@mui/icons-material';
 import { Link } from 'react-router';
-import { formatDate, type Activity } from '../../../shared';
-import { tokens } from '../../../theme';
-import { useActivityMutations } from '../hooks/useActivityMutations';
+import { formatDate, type Activity } from '../../../../shared';
+import { tokens } from '../../../../theme';
+import { useActivityMutations } from '../../hooks/useActivityMutations';
 
 interface Props {
   activity: Activity;

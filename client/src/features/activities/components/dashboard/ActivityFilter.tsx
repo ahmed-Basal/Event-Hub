@@ -14,7 +14,7 @@ import CloudSyncIcon from '@mui/icons-material/CloudSync';
 import AppsIcon from '@mui/icons-material/Apps';
 import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
 import TuneIcon from '@mui/icons-material/Tune';
-import { tokens } from '../../../theme';
+import { tokens } from '../../../../theme';
 
 export interface ActivityFilterValues {
   category: string;

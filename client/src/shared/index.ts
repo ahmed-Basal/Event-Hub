@@ -10,7 +10,7 @@ export { default as MenuItemLink, type MenuItemLinkProps } from '../App/Layout/c
 export { Tag, type TagProps } from './components/tags/Tag';
 export { TagList, type TagListProps } from './components/tags/TagList';
 
-export { default as LogisticsCard, type LogisticsCardProps } from '../features/activities/components/LogisticsCard';
+export { LogisticsCard, type LogisticsCardProps } from '../features/activities/components';
 
 export * from './components/form';
 export * from './components/map';

@@ -12,22 +12,13 @@ public class DevMeetDbContext(DbContextOptions<DevMeetDbContext> options)
     public required DbSet<Activity> Activities { get; set; }
     public required DbSet<ActivityAttendee> ActivityAttendees { get; set; }
     public DbSet<DataProtectionKey> DataProtectionKeys { get; set; } = null!;
+    public DbSet<RefreshToken> RefreshTokens { get; set; } = null!;
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
         base.OnModelCreating(builder);
 
-        builder.Entity<ActivityAttendee>(x => x.HasKey(a => new { a.ActivityId, a.UserId }));
-
-        builder.Entity<ActivityAttendee>()
-            .HasOne(x => x.User)
-            .WithMany(x => x.Activities)
-            .HasForeignKey(x => x.UserId);
-
-        builder.Entity<ActivityAttendee>()
-            .HasOne(x => x.Activity)
-            .WithMany(x => x.Attendees)
-            .HasForeignKey(x => x.ActivityId);
+        builder.ApplyConfigurationsFromAssembly(typeof(DevMeetDbContext).Assembly);
     }
 }
 

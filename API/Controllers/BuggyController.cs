@@ -1,7 +1,13 @@
+#if DEBUG
 using Microsoft.AspNetCore.Mvc;
 
 namespace API.Controllers;
 
+/// <summary>
+/// Development-only controller used for testing exception handling and HTTP error status codes.
+/// Excluded from production API documentation.
+/// </summary>
+[ApiExplorerSettings(IgnoreApi = true)]
 public class BuggyController : BaseApiController
 {
     [HttpGet("not-found")]
@@ -29,3 +35,4 @@ public class BuggyController : BaseApiController
         return Unauthorized();
     }
 }
+#endif

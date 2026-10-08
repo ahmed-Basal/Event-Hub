@@ -15,8 +15,8 @@ import {
   Send as SendIcon,
 } from '@mui/icons-material';
 import { Link } from 'react-router';
-import type { Comment } from '../../../shared';
-import { tokens } from '../../../theme';
+import type { Comment } from '../../../../shared';
+import { tokens } from '../../../../theme';
 
 const INITIAL_COMMENTS: Comment[] = [
   {

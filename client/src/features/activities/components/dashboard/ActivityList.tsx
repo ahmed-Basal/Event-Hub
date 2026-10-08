@@ -1,7 +1,7 @@
 import Grid from '@mui/material/Grid';
-import { Spinner, EmptyState } from '../../../shared';
+import { Spinner, EmptyState } from '../../../../shared';
 import ActivityCard from './ActivityCard';
-import { useActivitiesList } from '../hooks/useActivitiesList';
+import { useActivitiesList } from '../../hooks/useActivitiesList';
 import type { ActivityFilterValues } from './ActivityFilter';
 
 export interface ActivityListProps {

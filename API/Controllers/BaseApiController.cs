@@ -1,4 +1,4 @@
-using Application.Core;
+using Application.Bases;
 using Microsoft.AspNetCore.Mvc;
 
 namespace API.Controllers;
@@ -7,15 +7,20 @@ namespace API.Controllers;
 [Route("api/[controller]")]
 public abstract class BaseApiController : ControllerBase
 {
-    protected ActionResult HandleResult<T>(Result<T>? result)
+    protected ActionResult NewResult<T>(Response<T>? response)
     {
-        if (result == null) return NotFound();
+        if (response == null) return NotFound();
 
-        if (!result.IsSuccess && result.Code == 404) return NotFound();
-        if (!result.IsSuccess && result.Code == 401) return Unauthorized(result.Error);
-
-        if (result.IsSuccess) return Ok(result.Value);
-
-        return BadRequest(result.Error);
+        return response.StatusCode switch
+        {
+            System.Net.HttpStatusCode.OK => Ok(response),
+            System.Net.HttpStatusCode.Created => Created(string.Empty, response),
+            System.Net.HttpStatusCode.Unauthorized => Unauthorized(response),
+            System.Net.HttpStatusCode.BadRequest => BadRequest(response),
+            System.Net.HttpStatusCode.NotFound => NotFound(response),
+            System.Net.HttpStatusCode.Accepted => Accepted(response),
+            System.Net.HttpStatusCode.UnprocessableEntity => UnprocessableEntity(response),
+            _ => BadRequest(response)
+        };
     }
 }

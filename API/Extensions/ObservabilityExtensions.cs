@@ -1,4 +1,5 @@
 using API.Options;
+using Application.Behaviors;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
@@ -22,7 +23,7 @@ public static class ObservabilityExtensions
             .Enrich.WithProcessId()
             .Enrich.WithThreadId()
             .WriteTo.Console(outputTemplate:
-                "[{Timestamp:HH:mm:ss} {Level:u3}] {SourceContext}{NewLine}{Message:lj}{NewLine}{Exception}")
+                "[{Timestamp:HH:mm:ss} {Level:u3}] [{TraceId}] {SourceContext}{NewLine}{Message:lj}{NewLine}{Exception}")
             .WriteTo.Seq(seqOptions.ServerUrl)
             .CreateLogger();
 
@@ -46,11 +47,13 @@ public static class ObservabilityExtensions
 
         var otelOptions = config.GetSection(OpenTelemetryOptions.SectionName).Get<OpenTelemetryOptions>() ?? new OpenTelemetryOptions();
 
+        services.AddHealthChecks();
+
         services.AddOpenTelemetry()
             .ConfigureResource(resource =>
                 resource.AddService(serviceName: otelOptions.ServiceName, serviceVersion: "1.0.0"))
             .WithTracing(tracing => tracing
-                .AddSource("Reactivities.Application")
+                .AddSource(TracingBehavior<object, object>.ActivitySourceName)
                 .AddAspNetCoreInstrumentation(opts =>
                 {
                     opts.RecordException = true;
@@ -74,7 +77,7 @@ public static class ObservabilityExtensions
             .WithMetrics(metrics => metrics
                 .AddAspNetCoreInstrumentation()
                 .AddHttpClientInstrumentation()
-                .AddMeter("Reactivities.Application")
+                .AddMeter(MetricsBehavior<object, object>.MeterName)
                 .AddPrometheusExporter());
 
         return services;

@@ -10,8 +10,8 @@ import BookmarkIcon from '@mui/icons-material/Bookmark';
 import LocationOnIcon from '@mui/icons-material/LocationOn';
 import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
 import { Link } from 'react-router';
-import { TagList, formatDate, formatDateOnly, formatTimeOnly } from '../../../shared';
-import { tokens } from '../../../theme';
+import { TagList, formatDate, formatDateOnly, formatTimeOnly } from '../../../../shared';
+import { tokens } from '../../../../theme';
 
 export interface ActivityCardData {
   id: string;

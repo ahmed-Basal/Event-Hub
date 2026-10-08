@@ -5,10 +5,12 @@ import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import Grid from '@mui/material/Grid';
 import Typography from '@mui/material/Typography';
-import ActivityDetailsChats from '../components/ActivityDetailsChats';
-import ActivityDetailsInfo from '../components/ActivityDetailsInfo';
-import ActivityDetailsSideBar from '../components/ActivityDetailsSideBar';
-import ActivityDetailsHeader from '../components/ActivityDetailsHeaders';
+import {
+  ActivityDetailsChats,
+  ActivityDetailsHeader,
+  ActivityDetailsInfo,
+  ActivityDetailsSideBar,
+} from '../components/details';
 import { Spinner } from '../../../shared';
 import { tokens } from '../../../theme';
 import { useActivityDetail } from '../hooks';

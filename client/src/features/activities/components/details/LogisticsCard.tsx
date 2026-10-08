@@ -1,6 +1,6 @@
 import React from 'react';
 import { Box, Paper, Typography, type SxProps, type Theme } from '@mui/material';
-import { tokens } from '../../../theme';
+import { tokens } from '../../../../theme';
 
 export interface LogisticsCardProps {
 

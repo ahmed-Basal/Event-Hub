@@ -2,7 +2,7 @@ import Container from '@mui/material/Container';
 import Paper from '@mui/material/Paper';
 import Box from '@mui/material/Box';
 import { tokens } from '../../../theme';
-import RegisterForm from '../components/RegisterForm';
+import { RegisterForm } from '../components/register';
 
 export default function RegisterPage() {
   return (

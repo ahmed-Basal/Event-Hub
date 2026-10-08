@@ -8,4 +8,6 @@ public interface IUserAccessor
     string? GetUsername();
     string GetUserId();
     Task<User> GetUserAsync();
+    string? GetIpAddress();
+    string? GetRefreshToken();
 }

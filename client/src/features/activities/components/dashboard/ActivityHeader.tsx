@@ -1,7 +1,7 @@
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import EmojiEventsIcon from '@mui/icons-material/EmojiEvents';
-import { tokens } from '../../../theme';
+import { tokens } from '../../../../theme';
 
 export interface ActivityHeaderProps {
   title?: string;

@@ -1,14 +1,20 @@
+using API;
 using API.Extensions;
 using API.Middleware;
+using Application;
+using Infrastructure;
+using Persistence;
 using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.AddSerilogLogging();
 
-builder.Services.AddControllers();
-builder.Services.AddApplicationServices(builder.Configuration);
-builder.Services.AddTransient<ExceptionMiddleware>();
+// Register Dependencies Layer by Layer
+builder.Services.AddApplicationDi(builder.Configuration);
+builder.Services.AddPersistenceDi(builder.Configuration);
+builder.Services.AddInfrastructureDi(builder.Configuration);
+builder.Services.AddApiDi(builder.Configuration);
 
 var app = builder.Build();
 
@@ -20,6 +26,7 @@ app.UseSerilogRequestLogging(opts =>
 });
 
 app.MapPrometheusScrapingEndpoint();
+app.MapHealthChecks("/health");
 
 if (app.Environment.IsDevelopment())
 {
