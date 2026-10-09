@@ -4,8 +4,16 @@ using Scalar.AspNetCore;
 
 namespace API.Extensions;
 
+/// <summary>
+/// Provides extension methods for configuring OpenAPI specifications and Scalar interactive API documentation.
+/// </summary>
 public static class OpenApiExtensions
 {
+    /// <summary>
+    /// Registers OpenAPI document generation services with DevMeet platform metadata and JWT Bearer security schemes.
+    /// </summary>
+    /// <param name="services">The application service collection.</param>
+    /// <returns>The configured service collection for chaining.</returns>
     public static IServiceCollection AddAppOpenApi(this IServiceCollection services)
     {
         services.AddOpenApi("v1", options =>
@@ -48,6 +56,11 @@ public static class OpenApiExtensions
         return services;
     }
 
+    /// <summary>
+    /// Mounts the interactive Scalar API Reference UI and developer shortcuts in development mode.
+    /// </summary>
+    /// <param name="app">The web application host.</param>
+    /// <returns>The web application instance for chaining.</returns>
     public static WebApplication UseAppScalarDocumentation(this WebApplication app)
     {
         if (app.Environment.IsDevelopment())

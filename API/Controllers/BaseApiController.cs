@@ -3,10 +3,19 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace API.Controllers;
 
+/// <summary>
+/// Abstract foundational controller encapsulating standardized HTTP response mapping and routing conventions.
+/// </summary>
 [ApiController]
 [Route("api/[controller]")]
 public abstract class BaseApiController : ControllerBase
 {
+    /// <summary>
+    /// Transforms the standardized internal <see cref="Response{T}"/> domain result into the appropriate <see cref="ActionResult"/>.
+    /// </summary>
+    /// <typeparam name="T">The type of the encapsulated payload.</typeparam>
+    /// <param name="response">The domain operation response envelope.</param>
+    /// <returns>A mapped ASP.NET Core <see cref="ActionResult"/> with corresponding HTTP status code.</returns>
     protected ActionResult NewResult<T>(Response<T>? response)
     {
         if (response == null) return NotFound();
