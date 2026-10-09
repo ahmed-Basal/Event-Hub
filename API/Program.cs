@@ -28,10 +28,7 @@ app.UseSerilogRequestLogging(opts =>
 app.MapPrometheusScrapingEndpoint();
 app.MapHealthChecks("/health");
 
-if (app.Environment.IsDevelopment())
-{
-    app.MapOpenApi();
-}
+app.UseAppScalarDocumentation();
 
 app.UseAppCors();
 

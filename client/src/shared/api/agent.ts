@@ -41,7 +41,7 @@ agent.interceptors.response.use(
     },
     (error: AxiosError) => {
         if (!error.response) {
-            toast.error("Network Error: Cannot connect to API. Please make sure the backend is running and you have accepted the HTTPS certificate at https://localhost:7223 in your browser.");
+            toast.error("Network Error: Cannot connect to API. Please make sure the backend is running.");
             return Promise.reject(error);
         }
 

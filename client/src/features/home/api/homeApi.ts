@@ -4,7 +4,7 @@ import type { HomePageData } from '../types';
 export const homeApi = {
 
   getPageData: async (): Promise<HomePageData> => {
-    const response = await axiosClient.get<HomePageData>('/home');
-    return response.data;
+    const response = await axiosClient.get<any>('/home');
+    return response.data?.data ?? response.data;
   },
 };

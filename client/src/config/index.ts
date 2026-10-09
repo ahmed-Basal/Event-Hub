@@ -105,9 +105,9 @@ function formatWhatsappUrl(phone: string): string {
 }
 
 const fallbackConfig: AppConfig = {
-  apiUrl: import.meta.env.VITE_API_URL || 'https://localhost:7223/api',
+  apiUrl: import.meta.env.VITE_API_URL || '/api',
   api: {
-    baseUrl: import.meta.env.VITE_API_URL || 'https://localhost:7223/api',
+    baseUrl: import.meta.env.VITE_API_URL || '/api',
     timeoutMs: 15000,
   },
   app: {

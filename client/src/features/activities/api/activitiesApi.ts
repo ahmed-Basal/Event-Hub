@@ -4,21 +4,21 @@ import type { Activity, CreateActivityDto, UpdateActivityDto } from '../../../sh
 export const activitiesApi = {
 
   getAll: async (): Promise<Activity[]> => {
-    const response = await axiosClient.get<Activity[]>('/activities');
-    return response.data;
+    const response = await axiosClient.get<any>('/activities');
+    return response.data?.data ?? response.data;
   },
 
   getById: async (id: string): Promise<Activity> => {
-    const response = await axiosClient.get<Activity>(`/activities/${id}`);
-    return response.data;
+    const response = await axiosClient.get<any>(`/activities/${id}`);
+    return response.data?.data ?? response.data;
   },
 
   /**
    * Create a new activity
    */
   create: async (activity: CreateActivityDto | Partial<Activity>): Promise<string> => {
-    const response = await axiosClient.post<string>('/activities', activity);
-    return response.data;
+    const response = await axiosClient.post<any>('/activities', activity);
+    return response.data?.data ?? response.data;
   },
 
   /**
@@ -26,7 +26,7 @@ export const activitiesApi = {
    */
   update: async (activity: UpdateActivityDto | Activity): Promise<void> => {
     const response = await axiosClient.put(`/activities/${activity.id}`, activity);
-    return response.data;
+    return response.data?.data ?? response.data;
   },
 
   /**

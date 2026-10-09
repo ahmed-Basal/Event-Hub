@@ -4,19 +4,19 @@ import type { LoginSchema, RegisterSchema } from '../../../shared/schemas';
 
 export const accountApi = {
   login: async (creds: LoginSchema): Promise<User> => {
-    const response = await axiosClient.post<User>('/account/login', creds);
-    return response.data;
+    const response = await axiosClient.post<any>('/account/login', creds);
+    return response.data?.data ?? response.data;
   },
 
   register: async (creds: RegisterSchema): Promise<User> => {
-    const response = await axiosClient.post<User>('/account/register', creds);
-    return response.data;
+    const response = await axiosClient.post<any>('/account/register', creds);
+    return response.data?.data ?? response.data;
   },
 
   currentUser: async (): Promise<User | null> => {
     try {
-      const response = await axiosClient.get<User>('/account');
-      return response.data;
+      const response = await axiosClient.get<any>('/account');
+      return response.data?.data ?? response.data;
     } catch {
       return null;
     }

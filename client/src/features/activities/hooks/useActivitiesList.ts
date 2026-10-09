@@ -14,7 +14,13 @@ export function useActivitiesList(filters?: UseActivitiesListOptions) {
     queryFn: activitiesApi.getAll,
   });
 
-  const filteredActivities = query.data?.filter((activity) => {
+  const activitiesArray: Activity[] = Array.isArray(query.data)
+    ? query.data
+    : Array.isArray((query.data as any)?.data)
+    ? (query.data as any).data
+    : [];
+
+  const filteredActivities = activitiesArray.filter((activity) => {
     if (!filters) return true;
 
     if (filters.category && filters.category !== 'all') {
@@ -24,7 +30,6 @@ export function useActivitiesList(filters?: UseActivitiesListOptions) {
     }
 
     if (filters.status && filters.status !== 'all') {
-
       if (filters.status === 'hosting' && activity.isCancelled) {
         return false;
       }
@@ -34,8 +39,8 @@ export function useActivitiesList(filters?: UseActivitiesListOptions) {
   });
 
   return {
-    activities: filteredActivities ?? query.data,
-    rawActivities: query.data,
+    activities: filteredActivities ?? activitiesArray,
+    rawActivities: activitiesArray,
     isPending: query.isPending,
     isLoading: query.isLoading,
     isError: query.isError,

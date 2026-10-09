@@ -10,7 +10,7 @@ public static class ModuleApiDi
         IConfiguration config)
     {
         services.AddControllers();
-        services.AddOpenApi();
+        services.AddAppOpenApi();
         services.AddIdentityServices(config);
         services.AddCorsPolicy(config);
         services.AddAppSecurityServices(config);
