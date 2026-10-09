@@ -114,7 +114,7 @@ graph TD
 
 ## 3. C4 Architecture Model
 
-The **C4 Model** (Context, Containers, Components, Code/Dynamic) provides hierarchical views of the system for both technical leaders and engineers.
+The **C4 Model** (Context, Containers, Components, Dynamic) provides hierarchical architectural views of the system across four levels of abstraction, formatted with standard C4 notation and CSS color conventions.
 
 ---
 
@@ -123,23 +123,28 @@ The **C4 Model** (Context, Containers, Components, Code/Dynamic) provides hierar
 The System Context diagram establishes the boundary of the DevMeet Egypt platform, illustrating the human actors interacting with the system and external third-party software integrations.
 
 ```mermaid
-C4Context
-    title System Context Diagram — DevMeet Egypt Platform
+flowchart TB
+    classDef person fill:#08427b,stroke:#052e56,color:#ffffff,stroke-width:2px;
+    classDef internalSystem fill:#1168bd,stroke:#0b4884,color:#ffffff,stroke-width:2px;
+    classDef externalSystem fill:#777777,stroke:#555555,color:#ffffff,stroke-width:2px;
+    classDef boundary fill:#f8f9fa,stroke:#444444,stroke-width:2px,stroke-dasharray: 5 5;
 
-    Person(developer, "Software Developer", "Browses, searches, RSVPs, and attends tech meetups and developer conferences across Egypt.")
-    Person(organizer, "Community Organizer", "Creates, schedules, manages RSVPs, and cancels/reactivates technical events.")
+    Developer(["👤 Software Developer<br/><b>[Person]</b><br/>Browses, searches, RSVPs, and attends developer meetups across Egypt"]):::person
+    Organizer(["👤 Community Organizer<br/><b>[Person]</b><br/>Creates, manages, and schedules technical events and tracks RSVPs"]):::person
 
-    Enterprise_Boundary(b0, "DevMeet Egypt Platform Boundary") {
-        System(devmeet, "DevMeet Egypt System", "Enables Egyptian developer communities to discover, organize, and manage tech meetups, tracks, and attendees.")
-    }
+    subgraph Boundary ["🏢 DevMeet Egypt Platform Boundary"]
+        DevMeet["🏛️ DevMeet Egypt System<br/><b>[Software System]</b><br/>Enables Egyptian tech communities to discover, organize, and manage tech events, venues, and developer profiles"]:::internalSystem
+    end
 
-    System_Ext(locationiq, "LocationIQ API", "Provides forward geocoding, reverse geocoding, and map coordinates for Egyptian venue addresses.")
-    System_Ext(telemetry, "Telemetry & Observability", "Seq (Structured Logs), Jaeger (Distributed Traces), and Prometheus (Operational Metrics).")
+    LocationIQ["🗺️ LocationIQ API<br/><b>[External System]</b><br/>Forward/reverse geocoding and Egyptian map coordinates"]:::externalSystem
+    Telemetry["📊 Observability Stack<br/><b>[External System]</b><br/>Seq (Logs), Jaeger (Traces), Prometheus & Grafana (Metrics)"]:::externalSystem
 
-    Rel(developer, devmeet, "Views events, registers profile, and RSVPs to meetups using", "HTTPS / Browser")
-    Rel(organizer, devmeet, "Creates, edits, and manages developer meetups using", "HTTPS / Browser")
-    Rel(devmeet, locationiq, "Fetches venue latitude/longitude coordinates via", "REST / HTTPS")
-    Rel(devmeet, telemetry, "Pushes traces (OTLP 4317), metrics (/metrics), and logs (5341) via", "OTLP gRPC/HTTP")
+    Developer -->|"Views meetups, registers account, and RSVPs via [HTTPS]"| DevMeet
+    Organizer -->|"Creates, edits, and manages tech events via [HTTPS]"| DevMeet
+    DevMeet -->|"Fetches venue coordinates & address validation via [REST / HTTPS]"| LocationIQ
+    DevMeet -->|"Pushes distributed traces (4317), logs (5341), and metrics (/metrics)"| Telemetry
+
+    class Boundary boundary;
 ```
 
 ---
@@ -149,32 +154,38 @@ C4Context
 The Container diagram zooms into the DevMeet Egypt boundary, showing the major deployable software containers, their technologies, and communication protocols.
 
 ```mermaid
-C4Container
-    title Container Diagram — DevMeet Egypt Platform
+flowchart TB
+    classDef person fill:#08427b,stroke:#052e56,color:#ffffff,stroke-width:2px;
+    classDef container fill:#2b78c5,stroke:#1a4d80,color:#ffffff,stroke-width:2px;
+    classDef database fill:#1a5276,stroke:#11334d,color:#ffffff,stroke-width:2px;
+    classDef externalSystem fill:#777777,stroke:#555555,color:#ffffff,stroke-width:2px;
+    classDef boundary fill:#f8f9fa,stroke:#444444,stroke-width:2px,stroke-dasharray: 5 5;
 
-    Person(user, "Developer / Organizer", "Uses web browser on desktop or mobile device.")
+    User(["👤 Developer / Organizer<br/><b>[Person]</b><br/>Accesses platform via desktop or mobile web browser"]):::person
 
-    Container_Boundary(c1, "DevMeet Egypt Architecture Boundary") {
-        Container(spa, "Single-Page Application (SPA)", "React 19, TypeScript, MUI v9, TanStack Query", "Provides responsive UI, event discovery, interactive map filters, and attendee management.")
-        Container(proxy, "Reverse Proxy / Dev Server", "Vite / Nginx Alpine", "Routes client traffic, terminates SSL, and proxies /api, /scalar, and /health calls.")
-        Container(api, "Backend Web API Host", "ASP.NET Core (.NET 11), MediatR, EF Core", "Executes business logic, CQRS commands & queries, security pipeline, and serves Scalar OpenAPI docs.")
-        ContainerDb(db, "Relational Database", "PostgreSQL 17", "Persists users, activities, attendees, refresh tokens, and venue geographic coordinates.")
-    }
+    subgraph Boundary ["🏢 DevMeet Egypt Architecture Boundary"]
+        Proxy["🔀 Reverse Proxy / Dev Server<br/><b>[Container: Vite / Nginx]</b><br/>Terminates SSL, serves SPA static bundles, and proxies /api, /scalar, and /health"]:::container
+        SPA["💻 Single-Page Application (SPA)<br/><b>[Container: React 19, TypeScript, MUI v9]</b><br/>Provides UI, event discovery, interactive maps, form validation, and TanStack Query cache"]:::container
+        API["⚙️ Backend Web API Host<br/><b>[Container: ASP.NET Core, .NET 11]</b><br/>Executes CQRS commands/queries via MediatR, security pipeline, and serves Scalar OpenAPI docs"]:::container
+        DB[("🗄️ Relational Database<br/><b>[Container: PostgreSQL 17]</b><br/>Persists users, activities, attendees, refresh tokens, and venue coordinates")]:::database
+    end
 
-    Container_Ext(seq, "Seq Log Server", "Docker Container (8081 / 5341)", "Centralized structured JSON log ingestion and search UI.")
-    Container_Ext(jaeger, "Jaeger Tracing", "Docker Container (16686 / 4317)", "Stores and visualizes OpenTelemetry distributed trace spans.")
-    Container_Ext(prom, "Prometheus & Grafana", "Docker Containers (9090 / 3001)", "Scrapes operational metrics from /metrics and renders dashboards.")
-    System_Ext(locationiq, "LocationIQ API", "SaaS Geocoding Service", "Address-to-coordinate geocoding service.")
+    LocationIQ["🗺️ LocationIQ API<br/><b>[External System]</b><br/>Address geocoding service"]:::externalSystem
+    Seq["📋 Seq Log Server<br/><b>[Container: Docker :8081]</b><br/>Centralized structured log ingestion"]:::externalSystem
+    Jaeger["🔍 Jaeger Tracing<br/><b>[Container: Docker :16686]</b><br/>Distributed OpenTelemetry trace spans"]:::externalSystem
+    PromGraf["📈 Prometheus & Grafana<br/><b>[Containers: Docker :9090/:3001]</b><br/>Scrapes /metrics and displays dashboards"]:::externalSystem
 
-    Rel(user, proxy, "Accesses via web browser", "HTTPS / Port 3000 (Local) or 80 (Docker)")
-    Rel(proxy, spa, "Delivers static bundles (HTML/JS/CSS)", "HTTP/2")
-    Rel(proxy, api, "Proxies API, Scalar, and Health requests", "HTTP / HTTPS")
-    Rel(spa, api, "Dispatches REST API requests with JWT", "JSON / HTTPS /api/*")
-    Rel(api, db, "Reads and writes data via Entity Framework Core", "TCP / Port 5432")
-    Rel(spa, locationiq, "Fetches address autocompletion & geocoding", "HTTPS REST")
-    Rel(api, seq, "Streams structured log events", "HTTP / Port 5341")
-    Rel(api, jaeger, "Exports OpenTelemetry activity spans", "gRPC / Port 4317")
-    Rel(prom, api, "Scrapes operational metrics every 15s", "HTTP /metrics")
+    User -->|"Navigates to https://localhost:3000 [HTTPS]"| Proxy
+    Proxy -->|"Serves static HTML/JS/CSS bundles"| SPA
+    Proxy -->|"Proxies /api, /scalar, /health requests"| API
+    SPA -->|"Makes REST API requests with JWT Bearer [JSON / HTTPS]"| API
+    SPA -->|"Fetches venue autocomplete coordinates [HTTPS]"| LocationIQ
+    API -->|"Queries and persists domain entities via EF Core [TCP 5432]"| DB
+    API -->|"Streams structured Serilog events [HTTP 5341]"| Seq
+    API -->|"Exports activity trace spans via OTLP [gRPC 4317]"| Jaeger
+    PromGraf -->|"Scrapes /metrics endpoint every 15s [HTTP]"| API
+
+    class Boundary boundary;
 ```
 
 ---
@@ -184,34 +195,39 @@ C4Container
 The Component diagram dissects the **Backend Web API Container**, highlighting how Clean Architecture and CQRS slices assemble inside the ASP.NET Core host:
 
 ```mermaid
-C4Component
-    title Component Diagram — Backend Web API Container
+flowchart TB
+    classDef client fill:#08427b,stroke:#052e56,color:#ffffff,stroke-width:2px;
+    classDef component fill:#2b78c5,stroke:#1a4d80,color:#ffffff,stroke-width:2px;
+    classDef database fill:#1a5276,stroke:#11334d,color:#ffffff,stroke-width:2px;
+    classDef boundary fill:#f8f9fa,stroke:#444444,stroke-width:2px,stroke-dasharray: 5 5;
 
-    Container(spa, "Single-Page Application", "React 19 SPA", "Dispatches REST requests with Axios.")
-    ContainerDb(db, "PostgreSQL Database", "PostgreSQL 17", "Stores persistent entities.")
+    SPA["💻 Single-Page Application<br/><b>[Container: React 19 SPA]</b>"]:::client
+    Postgres[("🗄️ PostgreSQL Database<br/><b>[Container: PostgreSQL 17]</b>")]:::database
 
-    Container_Boundary(api_boundary, "DevMeet Backend API Container") {
-        Component(controllers, "API Controllers", "ASP.NET Core BaseApiController", "Exposes endpoints: ActivitiesController, AccountController, HomeController.")
-        Component(scalar, "Scalar API Reference", "Scalar.AspNetCore", "Interactive API documentation UI mounted at /scalar/v1 with Bearer auth.")
-        Component(sec_mw, "Security Pipeline", "SecurityExtensions", "HSTS, 308 Permanent HTTPS Redirection, CookiePolicy, IP-based Rate Limiter.")
-        Component(err_mw, "Exception Middleware", "ExceptionMiddleware", "Uniformly intercepts unhandled exceptions & validation errors into RFC 7807.")
-        Component(mediatr, "MediatR Pipeline", "IPipelineBehavior", "Orchestrates ValidationBehavior (FluentValidation) and TracingBehavior.")
-        Component(handlers, "CQRS Feature Handlers", "IRequestHandler<T>", "Executes vertical use cases: CreateActivity, GetActivityList, Login, Register.")
-        Component(domain, "Domain Entities & Invariants", "C# POCOs (DDD)", "Rich domain aggregate (Activity), User, and automated SEO slug generation.")
-        Component(token_svc, "Token Service", "Infrastructure (ITokenService)", "Signs and verifies HMAC-SHA512 JWT access tokens and cryptographically secure refresh tokens.")
-        Component(dbcontext, "DevMeetDbContext", "Persistence (IAppDbContext)", "EF Core DbContext mapping entity configurations to PostgreSQL tables.")
-    }
+    subgraph APIContainer ["⚙️ DevMeet Backend API Container"]
+        SecMW["🛡️ Security Pipeline<br/><b>[Component: SecurityExtensions]</b><br/>HSTS Preload, 308 HTTPS Redirection, Rate Limiter, OWASP Headers"]:::component
+        ErrMW["🚨 Exception Middleware<br/><b>[Component: ExceptionMiddleware]</b><br/>Catches unhandled exceptions & validation errors, emits RFC 7807"]:::component
+        Controllers["📡 API Controllers<br/><b>[Component: BaseApiController]</b><br/>ActivitiesController, AccountController, HomeController"]:::component
+        ScalarDoc["📖 Scalar Documentation<br/><b>[Component: Scalar.AspNetCore]</b><br/>Interactive OpenAPI UI at /scalar/v1 with Bearer scheme"]:::component
+        Pipeline["⚡ MediatR Pipeline<br/><b>[Component: Pipeline Behaviors]</b><br/>ValidationBehavior (FluentValidation), TracingBehavior (OTel)"]:::component
+        Handlers["🧩 CQRS Feature Handlers<br/><b>[Component: MediatR Handlers]</b><br/>CreateActivity, GetActivityList, Login, Register, GetCurrentUser"]:::component
+        Domain["🏛️ Domain Entities<br/><b>[Component: Domain Aggregate Root]</b><br/>Rich Activity entity, AppUser, invariants, SEO slug generator"]:::component
+        TokenSvc["🔑 Token Service<br/><b>[Component: TokenService]</b><br/>Signs and verifies HMAC-SHA512 JWT access & refresh tokens"]:::component
+        DbContext["💾 DevMeetDbContext<br/><b>[Component: EF Core / IAppDbContext]</b><br/>Entity configurations, change tracking, and SQL query generation"]:::component
+    end
 
-    Rel(spa, sec_mw, "1. Sends HTTP REST requests to", "JSON / HTTPS")
-    Rel(sec_mw, err_mw, "2. Passes verified request through security filters", "")
-    Rel(err_mw, controllers, "3. Routes request to Controller action", "")
-    Rel(controllers, mediatr, "4. Dispatches Command / Query via ISender", "In-Process")
-    Rel(mediatr, handlers, "5. Invokes validated CQRS handler", "")
-    Rel(handlers, domain, "6. Applies domain invariants on", "")
-    Rel(handlers, token_svc, "7. Requests token generation for user", "")
-    Rel(handlers, dbcontext, "8. Performs DB operations through IAppDbContext", "")
-    Rel(dbcontext, db, "9. Executes SQL queries via Npgsql", "TCP / Port 5432")
-    Rel(controllers, scalar, "10. Informs OpenAPI metadata for", "")
+    SPA -->|"1. Sends HTTP REST requests [JSON/HTTPS]"| SecMW
+    SecMW -->|"2. Passes through rate limit & security filters"| ErrMW
+    ErrMW -->|"3. Routes valid requests to"| Controllers
+    Controllers -->|"4. Informs metadata to"| ScalarDoc
+    Controllers -->|"5. Dispatches Command / Query via ISender"| Pipeline
+    Pipeline -->|"6. Validates payload & forwards to"| Handlers
+    Handlers -->|"7. Applies business invariants on"| Domain
+    Handlers -->|"8. Requests JWT token generation from"| TokenSvc
+    Handlers -->|"9. Queries and persists entities via"| DbContext
+    DbContext -->|"10. Executes SQL queries via Npgsql [TCP 5432]"| Postgres
+
+    class APIContainer boundary;
 ```
 
 ---
@@ -221,29 +237,40 @@ C4Component
 The Dynamic diagram details the runtime collaboration between components during the creation of a new technical event:
 
 ```mermaid
-C4Dynamic
-    title Dynamic Diagram — Event Creation with Validation and Persistence Flow
+sequenceDiagram
+    autonumber
+    actor Organizer as 👤 Community Organizer
+    participant SPA as 💻 React 19 SPA (Hook Form + Zod)
+    participant Proxy as 🔀 Vite / Nginx Proxy
+    participant SecMW as 🛡️ Security & Rate Limiter MW
+    participant API as 📡 ActivitiesController
+    participant Pipe as ⚡ ValidationBehavior (FluentValidation)
+    participant Handler as 🧩 CreateActivityCommandHandler
+    participant Domain as 🏛️ Activity (Aggregate Root)
+    participant DB as 💾 DevMeetDbContext (PostgreSQL)
 
-    actor user as "Community Organizer"
-    Component(spa, "Create Event Form", "React 19 Hook Form", "Collects event details & validates with Zod")
-    Component(api, "ActivitiesController", "API Layer", "Receives POST /api/activities")
-    Component(pipeline, "ValidationBehavior", "MediatR Pipeline", "Executes FluentValidation rules")
-    Component(handler, "CreateActivityCommandHandler", "Application Layer", "Orchestrates business logic")
-    Component(domain, "Activity Aggregate Root", "Domain Layer", "Enforces invariants & generates slug")
-    Component(db, "DevMeetDbContext", "Persistence Layer", "Persists changes to PostgreSQL")
-
-    Rel(user, spa, "1. Submits form details (Title, Venue, Date, Category)")
-    Rel(spa, api, "2. Sends POST /api/activities with Bearer JWT")
-    Rel(api, pipeline, "3. Dispatches CreateActivityCommand via MediatR")
-    Rel(pipeline, pipeline, "4. Executes CreateActivityValidator (FluentValidation)")
-    Rel(pipeline, handler, "5. Passes validated command to handler")
-    Rel(handler, domain, "6. Instantiates Activity aggregate with private setters")
-    Rel(domain, domain, "7. Computes SEO slug and validates invariant rules")
-    Rel(handler, db, "8. Adds entity to DbSet<Activity> and calls SaveChangesAsync()")
-    Rel(db, handler, "9. Commits SQL INSERT and returns generated Activity ID")
-    Rel(handler, api, "10. Returns Response<string>.Success(activityId)")
-    Rel(api, spa, "11. Returns HTTP 200 OK with Activity ID payload")
-    Rel(spa, user, "12. Invalidates React Query cache & navigates to event view")
+    Organizer->>SPA: 1. Fills form (Title, Venue, Date, Category) & clicks "Publish"
+    SPA->>SPA: 2. Validates client-side constraints with Zod schema
+    SPA->>Proxy: 3. Dispatches POST /api/activities with Bearer JWT
+    Proxy->>SecMW: 4. Forwards to backend Kestrel server
+    SecMW->>SecMW: 5. Validates rate limit token bucket & OWASP headers
+    SecMW->>API: 6. Routes to ActivitiesController.Create(CreateActivityDto)
+    API->>Pipe: 7. Sends CreateActivityCommand via MediatR
+    Pipe->>Pipe: 8. Executes CreateActivityValidator rules
+    alt Validation Failed (Invalid Input)
+        Pipe-->>SPA: 9a. Throws ValidationException ➔ 400 Bad Request (RFC 7807)
+        SPA-->>Organizer: 10a. Displays inline field error toasts
+    else Validation Succeeded
+        Pipe->>Handler: 9b. Passes validated command to Handler
+        Handler->>Domain: 10b. Instantiates Activity aggregate (private setters)
+        Domain->>Domain: 11b. Validates domain invariants & computes SEO slug
+        Handler->>DB: 12b. Adds Activity & commits transaction (SaveChangesAsync)
+        DB-->>Handler: 13b. SQL INSERT committed, returns ID
+        Handler-->>API: 14b. Returns Response<string>.Success(activityId)
+        API-->>SPA: 15b. Returns HTTP 200 OK { statusCode: 200, data: "guid" }
+        SPA->>SPA: 16b. Invalidates TanStack Query cache & navigates to event
+        SPA-->>Organizer: 17b. Displays success notification & renders event page
+    end
 ```
 
 ---
