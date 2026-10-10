@@ -17,12 +17,11 @@
    - [3.3 Level 3: Component Diagram (Backend API Container)](#33-level-3-component-diagram-backend-api-container)
    - [3.4 Level 4: Dynamic Diagram (CQRS Event Creation Flow)](#34-level-4-dynamic-diagram-cqrs-event-creation-flow)
 4. [Layer-by-Layer Detailed Breakdown](#4-layer-by-layer-detailed-breakdown)
-   - [4.1 Domain Layer (The Enterprise Core)](#41-domain-layer-the-enterprise-core)
-   - [4.2 Application Layer (CQRS & Business Orchestration)](#42-application-layer-cqrs--business-orchestration)
-   - [4.3 Persistence Layer (Data Access & EF Core)](#43-persistence-layer-data-access--ef-core)
-   - [4.4 Infrastructure Layer (External Services & Security)](#44-infrastructure-layer-external-services--security)
-   - [4.5 API Layer (Host, Pipeline & Presentation Gateway)](#45-api-layer-host-pipeline--presentation-gateway)
-   - [4.6 Client SPA (React 19 Frontend Architecture)](#46-client-spa-react-19-frontend-architecture)
+   - [4.1 Core Layer — Domain & Application](#41-core-layer--domain--application-srccorecorecsproj)
+   - [4.2 Infrastructure Layer — Data & Security](#42-infrastructure-layer--data--security-srcinfrastructureinfrastructurecsproj)
+   - [4.3 API Layer — Host & Gateway](#43-api-layer--host--gateway-srcapiapicsproj)
+   - [4.4 UI Layer — Frontend SPA](#44-ui-layer--frontend-spa-srcui)
+   - [4.5 Testing Layer](#45-testing-layer-testcoretests)
 5. [Request Processing & Pipeline Flow](#5-request-processing--pipeline-flow)
 6. [Authentication & Authorization Lifecycle](#6-authentication--authorization-lifecycle)
 7. [Cross-Cutting Concerns](#7-cross-cutting-concerns)
@@ -54,49 +53,54 @@ DevMeet Egypt is built as a modular monolith adhering strictly to the **Clean Ar
 
 ```mermaid
 graph TD
-    subgraph ClientLayer ["Client Presentation (React 19 SPA)"]
+    subgraph UILayer ["1. UI Presentation Layer (React 19 SPA) - src/UI"]
         SPA["React 19 + TypeScript + MUI v9"]
         TanStack["TanStack React Query v5 (Server-State Cache)"]
         ViteProxy["Vite Dev Reverse Proxy (/api, /scalar, /health)"]
         SPA --> TanStack --> ViteProxy
     end
 
-    subgraph APILayer ["API Host & Gateway (ASP.NET Core)"]
+    subgraph APILayer ["2. API Host & Presentation Gateway - src/API"]
         Kestrel["Kestrel HTTP / HTTPS Server"]
         SecurityMW["Security Pipeline (HSTS, RateLimiter, OWASP Headers)"]
         ExceptionMW["ExceptionMiddleware (RFC 7807)"]
         Controllers["Controllers (Account, Activities, Home)"]
+        ApiConfigs["Modular Extensions (Core, Versioning, Extra)"]
         ScalarDocs["Scalar API Documentation (/scalar/v1)"]
         
         Kestrel --> SecurityMW --> ExceptionMW --> Controllers
         Kestrel --> ScalarDocs
     end
 
-    subgraph AppLayer ["Application Layer (CQRS & Contracts)"]
-        MediatRPipeline["MediatR Pipeline Behaviors"]
-        Validation["FluentValidation Behavior"]
-        Tracing["Tracing & Metrics Behaviors"]
-        Handlers["Command & Query Handlers"]
-        Contracts["Abstractions: IAppDbContext, IUserAccessor, ITokenService"]
-        
+    subgraph CoreLayer ["3. Core Business & Application Layer - src/Core"]
+        subgraph DomainSlice ["Domain (Enterprise Core)"]
+            Aggregates["Activity (Aggregate Root)"]
+            Entities["User, ActivityAttendee, RefreshToken"]
+            Common["BaseEntity, SlugHelper, Invariants"]
+        end
+        subgraph AppSlice ["Application (CQRS & Contracts)"]
+            MediatRPipeline["MediatR Pipeline Behaviors"]
+            Validation["FluentValidation Behavior"]
+            Tracing["Tracing & Metrics Behaviors"]
+            Handlers["Command & Query Handlers"]
+            Contracts["Abstractions: IAppDbContext, IUserAccessor, ITokenService"]
+            Exceptions["AppException (Unified Error Model)"]
+        end
         MediatRPipeline --> Validation --> Tracing --> Handlers
+        Handlers --> DomainSlice
     end
 
-    subgraph PersistenceLayer ["Persistence Layer"]
-        DbContext["DevMeetDbContext : IAppDbContext"]
-        EFMigrations["EF Core 10 Migrations"]
-        DbSeed["DbInitializer & Seed Data"]
-    end
-
-    subgraph InfraLayer ["Infrastructure Layer"]
-        JWT["TokenService : ITokenService"]
-        UserAccessor["UserAccessor : IUserAccessor"]
-    end
-
-    subgraph DomainLayer ["Domain Layer (Core - Zero Dependencies)"]
-        Aggregates["Activity (Aggregate Root)"]
-        Entities["User, ActivityAttendee"]
-        Invariants["Business Rules & Slug Generators"]
+    subgraph InfraLayer ["4. Infrastructure Layer - src/Infrastructure"]
+        subgraph DataSlice ["Data Access (Persistence)"]
+            DbContext["DevMeetDbContext : IAppDbContext"]
+            EFMigrations["EF Core PostgreSQL Migrations"]
+            DbSeed["DbInitializer & Seed Data"]
+        end
+        subgraph SecSlice ["Security & Identity"]
+            JWT["TokenService : ITokenService"]
+            UserAccessor["UserAccessor : IUserAccessor"]
+            Policies["Authorization Handlers & Policies"]
+        end
     end
 
     Database[("PostgreSQL 17 Database")]
@@ -104,9 +108,8 @@ graph TD
     ViteProxy -->|"HTTPS / Local Proxy"| Kestrel
     Controllers --> MediatRPipeline
     Handlers --> Contracts
-    PersistenceLayer -.->|"Implements"| Contracts
-    InfraLayer -.->|"Implements"| Contracts
-    Handlers --> DomainLayer
+    DataSlice -.->|"Implements"| Contracts
+    SecSlice -.->|"Implements"| Contracts
     DbContext --> Database
 ```
 
@@ -277,58 +280,68 @@ sequenceDiagram
 
 ## 4. Layer-by-Layer Detailed Breakdown
 
-### 4.1 Domain Layer (The Enterprise Core)
-- **Assembly:** `Domain.csproj`
-- **Dependencies:** **Zero external dependencies.** (No EF Core, no ASP.NET, no third-party libraries).
-- **Responsibilities:**
-  - **Aggregate Roots:** The `Activity` aggregate root encapsulates event identity, scheduling, venue coordinates, and attendee lists.
-  - **Encapsulated State:** Private property setters prevent external corruption of state. All state changes occur through explicit domain methods (`UpdateDetails()`, `CancelActivity()`, `ReactivateActivity()`).
-  - **Domain Invariants:** Enforces business constraints (e.g., event date cannot be in the past, slugs are generated deterministically).
+### 4.1 Core Layer — Domain & Application (`src/Core/Core.csproj`)
 
-### 4.2 Application Layer (CQRS & Business Orchestration)
-- **Assembly:** `Application.csproj`
-- **Dependencies:** `Domain.csproj`, `MediatR`, `FluentValidation`, `AutoMapper`.
+- **Assembly:** `Core.csproj`
+- **Namespaces:** `Core.Domain`, `Core.Application`
+- **Dependencies:** `MediatR`, `FluentValidation`, `AutoMapper`. (Zero dependencies on EF Core, ASP.NET Core, or Infrastructure).
 - **Responsibilities:**
-  - **CQRS Slices:** Grouped into feature vertical slices:
-    - `Feature/Activities`: Commands (`CreateActivityCommand`, `EditActivityCommand`, `DeleteActivityCommand`) and Queries (`GetActivityListQuery`, `GetActivityDetailsQuery`).
-    - `Feature/Account`: Authentication commands (`LoginCommand`, `RegisterCommand`, `RefreshTokenCommand`, `RevokeTokenCommand`) and Queries (`GetCurrentUserQuery`).
-    - `Feature/Home`: Aggregated dashboard metrics and upcoming event queries (`GetHomePageDataQuery`).
-  - **Cross-Cutting Pipeline Behaviors:**
-    - `ValidationBehavior`: Automatically evaluates FluentValidation rules before any handler executes.
-    - `LoggingBehavior`: Structured logging with MediatR request identifiers.
-  - **Standardized Response Envelope:** Uses `Response<T>` wrapping `statusCode`, `succeeded`, `data`, and `errors`.
+  - **Enterprise Domain:**
+    - `Core.Domain.Common.BaseEntity`: Common audit and identity contract (`Id`, `CreatedAt`, `UpdatedAt`, `IsDeleted`).
+    - `Activity` Aggregate Root: Rich model encapsulating invariants, state transitions, venue coordinates, and attendees with private setters.
+    - Identity & Security Entities: `User` and `RefreshToken`.
+    - Pure Helpers: `SlugHelper` generating deterministic URL slugs.
+  - **Application CQRS & Orchestration:**
+    - Vertical feature slices: `Activities` (Create, Edit, Delete, Details, List), `Account` (Login, Register, Refresh Token), `Home` (Dashboard metrics).
+    - Pipeline Behaviors: `ValidationBehavior` (FluentValidation) and `TracingBehavior` (OpenTelemetry).
+    - Contracts & Abstractions: `IAppDbContext`, `IUserAccessor`, `ITokenService`.
+    - Unified Error Model: `AppException` and standardized `Response<T>` envelopes.
 
-### 4.3 Persistence Layer (Data Access & EF Core)
-- **Assembly:** `Persistence.csproj`
-- **Dependencies:** `Application.csproj`, `Npgsql.EntityFrameworkCore.PostgreSQL`, `Microsoft.AspNetCore.Identity.EntityFrameworkCore`.
-- **Responsibilities:**
-  - Implements `IAppDbContext` defined by the Application layer.
-  - Configures entity mappings via fluent configurations in `DevMeetDbContext`.
-  - Manages automated Code-First schema migrations and seeding of Egyptian developer meetup datasets upon startup.
+### 4.2 Infrastructure Layer — Data & Security (`src/Infrastructure/Infrastructure.csproj`)
 
-### 4.4 Infrastructure Layer (External Services & Security)
 - **Assembly:** `Infrastructure.csproj`
-- **Dependencies:** `Application.csproj`, `Microsoft.AspNetCore.Authentication.JwtBearer`.
+- **Namespaces:** `Infrastructure.Data`, `Infrastructure.Security`
+- **Dependencies:** `Core.csproj`, `Npgsql.EntityFrameworkCore.PostgreSQL`, `Microsoft.AspNetCore.Identity.EntityFrameworkCore`, `Microsoft.AspNetCore.Authentication.JwtBearer`.
 - **Responsibilities:**
-  - `TokenService`: Issues cryptographically signed HMAC-SHA512 JWT access tokens and cryptographically random refresh tokens.
-  - `UserAccessor`: Safely reads the authenticated `ClaimsPrincipal` from `IHttpContextAccessor`.
+  - **Persistence & Data Access (`Infrastructure.Data`):**
+    - `DevMeetDbContext`: Implements `IAppDbContext` from Core with Fluent API configurations.
+    - Automated Code-First PostgreSQL migrations and Egyptian tech community seed data.
+  - **Security & Identity Adapters (`Infrastructure.Security`):**
+    - `TokenService`: Issues HMAC-SHA512 JWT access tokens and cryptographically random refresh tokens.
+    - `UserAccessor`: Reads authenticated `ClaimsPrincipal` from `IHttpContextAccessor`.
+    - Authorization Handlers & Requirements (e.g., `IsHostRequirement`).
 
-### 4.5 API Layer (Host, Pipeline & Presentation Gateway)
+### 4.3 API Layer — Host & Gateway (`src/API/API.csproj`)
+
 - **Assembly:** `API.csproj`
-- **Dependencies:** `Application.csproj`, `Infrastructure.csproj`, `Persistence.csproj`, `Scalar.AspNetCore`, `Serilog.AspNetCore`.
+- **Namespaces:** `API`, `API.Controllers`, `API.Extensions`, `API.Configuration`, `API.Middleware`
+- **Dependencies:** `Core.csproj`, `Infrastructure.csproj`, `Scalar.AspNetCore`, `Serilog.AspNetCore`, `Asp.Versioning.Mvc`.
 - **Responsibilities:**
-  - Serves as the composition root (`Program.cs`, `ModuleApiDi.cs`).
-  - Contains lightweight controller endpoints that validate routing parameters and delegate immediately to `ISender` (MediatR).
-  - Hosts modular extension methods (`OpenApiExtensions`, `SecurityExtensions`, `CorsExtensions`).
-  - Exposes interactive **Scalar API Reference** at `/scalar/v1`.
+  - **Composition Root:** `Program.cs` orchestrates DI across `ModuleCoreDi`, `InfrastructureServicesRegistration`, and API extensions.
+  - **Thin Controllers:** Validate HTTP parameters and route directly to MediatR `ISender`.
+  - **Modular Architecture Extensions:**
+    - `Core`: General framework and middleware wiring.
+    - `Versioning`: URL / Header / Query API versioning with `Asp.Versioning`.
+    - `Extra`: Scalar OpenAPI documentation, Serilog, and observability.
+  - **RFC 7807 Error Pipeline:** `ExceptionMiddleware` translating exceptions and `AppException` to RFC 7807 problem details.
 
-### 4.6 Client SPA (React 19 Frontend Architecture)
-- **Directory:** `client/`
+### 4.4 UI Layer — Frontend SPA (`src/UI/`)
+
+- **Directory:** `src/UI/`
 - **Tech Stack:** React 19, TypeScript, Vite, Material UI (MUI v9), TanStack Query v5, React Router.
 - **Responsibilities:**
-  - **Server State Management:** TanStack React Query maintains an in-memory client cache with automatic background invalidation on mutations.
-  - **Vite Reverse Proxy:** Forwards `/api`, `/scalar`, `/openapi`, and `/health` to the backend Kestrel server, eliminating cross-port CORS and dev certificate warnings.
-  - **Form Validation:** React Hook Form coupled with **Zod** schema validations for instant client-side feedback.
+  - **Server-State Management:** TanStack Query handles caching, background invalidation, and optimistic mutations.
+  - **Vite Reverse Proxy:** Forwards `/api`, `/scalar`, `/openapi`, and `/health` requests to backend Kestrel (`https://localhost:7223`), eliminating CORS and SSL friction.
+  - **Form Validation:** React Hook Form with Zod schemas for instant feedback.
+
+### 4.5 Testing Layer (`test/Core.Tests/`)
+
+- **Assembly:** `Core.Tests.csproj`
+- **Tech Stack:** xUnit, FluentAssertions, Moq.
+- **Responsibilities:**
+  - Unit tests for Domain entities and invariants (`BaseEntityTests`, `SlugHelperTests`).
+  - Unit tests for CQRS handlers and validators.
+  - Configuration and settings tests (`ApiSettingsTests`, `ApiConfigurationTests`).
 
 ---
 
@@ -449,10 +462,16 @@ sequenceDiagram
 
 ## 8. Architectural Decision Records (ADRs)
 
-### ADR-001: Clean Architecture & CQRS Segregation
-- **Context:** The application manages complex business invariants, diverse query shapes, and multiple integration points.
-- **Decision:** Adopt Clean Architecture with 4 distinct assemblies (`Domain`, `Application`, `Persistence`, `Infrastructure`) paired with MediatR CQRS.
-- **Consequences:** Superior unit testability, domain isolation, and clean boundaries. Requires upfront scaffolding of queries and commands.
+### ADR-001: 4-Layer Clean Architecture & CQRS Segregation
+
+- **Context:** The application manages complex business invariants, diverse query shapes, and multiple integration points across backend and frontend.
+- **Decision:** Adopt an enterprise 4-layer Clean Architecture organized under `src/` and `test/`:
+  1. `src/Core`: Domain logic & Application CQRS (Domain + Application).
+  2. `src/Infrastructure`: Persistence (EF Core, Migrations) & Security (JWT, Identity).
+  3. `src/API`: Presentation host, modular configurations (Core, Versioning, Extra), and middlewares.
+  4. `src/UI`: Modern React 19 SPA with Vite reverse proxy.
+  5. `test/Core.Tests`: Automated unit and integration test suite.
+- **Consequences:** Eliminates unnecessary project fragmentation while enforcing strict inward dependency boundaries, high cohesion, zero circular dependencies, and streamlined CI/CD pipeline builds.
 
 ### ADR-002: Scalar API Reference over Swagger UI
 - **Context:** .NET 9+ deprecates out-of-the-box Swashbuckle in favor of built-in `Microsoft.AspNetCore.OpenApi`.

@@ -34,36 +34,31 @@ The solution adheres strictly to **Clean Architecture** (Onion Architecture) pri
 
 ```text
 ┌──────────────────────────────────────────────────────────────┐
-│                    Presentation Layer                        │
-│  React 19 SPA (Vite + TS + MUI v9) ──(Reverse Proxy)──┐       │
+│                    1. UI Layer (src/UI)                      │
+│   React 19 SPA (Vite + TypeScript + TanStack Query + MUI)    │
+│            └───(Vite Reverse Proxy: /api, /scalar)───┐        │
 └───────────────────────────────────────────────────────│──────┘
                                                         ▼
 ┌──────────────────────────────────────────────────────────────┐
-│                         API Layer                            │
-│  Controllers, Security Middlewares, Scalar / OpenAPI v1      │
+│                    2. API Layer (src/API)                    │
+│   Controllers, Security, Versioning, RFC 7807, Scalar OpenAPI│
 └───────────────────────────────┬──────────────────────────────┘
-                                │ Calls MediatR
+                                │ Calls MediatR / Injects Core
                                 ▼
 ┌──────────────────────────────────────────────────────────────┐
-│                     Application Layer                        │
-│  Commands, Queries, FluentValidation, MediatR Behaviors      │
-│  Abstractions: IAppDbContext, IUserAccessor, ITokenService   │
-└───────────────────┬──────────────────────┬───────────────────┘
-                    │                      │
-       Implements   │                      │ Implements
-                    ▼                      ▼
-┌──────────────────────────────┐ ┌─────────────────────────────┐
-│      Persistence Layer       │ │    Infrastructure Layer     │
-│  DevMeetDbContext (EF Core)  │ │  JWT TokenService, UserAcc  │
-│  PostgreSQL Migrations & Seed│ │  Security Options           │
-└──────────────┬───────────────┘ └─────────────────────────────┘
-               │
-               ▼
-┌──────────────────────────────────────────────────────────────┐
-│                        Domain Layer                          │
-│  Activity Aggregate Root (DDD Rich Model, Slug Invariants)   │
-│  AppUser, ActivityAttendee (Zero External Dependencies)      │
-└──────────────────────────────────────────────────────────────┘
+│                   3. Core Layer (src/Core)                   │
+│   ├── Domain: Rich Entities, Aggregates, BaseEntity, Slugs   │
+│   └── Application: CQRS Slices, Validation, Contracts, DI    │
+└───────────────────────────────▲──────────────────────────────┘
+                                │ Implements IAppDbContext,
+                                │ IUserAccessor, ITokenService
+┌───────────────────────────────┴──────────────────────────────┐
+│            4. Infrastructure Layer (src/Infrastructure)      │
+│   ├── Data: EF Core, DevMeetDbContext, Migrations, Seed      │
+│   └── Security: JWT TokenService, Claims, Auth Policies      │
+└───────────────────────────────┬──────────────────────────────┘
+                                ▼
+                  PostgreSQL 17 Database
 ```
 
 ---
@@ -106,7 +101,7 @@ The API is fully documented and interactively testable using **[Scalar.AspNetCor
 
 ## 🔒 Security & Rate Limiting
 
-The API implements a multi-tier **Defense-in-Depth** security strategy ([`API/Extensions/SecurityExtensions.cs`](file:///c:/Users/ahmed/OneDrive/Desktop/FullStackDotNEtREACT/API/Extensions/SecurityExtensions.cs)):
+The API implements a multi-tier **Defense-in-Depth** security strategy ([`src/API/Extensions/SecurityExtensions.cs`](file:///c:/Users/ahmed/OneDrive/Desktop/FullStackDotNEtREACT/src/API/Extensions/SecurityExtensions.cs)):
 
 1. **HTTP Strict Transport Security (HSTS):** Preload-ready HSTS (`max-age=31536000; includeSubDomains; preload`).
 2. **Permanent HTTPS Redirection:** Insecure HTTP requests (port `5096`) are upgraded permanently (HTTP 308) to HTTPS (port `7223`).
