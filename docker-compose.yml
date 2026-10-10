@@ -101,7 +101,7 @@ services:
   # ── React Client (Nginx) ───────────────────────────────────────────────────
   client:
     build:
-      context: ./client
+      context: ./src/UI
       dockerfile: Dockerfile
     container_name: reactivities-client
     ports:

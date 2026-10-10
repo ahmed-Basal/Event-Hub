@@ -1,4 +1,6 @@
+using API.Options;
 using Microsoft.AspNetCore.OpenApi;
+using Microsoft.Extensions.Configuration;
 using Microsoft.OpenApi;
 using Scalar.AspNetCore;
 
@@ -13,23 +15,26 @@ public static class OpenApiExtensions
     /// Registers OpenAPI document generation services with DevMeet platform metadata and JWT Bearer security schemes.
     /// </summary>
     /// <param name="services">The application service collection.</param>
+    /// <param name="config">The configuration instance to resolve ApiSettings from.</param>
     /// <returns>The configured service collection for chaining.</returns>
-    public static IServiceCollection AddAppOpenApi(this IServiceCollection services)
+    public static IServiceCollection AddAppOpenApi(this IServiceCollection services, IConfiguration? config = null)
     {
-        services.AddOpenApi("v1", options =>
+        var apiSettings = config?.GetSection(ApiSettings.SectionName).Get<ApiSettings>() ?? new ApiSettings();
+
+        services.AddOpenApi(apiSettings.Version, options =>
         {
             options.AddDocumentTransformer((document, context, cancellationToken) =>
             {
                 document.Info = new OpenApiInfo
                 {
-                    Title = "DevMeet Egypt API",
-                    Version = "v1",
-                    Description = "REST API for DevMeet Egypt - Tech Events & Meetups Platform.",
+                    Title = apiSettings.Title,
+                    Version = apiSettings.Version,
+                    Description = apiSettings.Description,
                     Contact = new OpenApiContact
                     {
-                        Name = "DevMeet Egypt Team",
-                        Email = "ahmedbassl913@devmeet.com",
-                        Url = new Uri("https://github.com/ahmed-Basal/Event-Hub")
+                        Name = apiSettings.ContactName,
+                        Email = apiSettings.ContactEmail,
+                        Url = !string.IsNullOrWhiteSpace(apiSettings.ContactUrl) ? new Uri(apiSettings.ContactUrl) : null
                     }
                 };
 

@@ -187,7 +187,7 @@ In a separate terminal:
 
 ```bash
 # 1. Navigate to client
-cd client
+cd src/UI
 
 # 2. Install dependencies
 npm install
@@ -214,48 +214,42 @@ docker compose up -d --build
 
 ```text
 DevMeet-Egypt/
-├── src/                                  # Production Source Code
-│   ├── API/                              # ASP.NET Core Web API Host
-│   │   ├── Controllers/                  # Thin controllers dispatching to MediatR
-│   │   ├── Extensions/                   # OpenApi, Security, CORS, Observability
-│   │   │   ├── OpenApiExtensions.cs      # Scalar API Reference & Bearer scheme
-│   │   │   ├── SecurityExtensions.cs     # HSTS, Rate Limiting, OWASP headers
-│   │   │   └── CorsExtensions.cs         # Config-driven CORS rules
-│   │   ├── Middleware/                   # Centralized ExceptionMiddleware (RFC 7807)
-│   │   ├── Program.cs                    # Application composition root
-│   │   └── appsettings.json              # App configuration
+├── src/                                  # 4-Layer Architecture Source Code
+│   ├── Core/                             # Enterprise Domain & Application CQRS
+│   │   ├── Domain/                       # Entities, Value Objects, BaseEntity
+│   │   │   ├── Activities/               # Activity Aggregate Root & Attendees
+│   │   │   ├── Common/                   # BaseEntity, SlugHelper
+│   │   │   ├── User.cs                   # Identity User model
+│   │   │   └── RefreshToken.cs           # Token rotation entity
+│   │   └── Application/                  # Use Cases, CQRS & Orchestration
+│   │       ├── Feature/                  # Feature slices (Activities, Account, Home)
+│   │       ├── Behaviors/                # ValidationBehavior, TracingBehavior
+│   │       ├── Interfaces/               # IAppDbContext, ITokenService, IUserAccessor
+│   │       ├── Bases/                    # Response<T> envelope & Result models
+│   │       └── Mapping/                  # AutoMapper Profiles
 │   │
-│   ├── Application/                      # Business Logic & CQRS (Clean Architecture)
-│   │   ├── Feature/                      # Vertical feature slices (Activities, Account, Home)
-│   │   ├── Behaviors/                    # ValidationBehavior, TracingBehavior
-│   │   ├── Interfaces/                   # Abstractions (IAppDbContext, IUserAccessor)
-│   │   └── Bases/                        # Response<T> envelope & Result models
-│   │
-│   ├── Domain/                           # Core Domain (Zero Dependencies)
-│   │   ├── Activity.cs                   # Rich Activity Aggregate Root
-│   │   ├── User.cs                       # Identity User model
-│   │   └── ActivityAttendee.cs           # Many-to-many relationship entity
-│   │
-│   ├── Persistence/                      # EF Core & Database Context
-│   │   ├── DevMeetDbContext.cs           # Database context implementing IAppDbContext
-│   │   ├── DbInitializer.cs              # Automatic database migration & seeding
-│   │   └── Migrations/                   # EF Core Code-First migrations
-│   │
-│   ├── Infrastructure/                   # External Services (JWT, User Accessor)
+│   ├── Infrastructure/                   # Persistence & External Adapters
+│   │   ├── Data/                         # EF Core DbContext, Configurations, Migrations, Seed
+│   │   │   ├── DevMeetDbContext.cs       # Database context implementing IAppDbContext
+│   │   │   ├── Configurations/           # EF Core Entity Type Configurations
+│   │   │   ├── Migrations/               # PostgreSQL Migrations
+│   │   │   └── Seed/                     # Initial Data Seeders
 │   │   └── Security/                     # TokenService & Claims extraction
 │   │
-├── test/                                 # Automated Tests
-│   └── Application.Tests/                # xUnit Unit & Integration Tests
+│   ├── API/                              # ASP.NET Core Web API Host & Gateway
+│   │   ├── Configuration/                # Core, Versioning, Extra configurations
+│   │   ├── Controllers/                  # Thin controllers dispatching to MediatR
+│   │   ├── Extensions/                   # OpenApi, Security, CORS, Observability
+│   │   ├── Middleware/                   # ExceptionMiddleware (RFC 7807)
+│   │   └── Program.cs                    # Composition Root (4-Layer DI)
+│   │
+│   └── UI/                               # React 19 Frontend SPA (Vite + TypeScript)
+│       ├── src/                          # Activities, Account, Home feature modules
+│       ├── public/                       # Static assets & runtime config
+│       └── vite.config.ts                # Vite config + Proxy to backend
 │
-└── client/                           # React 19 Frontend SPA (Vite + TypeScript)
-    ├── public/
-    │   └── config.json               # Zero-rebuild runtime config
-    ├── src/
-    │   ├── features/                 # Activities, Account, Home feature modules
-    │   ├── shared/                   # Axios agent, form inputs, Zod schemas
-    │   ├── theme/                    # Material UI dark/light theme tokens
-    │   └── main.tsx                  # Application entry point
-    └── vite.config.ts                # Vite config + Proxy to backend + mkcert
+└── test/                                 # Automated Tests
+    └── Core.Tests/                       # xUnit Unit & Integration Tests
 ```
 
 ---

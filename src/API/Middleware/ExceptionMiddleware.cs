@@ -1,6 +1,6 @@
 
 using System.Text.Json;
-using Application.Exceptions;
+using Core.Application.Exceptions;
 using FluentValidation;
 using Microsoft.AspNetCore.Mvc;
 

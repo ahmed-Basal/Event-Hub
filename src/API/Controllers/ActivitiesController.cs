@@ -1,6 +1,6 @@
-using Application.Feature.Activities.command.Models;
-using Application.Feature.Activities.DTO;
-using Application.Feature.Activities.Queries.Models;
+using Core.Application.Feature.Activities.command.Models;
+using Core.Application.Feature.Activities.DTO;
+using Core.Application.Feature.Activities.Queries.Models;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;

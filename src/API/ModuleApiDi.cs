@@ -1,5 +1,4 @@
-using API.Extensions;
-using API.Middleware;
+using API.Configuration;
 
 namespace API;
 
@@ -9,13 +8,7 @@ public static class ModuleApiDi
         this IServiceCollection services,
         IConfiguration config)
     {
-        services.AddControllers();
-        services.AddAppOpenApi();
-        services.AddIdentityServices(config);
-        services.AddCorsPolicy(config);
-        services.AddAppSecurityServices(config);
-        services.AddObservability(config);
-        services.AddTransient<ExceptionMiddleware>();
+        services.AddApiConfigurations(config);
 
         return services;
     }

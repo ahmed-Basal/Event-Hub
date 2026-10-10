@@ -1,5 +1,5 @@
 using Microsoft.EntityFrameworkCore;
-using Persistence;
+using Infrastructure.Data;
 
 namespace API.Extensions;
 
@@ -50,7 +50,7 @@ public static class MigrationExtensions
             ");
 
             await context.Database.MigrateAsync();
-            var userManager = services.GetRequiredService<Microsoft.AspNetCore.Identity.UserManager<Domain.User>>();
+            var userManager = services.GetRequiredService<Microsoft.AspNetCore.Identity.UserManager<Core.Domain.User>>();
             await DbInitializer.SeedData(context, userManager);
         }
         catch (Exception ex)

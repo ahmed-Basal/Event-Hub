@@ -1,5 +1,5 @@
 using API.Options;
-using Application.Behaviors;
+using Core.Application.Behaviors;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;

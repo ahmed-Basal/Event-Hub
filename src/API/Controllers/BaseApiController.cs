@@ -1,4 +1,4 @@
-using Application.Bases;
+using Core.Application.Bases;
 using Microsoft.AspNetCore.Mvc;
 
 namespace API.Controllers;

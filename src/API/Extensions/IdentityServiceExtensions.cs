@@ -1,6 +1,6 @@
-using Domain;
+using Core.Domain;
 using Microsoft.AspNetCore.Identity;
-using Persistence;
+using Infrastructure.Data;
 
 namespace API.Extensions;
 

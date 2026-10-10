@@ -1,5 +1,5 @@
-using Application.Feature.Home.DTO;
-using Application.Feature.Home.Queries.Models;
+using Core.Application.Feature.Home.DTO;
+using Core.Application.Feature.Home.Queries.Models;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 

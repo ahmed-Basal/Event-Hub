@@ -1,7 +1,9 @@
 using System.Text;
-using Application.Interfaces;
+using Core.Application.Interfaces;
+using Infrastructure.Data;
 using Infrastructure.Security;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
@@ -15,6 +17,18 @@ public static class ModuleInfrastructureDi
         this IServiceCollection services, 
         IConfiguration config)
     {
+        // ── 1. Data Access (EF Core / PostgreSQL) ───────────────────────────
+        var connectionString = config.GetConnectionString("DefaultConnection")
+            ?? config.GetSection("ConnectionStrings:DefaultConnection").Value;
+
+        services.AddDbContext<DevMeetDbContext>(options =>
+        {
+            options.UseNpgsql(connectionString);
+        });
+
+        services.AddScoped<IAppDbContext>(sp => sp.GetRequiredService<DevMeetDbContext>());
+
+        // ── 2. Security & Authentication (JWT & Identity) ───────────────────
         services.AddOptions<JwtOptions>()
             .BindConfiguration(JwtOptions.SectionName)
             .ValidateDataAnnotations()

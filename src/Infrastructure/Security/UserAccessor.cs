@@ -1,6 +1,6 @@
 using System.Security.Claims;
-using Application.Interfaces;
-using Domain;
+using Core.Application.Interfaces;
+using Core.Domain;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 
