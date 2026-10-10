@@ -174,7 +174,7 @@ The API implements a multi-tier **Defense-in-Depth** security strategy ([`API/Ex
 dotnet dev-certs https --trust
 
 # 2. Run the API (applies EF Core migrations & seeds initial meetups automatically)
-dotnet run --project API/API.csproj
+dotnet run --project src/API/API.csproj
 ```
 - API Base: `https://localhost:7223` (or `http://localhost:5096`)
 - Interactive Scalar Docs: **`https://localhost:7223/scalar/v1`**
@@ -214,34 +214,38 @@ docker compose up -d --build
 
 ```text
 DevMeet-Egypt/
-├── API/                              # ASP.NET Core Web API Host
-│   ├── Controllers/                  # Thin controllers dispatching to MediatR
-│   ├── Extensions/                   # OpenApi, Security, CORS, Observability
-│   │   ├── OpenApiExtensions.cs      # Scalar API Reference & Bearer scheme
-│   │   ├── SecurityExtensions.cs     # HSTS, Rate Limiting, OWASP headers
-│   │   └── CorsExtensions.cs         # Config-driven CORS rules
-│   ├── Middleware/                   # Centralized ExceptionMiddleware (RFC 7807)
-│   ├── Program.cs                    # Application composition root
-│   └── appsettings.json              # App configuration
-│
-├── Application/                      # Business Logic & CQRS (Clean Architecture)
-│   ├── Feature/                      # Vertical feature slices (Activities, Account, Home)
-│   ├── Behaviors/                    # ValidationBehavior, TracingBehavior
-│   ├── Interfaces/                   # Abstractions (IAppDbContext, IUserAccessor)
-│   └── Bases/                        # Response<T> envelope & Result models
-│
-├── Domain/                           # Core Domain (Zero Dependencies)
-│   ├── Activity.cs                   # Rich Activity Aggregate Root
-│   ├── User.cs                       # Identity User model
-│   └── ActivityAttendee.cs           # Many-to-many relationship entity
-│
-├── Persistence/                      # EF Core & Database Context
-│   ├── DevMeetDbContext.cs           # Database context implementing IAppDbContext
-│   ├── DbInitializer.cs              # Automatic database migration & seeding
-│   └── Migrations/                   # EF Core Code-First migrations
-│
-├── Infrastructure/                   # External Services (JWT, User Accessor)
-│   └── Security/                     # TokenService & Claims extraction
+├── src/                                  # Production Source Code
+│   ├── API/                              # ASP.NET Core Web API Host
+│   │   ├── Controllers/                  # Thin controllers dispatching to MediatR
+│   │   ├── Extensions/                   # OpenApi, Security, CORS, Observability
+│   │   │   ├── OpenApiExtensions.cs      # Scalar API Reference & Bearer scheme
+│   │   │   ├── SecurityExtensions.cs     # HSTS, Rate Limiting, OWASP headers
+│   │   │   └── CorsExtensions.cs         # Config-driven CORS rules
+│   │   ├── Middleware/                   # Centralized ExceptionMiddleware (RFC 7807)
+│   │   ├── Program.cs                    # Application composition root
+│   │   └── appsettings.json              # App configuration
+│   │
+│   ├── Application/                      # Business Logic & CQRS (Clean Architecture)
+│   │   ├── Feature/                      # Vertical feature slices (Activities, Account, Home)
+│   │   ├── Behaviors/                    # ValidationBehavior, TracingBehavior
+│   │   ├── Interfaces/                   # Abstractions (IAppDbContext, IUserAccessor)
+│   │   └── Bases/                        # Response<T> envelope & Result models
+│   │
+│   ├── Domain/                           # Core Domain (Zero Dependencies)
+│   │   ├── Activity.cs                   # Rich Activity Aggregate Root
+│   │   ├── User.cs                       # Identity User model
+│   │   └── ActivityAttendee.cs           # Many-to-many relationship entity
+│   │
+│   ├── Persistence/                      # EF Core & Database Context
+│   │   ├── DevMeetDbContext.cs           # Database context implementing IAppDbContext
+│   │   ├── DbInitializer.cs              # Automatic database migration & seeding
+│   │   └── Migrations/                   # EF Core Code-First migrations
+│   │
+│   ├── Infrastructure/                   # External Services (JWT, User Accessor)
+│   │   └── Security/                     # TokenService & Claims extraction
+│   │
+├── test/                                 # Automated Tests
+│   └── Application.Tests/                # xUnit Unit & Integration Tests
 │
 └── client/                           # React 19 Frontend SPA (Vite + TypeScript)
     ├── public/

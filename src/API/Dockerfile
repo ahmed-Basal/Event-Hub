@@ -1,16 +1,17 @@
 # ── Stage 1: Build ─────────────────────────────────────────────────────────────
 FROM mcr.microsoft.com/dotnet/sdk:11.0 AS build
-WORKDIR /src
+WORKDIR /app
 
-COPY API/API.csproj             API/
-COPY Application/Application.csproj Application/
-COPY Persistence/Persistence.csproj  Persistence/
-COPY Domain/Domain.csproj           Domain/
+COPY src/API/API.csproj                     src/API/
+COPY src/Application/Application.csproj     src/Application/
+COPY src/Persistence/Persistence.csproj     src/Persistence/
+COPY src/Domain/Domain.csproj               src/Domain/
+COPY src/Infrastructure/Infrastructure.csproj src/Infrastructure/
 
-RUN dotnet restore API/API.csproj
+RUN dotnet restore src/API/API.csproj
 
 COPY . .
-WORKDIR /src/API
+WORKDIR /app/src/API
 RUN dotnet publish -c Release -o /app/publish --no-restore
 
 # ── Stage 2: Runtime ───────────────────────────────────────────────────────────

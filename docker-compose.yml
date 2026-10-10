@@ -82,7 +82,7 @@ services:
   api:
     build:
       context: .
-      dockerfile: API/Dockerfile
+      dockerfile: src/API/Dockerfile
     container_name: reactivities-api
     environment:
       ASPNETCORE_ENVIRONMENT: Docker

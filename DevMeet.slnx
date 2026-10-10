@@ -1,7 +1,12 @@
 <Solution>
-  <Project Path="API/API.csproj" />
-  <Project Path="Application/Application.csproj" />
-  <Project Path="Domain/Domain.csproj" />
-  <Project Path="Infrastructure/Infrastructure.csproj" />
-  <Project Path="Persistence/Persistence.csproj" />
+  <Folder Name="/src/">
+    <Project Path="src/API/API.csproj" />
+    <Project Path="src/Application/Application.csproj" />
+    <Project Path="src/Domain/Domain.csproj" />
+    <Project Path="src/Infrastructure/Infrastructure.csproj" />
+    <Project Path="src/Persistence/Persistence.csproj" />
+  </Folder>
+  <Folder Name="/test/">
+    <Project Path="test/Application.Tests/Application.Tests.csproj" />
+  </Folder>
 </Solution>
