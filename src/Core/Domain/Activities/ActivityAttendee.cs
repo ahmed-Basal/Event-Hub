@@ -1,6 +1,6 @@
 namespace Core.Domain;
 
-public class ActivityAttendee
+public sealed class ActivityAttendee
 {
     public string ?UserId { get; set; } 
     public string ?ActivityId { get; set; } 

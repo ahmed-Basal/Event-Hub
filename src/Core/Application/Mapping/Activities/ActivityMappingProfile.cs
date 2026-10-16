@@ -1,4 +1,6 @@
-using Core.Application.Feature.Activities.DTO;
+using Core.Application.Feature.Activities.Commands.CreateActivity;
+using Core.Application.Feature.Activities.Commands.EditActivity;
+using Core.Application.Feature.Activities.Queries.GetActivityList;
 using Core.Application.Mapping.Common;
 using AutoMapper;
 using Core.Domain;
@@ -12,16 +14,16 @@ public class ActivityMappingProfile : Profile
 {
     public ActivityMappingProfile()
     {
-        // CreateActivityDto -> Activity
-        CreateMap<CreateActivityDto, Activity>()
+        // CreateActivityCommand -> Activity
+        CreateMap<CreateActivityCommand, Activity>()
             .ForMember(dest => dest.Slug, opt => opt.MapFrom(src => MappingDefaults.ResolveSlug(src.Title)))
             .ForMember(dest => dest.Category, opt => opt.MapFrom(src => MappingDefaults.ResolveCategory(src.Category)))
             .ForMember(dest => dest.Image, opt => opt.MapFrom(src => MappingDefaults.ResolveCategoryImage(src.Image, src.Category, null)))
             .ForMember(dest => dest.Latitude, opt => opt.MapFrom(src => MappingDefaults.ResolveCoordinate(src.Latitude, MappingDefaults.DefaultLatitude)))
             .ForMember(dest => dest.Longitude, opt => opt.MapFrom(src => MappingDefaults.ResolveCoordinate(src.Longitude, MappingDefaults.DefaultLongitude)));
 
-        // EditActivityDto -> Activity (partial updates with null/whitespace/zero guards)
-        CreateMap<EditActivityDto, Activity>()
+        // EditActivityCommand -> Activity (partial updates with null/whitespace/zero guards)
+        CreateMap<EditActivityCommand, Activity>()
             .ForMember(dest => dest.Id, opt => opt.Ignore())
             .ForMember(dest => dest.ID, opt => opt.Ignore())
             .ForMember(dest => dest.Slug, opt =>
@@ -59,8 +61,5 @@ public class ActivityMappingProfile : Profile
 
         CreateMap<ActivityDto, Activity>()
             .ForMember(dest => dest.Attendees, opt => opt.Ignore());
-
-        CreateMap<Activity, EditActivityDto>();
-        CreateMap<Activity, CreateActivityDto>();
     }
 }

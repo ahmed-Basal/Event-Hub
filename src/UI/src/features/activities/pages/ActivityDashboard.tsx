@@ -16,6 +16,10 @@ export default function ActivityDashboard() {
     status: 'all',
   });
 
+  const handleClearDate = () => {
+    setFilters((prev) => ({ ...prev, date: undefined }));
+  };
+
   return (
     <Box sx={{ bgcolor: tokens.bg, minHeight: '100vh', pb: 6 }}>
       <Container maxWidth="xl">
@@ -23,7 +27,7 @@ export default function ActivityDashboard() {
 
         <Grid container spacing={3}>
           <Grid size={{ xs: 12, md: 8 }}>
-            <ActivityList filters={filters} />
+            <ActivityList filters={filters} onClearDate={handleClearDate} />
           </Grid>
 
           <Grid size={{ xs: 12, md: 4 }}>

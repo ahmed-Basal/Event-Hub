@@ -48,8 +48,9 @@ agent.interceptors.response.use(
         const { data, status, config } = error.response as AxiosResponse;
 
         switch (status) {
-            case 400:
-                if (config?.method === 'get' && data?.errors && Object.prototype.hasOwnProperty.call(data.errors, 'id')) {
+            case 400: {
+                // Bad GUID or specific route id error on GET -> navigate to not-found
+                if (config?.method?.toLowerCase() === 'get' && data?.errors && Object.prototype.hasOwnProperty.call(data.errors, 'id')) {
                     if (router?.navigate) {
                         router.navigate('/not-found');
                     } else {
@@ -57,34 +58,63 @@ agent.interceptors.response.use(
                     }
                     break;
                 }
+
+                // Standard Validation Errors (RFC 7807 ValidationProblemDetails or array of errors)
                 if (data?.errors) {
                     const modelStateErrors: string[] = [];
-                    for (const key in data.errors) {
-                        if (data.errors[key]) {
-                            modelStateErrors.push(data.errors[key]);
+                    if (Array.isArray(data.errors)) {
+                        modelStateErrors.push(...data.errors);
+                    } else if (typeof data.errors === 'object') {
+                        for (const key in data.errors) {
+                            if (data.errors[key]) {
+                                if (Array.isArray(data.errors[key])) {
+                                    modelStateErrors.push(...data.errors[key]);
+                                } else {
+                                    modelStateErrors.push(String(data.errors[key]));
+                                }
+                            }
                         }
                     }
-                    throw modelStateErrors.flat();
-                } else if (typeof data === 'string') {
+                    if (modelStateErrors.length > 0) {
+                        throw modelStateErrors;
+                    }
+                }
+
+                if (typeof data === 'string') {
                     toast.error(data);
                 } else {
-                    toast.error(data?.title || data?.message || "Bad Request");
+                    toast.error(data?.message || data?.title || data?.detail || "Bad Request");
                 }
                 break;
+            }
 
-            case 401:
-                if (config?.url !== '/account') {
-                    toast.error("Unauthorised");
+            case 401: {
+                const isAuthCheck = config?.url?.endsWith('/account') || config?.url === '/account';
+                if (!isAuthCheck) {
+                    toast.error(data?.message || "Unauthorized: Please sign in to continue.");
                 }
                 break;
+            }
 
-            case 404:
-                if (router?.navigate) {
-                    router.navigate('/not-found');
+            case 403: {
+                toast.error(data?.message || "Forbidden: You do not have permission to perform this action.");
+                break;
+            }
+
+            case 404: {
+                const method = config?.method?.toLowerCase();
+                const isQuery = !method || method === 'get';
+                if (isQuery) {
+                    if (router?.navigate) {
+                        router.navigate('/not-found');
+                    } else {
+                        window.location.href = '/not-found';
+                    }
                 } else {
-                    window.location.href = '/not-found';
+                    toast.error(data?.message || "The requested resource was not found.");
                 }
                 break;
+            }
 
             case 500: {
                 const method = config?.method?.toLowerCase();

@@ -1,0 +1,36 @@
+using Core.Application.Bases;
+using Core.Application.Interfaces;
+using AutoMapper;
+using Core.Domain;
+using MediatR;
+using Microsoft.AspNetCore.Identity;
+
+namespace Core.Application.Feature.Account.Queries.GetCurrentUser;
+
+public class GetCurrentUserQueryHandler(
+    IUserAccessor userAccessor,
+    UserManager<User> userManager,
+    ITokenService tokenService,
+    IMapper mapper)
+    : ResponseHandler, IRequestHandler<GetCurrentUserQuery, Response<UserDto>>
+{
+    public async Task<Response<UserDto>> Handle(GetCurrentUserQuery request, CancellationToken cancellationToken)
+    {
+        var username = userAccessor.GetUsername();
+        if (string.IsNullOrEmpty(username))
+        {
+            return Unauthorized<UserDto>("User not found.");
+        }
+
+        var user = await userManager.FindByNameAsync(username);
+        if (user is null)
+        {
+            return Unauthorized<UserDto>("User not found.");
+        }
+
+        var userDto = mapper.Map<UserDto>(user);
+        userDto.Token = tokenService.CreateToken(user);
+
+        return Success(userDto);
+    }
+}

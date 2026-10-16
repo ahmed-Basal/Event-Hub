@@ -1,4 +1,5 @@
-using Core.Application.Feature.Account.DTO;
+using Core.Application.Feature.Account.Commands.Register;
+using Core.Application.Feature.Account.Queries.GetCurrentUser;
 using Core.Application.Mapping.Common;
 using AutoMapper;
 using Core.Domain;
@@ -6,7 +7,7 @@ using Core.Domain;
 namespace Core.Application.Mapping.Account;
 
 /// <summary>
-/// AutoMapper profile configuration for User, Account, and Identity DTOs.
+/// AutoMapper profile configuration for User, Account, and Identity models.
 /// </summary>
 public class AccountMappingProfile : Profile
 {
@@ -20,8 +21,8 @@ public class AccountMappingProfile : Profile
             .ForMember(dest => dest.Token, opt => opt.Ignore())
             .ForMember(dest => dest.RefreshToken, opt => opt.Ignore());
 
-        // RegisterDto -> User
-        CreateMap<RegisterDto, User>()
+        // RegisterCommand -> User
+        CreateMap<RegisterCommand, User>()
             .ForMember(dest => dest.DisplayName, opt => opt.MapFrom(src => src.DisplayName.Trim()))
             .ForMember(dest => dest.Email, opt => opt.MapFrom(src => src.Email.Trim()))
             .ForMember(dest => dest.UserName, opt => opt.MapFrom(src => src.Username.Trim()))

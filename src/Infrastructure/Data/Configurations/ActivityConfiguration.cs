@@ -14,7 +14,9 @@ public class ActivityConfiguration : IEntityTypeConfiguration<Activity>
 
         // Ignore unmigrated audit properties to maintain full backwards compatibility with current database
         builder.Ignore(a => a.CreatedAtUtc);
+        builder.Ignore(a => a.CreatedBy);
         builder.Ignore(a => a.LastModifiedUtc);
+        builder.Ignore(a => a.LastModifiedBy);
 
         builder.Property(a => a.Title)
             .IsRequired();

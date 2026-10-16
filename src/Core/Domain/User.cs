@@ -2,7 +2,7 @@ using Microsoft.AspNetCore.Identity;
 
 namespace Core.Domain;
 
-public class User : IdentityUser
+public sealed class User : IdentityUser
 {
 
     public string? DisplayName { get; set; }

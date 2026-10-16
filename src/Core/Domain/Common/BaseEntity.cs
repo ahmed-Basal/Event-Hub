@@ -1,26 +1,18 @@
 namespace Core.Domain.Common;
 
 /// <summary>
-/// Generic base entity supporting strongly-typed or primitive keys,
-/// with auditing timestamps.
+/// Abstract root base entity contract.
 /// </summary>
-/// <typeparam name="TKey">The type of the entity identifier.</typeparam>
-public abstract class BaseEntity<TKey>
+public abstract class BaseEntity
 {
-    public virtual TKey Id { get; set; } = default!;
-
-    public DateTime CreatedAtUtc { get; set; } = DateTime.UtcNow;
-
-    public DateTime? LastModifiedUtc { get; set; }
 }
 
 /// <summary>
-/// Default base entity with a string-based GUID identifier.
+/// Abstract generic base entity providing the primary key identity contract.
+/// Adheres to Single Responsibility Principle (SRP).
 /// </summary>
-public abstract class BaseEntity : BaseEntity<string>
+/// <typeparam name="TKey">The type of the entity identifier.</typeparam>
+public abstract class BaseEntity<TKey> : BaseEntity
 {
-    protected BaseEntity()
-    {
-        Id = Guid.NewGuid().ToString();
-    }
+    public virtual TKey Id { get; set; } = default!;
 }

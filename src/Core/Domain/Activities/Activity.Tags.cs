@@ -1,6 +1,6 @@
 namespace Core.Domain;
 
-public partial class Activity
+public sealed partial class Activity
 {
     public void AddTag(string tag)
     {

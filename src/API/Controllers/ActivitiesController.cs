@@ -1,6 +1,8 @@
-using Core.Application.Feature.Activities.command.Models;
-using Core.Application.Feature.Activities.DTO;
-using Core.Application.Feature.Activities.Queries.Models;
+using Core.Application.Feature.Activities.Commands.CreateActivity;
+using Core.Application.Feature.Activities.Commands.DeleteActivity;
+using Core.Application.Feature.Activities.Commands.EditActivity;
+using Core.Application.Feature.Activities.Queries.GetActivityDetails;
+using Core.Application.Feature.Activities.Queries.GetActivityList;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -19,14 +21,32 @@ public class ActivitiesController(ISender mediator) : BaseApiController
     /// Returns all scheduled meetups including title, date, venue, city, track tags, host details, and attendee lists.
     /// Supports client-side filtering by technical track category or status.
     /// </remarks>
+    /// <param name="pageNumber">Optional 1-based page index for pagination.</param>
+    /// <param name="pageSize">Optional count of items to retrieve per page.</param>
+    /// <param name="category">Optional category to filter activities by.</param>
+    /// <param name="status">Optional status filter (e.g., 'all' or 'hosting').</param>
+    /// <param name="date">Optional specific date to filter scheduled activities by.</param>
     /// <param name="ct">Cancellation token for aborting the asynchronous query.</param>
     /// <returns>A standardized response containing the collection of activity records.</returns>
     /// <response code="200">Returns the full collection of technical events.</response>
     [HttpGet]
     [ProducesResponseType(StatusCodes.Status200OK)]
-    public async Task<ActionResult> GetActivities(CancellationToken ct)
+    public async Task<ActionResult> GetActivities(
+        [FromQuery] int? pageNumber,
+        [FromQuery] int? pageSize,
+        [FromQuery] string? category,
+        [FromQuery] string? status,
+        [FromQuery] DateTime? date,
+        CancellationToken ct)
     {
-        return NewResult(await mediator.Send(new GetActivityListQuery(), ct));
+        return NewResult(await mediator.Send(new GetActivityListQuery
+        {
+            PageNumber = pageNumber,
+            PageSize = pageSize,
+            Category = category,
+            Status = status,
+            Date = date
+        }, ct));
     }
 
     /// <summary>
@@ -52,7 +72,7 @@ public class ActivitiesController(ISender mediator) : BaseApiController
     /// Requires an authenticated user with a valid JWT Bearer token.
     /// Validates business invariants via FluentValidation before persisting to PostgreSQL.
     /// </remarks>
-    /// <param name="activity">The event details payload including title, category, date, venue, and city.</param>
+    /// <param name="command">The event details payload including title, category, date, venue, and city.</param>
     /// <param name="ct">Cancellation token for aborting the operation.</param>
     /// <returns>The unique identifier (GUID) of the newly published event.</returns>
     /// <response code="200">The event was created successfully and returned its new identifier.</response>
@@ -63,16 +83,16 @@ public class ActivitiesController(ISender mediator) : BaseApiController
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-    public async Task<ActionResult> CreateActivity([FromBody] CreateActivityDto activity, CancellationToken ct)
+    public async Task<ActionResult> CreateActivity([FromBody] CreateActivityCommand command, CancellationToken ct)
     {
-        return NewResult(await mediator.Send(new CreateActivityCommand { ActivityDto = activity }, ct));
+        return NewResult(await mediator.Send(command, ct));
     }
 
     /// <summary>
     /// Updates details of an existing developer event.
     /// </summary>
     /// <param name="id">The unique identifier (GUID) of the event being updated.</param>
-    /// <param name="dto">The updated event properties payload.</param>
+    /// <param name="command">The updated event properties payload.</param>
     /// <param name="ct">Cancellation token for aborting the operation.</param>
     /// <returns>A standardized success response upon updating.</returns>
     /// <response code="200">The event was updated successfully.</response>
@@ -85,9 +105,10 @@ public class ActivitiesController(ISender mediator) : BaseApiController
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public async Task<ActionResult> EditActivity(string id, [FromBody] EditActivityDto dto, CancellationToken ct)
+    public async Task<ActionResult> EditActivity(string id, [FromBody] EditActivityCommand command, CancellationToken ct)
     {
-        return NewResult(await mediator.Send(new EditActivityCommand { ID = id, ActivityDto = dto }, ct));
+        command.ID = id;
+        return NewResult(await mediator.Send(command, ct));
     }
 
     /// <summary>

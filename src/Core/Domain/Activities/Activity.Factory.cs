@@ -2,7 +2,7 @@ using Core.Domain.Common;
 
 namespace Core.Domain;
 
-public partial class Activity
+public sealed partial class Activity
 {
     public static Activity Create(
         string title,

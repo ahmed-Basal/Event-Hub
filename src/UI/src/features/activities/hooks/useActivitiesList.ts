@@ -11,7 +11,7 @@ export interface UseActivitiesListOptions {
 export function useActivitiesList(filters?: UseActivitiesListOptions) {
   const query = useQuery<Activity[]>({
     queryKey: activitiesKeys.all,
-    queryFn: activitiesApi.getAll,
+    queryFn: () => activitiesApi.getAll(),
   });
 
   const activitiesArray: Activity[] = Array.isArray(query.data)

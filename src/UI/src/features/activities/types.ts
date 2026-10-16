@@ -49,3 +49,18 @@ export interface ActivityFilterParams {
   searchTerm?: string;
   tag?: string;
 }
+
+export interface PaginationMeta {
+  pageNumber: number;
+  pageSize: number;
+  totalCount: number;
+  totalPages: number;
+  hasNextPage: boolean;
+  hasPreviousPage: boolean;
+}
+
+export interface PagedActivitiesResponse {
+  items: Activity[];
+  meta?: PaginationMeta;
+}
+

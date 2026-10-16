@@ -1,5 +1,6 @@
 import { axiosClient } from '../../../shared';
 import type { Activity, CreateActivityDto, UpdateActivityDto } from '../../../shared';
+import type { PagedActivitiesResponse, PaginationMeta } from '../types';
 
 /**
  * Technical events and meetups API service client.
@@ -8,11 +9,32 @@ import type { Activity, CreateActivityDto, UpdateActivityDto } from '../../../sh
 export const activitiesApi = {
   /**
    * Fetches all scheduled technical events and conferences.
+   * @param params Optional query filters and pagination params.
    * @returns {Promise<Activity[]>} Resolves to an array of technical activity domain entities.
    */
-  getAll: async (): Promise<Activity[]> => {
-    const response = await axiosClient.get<any>('/activities');
+  getAll: async (params?: { pageNumber?: number; pageSize?: number; category?: string; status?: string; date?: string }): Promise<Activity[]> => {
+    const response = await axiosClient.get<any>('/activities', { params });
     return response.data?.data ?? response.data;
+  },
+
+  /**
+   * Fetches paged technical events with metadata for infinite scrolling and pagination.
+   * @param params Optional pagination parameters and filters.
+   * @returns {Promise<PagedActivitiesResponse>} Resolves to items and pagination metadata.
+   */
+  getPaged: async (params?: {
+    pageNumber?: number;
+    pageSize?: number;
+    category?: string;
+    status?: string;
+    date?: string;
+  }): Promise<PagedActivitiesResponse> => {
+    const response = await axiosClient.get<any>('/activities', { params });
+    const items = response.data?.data ?? response.data ?? [];
+    return {
+      items: Array.isArray(items) ? items : [],
+      meta: response.data?.meta as PaginationMeta | undefined,
+    };
   },
 
   /**

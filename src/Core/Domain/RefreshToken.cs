@@ -1,13 +1,22 @@
+using Core.Domain.Common;
+
 namespace Core.Domain;
 
-public class RefreshToken
+/// <summary>
+/// Refresh token entity tracking authentication sessions.
+/// Inherits from AuditEntity and is sealed.
+/// </summary>
+public sealed class RefreshToken : AuditEntity<Guid>
 {
-    public Guid Id { get; set; } = Guid.NewGuid();
+    public RefreshToken()
+    {
+        Id = Guid.NewGuid();
+    }
+
     public required string UserId { get; set; }
     public User? User { get; set; }
     public required string Token { get; set; }
     public DateTime ExpiresUtc { get; set; }
-    public DateTime CreatedAtUtc { get; set; } = DateTime.UtcNow;
     public DateTime? RevokedAtUtc { get; set; }
     public string? ReplacedByToken { get; set; }
     public string? CreatedByIp { get; set; }

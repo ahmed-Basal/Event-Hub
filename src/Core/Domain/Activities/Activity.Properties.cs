@@ -1,11 +1,13 @@
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Text.Json.Serialization;
 using Core.Domain.Common;
 
 namespace Core.Domain;
 
-public partial class Activity : BaseEntity
+public sealed partial class Activity : AuditEntity
 {
     [NotMapped]
+    [JsonIgnore]
     public string ID
     {
         get => Id;
