@@ -36,7 +36,7 @@ public class ActivitiesController(ISender mediator) : BaseApiController
         [FromQuery] int? pageSize,
         [FromQuery] string? category,
         [FromQuery] string? status,
-        [FromQuery] DateTime? date,
+        [FromQuery] DateTimeOffset? date,
         CancellationToken ct)
     {
         return NewResult(await mediator.Send(new GetActivityListQuery

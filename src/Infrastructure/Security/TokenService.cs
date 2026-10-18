@@ -52,7 +52,7 @@ public class TokenService(IOptions<JwtOptions> jwtOptions) : ITokenService
         {
             UserId = userId,
             Token = Convert.ToBase64String(randomNumber),
-            ExpiresUtc = DateTime.UtcNow.AddDays(days),
+            ExpiresUtc = DateTimeOffset.UtcNow.AddDays(days),
             CreatedAtUtc = DateTimeOffset.UtcNow,
             CreatedByIp = ipAddress
         };

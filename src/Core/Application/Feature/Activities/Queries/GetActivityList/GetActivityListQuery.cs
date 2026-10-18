@@ -9,5 +9,5 @@ public class GetActivityListQuery : IRequest<Response<List<ActivityDto>>>
     public int? PageSize { get; set; }
     public string? Category { get; set; }
     public string? Status { get; set; }
-    public DateTime? Date { get; set; }
+    public DateTimeOffset? Date { get; set; }
 }

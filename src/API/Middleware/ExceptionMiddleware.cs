@@ -60,7 +60,7 @@ public class ExceptionMiddleware(ILogger<ExceptionMiddleware> logger, IHostEnvir
             context.TraceIdentifier,
             context.Request.Path.Value ?? "/",
             context.Request.Method,
-            DateTime.UtcNow
+            DateTimeOffset.UtcNow
         );
 
         await context.Response.WriteAsync(JsonSerializer.Serialize(response, JsonOptions));
@@ -81,7 +81,7 @@ public class ExceptionMiddleware(ILogger<ExceptionMiddleware> logger, IHostEnvir
             context.TraceIdentifier,
             context.Request.Path.Value ?? "/",
             context.Request.Method,
-            DateTime.UtcNow
+            DateTimeOffset.UtcNow
         );
 
         await context.Response.WriteAsync(JsonSerializer.Serialize(response, JsonOptions));
@@ -102,7 +102,7 @@ public class ExceptionMiddleware(ILogger<ExceptionMiddleware> logger, IHostEnvir
             context.TraceIdentifier,
             context.Request.Path.Value ?? "/",
             context.Request.Method,
-            DateTime.UtcNow
+            DateTimeOffset.UtcNow
         );
 
         await context.Response.WriteAsync(JsonSerializer.Serialize(response, JsonOptions));
@@ -123,7 +123,7 @@ public class ExceptionMiddleware(ILogger<ExceptionMiddleware> logger, IHostEnvir
             context.TraceIdentifier,
             context.Request.Path.Value ?? "/",
             context.Request.Method,
-            DateTime.UtcNow
+            DateTimeOffset.UtcNow
         );
 
         await context.Response.WriteAsync(JsonSerializer.Serialize(response, JsonOptions));
@@ -155,7 +155,7 @@ public class ExceptionMiddleware(ILogger<ExceptionMiddleware> logger, IHostEnvir
                 traceId,
                 path,
                 method,
-                DateTime.UtcNow
+                DateTimeOffset.UtcNow
             )
             : new AppException(
                 context.Response.StatusCode,
@@ -164,7 +164,7 @@ public class ExceptionMiddleware(ILogger<ExceptionMiddleware> logger, IHostEnvir
                 traceId,
                 path,
                 method,
-                DateTime.UtcNow
+                DateTimeOffset.UtcNow
             );
 
         var json = JsonSerializer.Serialize(response, JsonOptions);

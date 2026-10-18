@@ -25,7 +25,7 @@ public class RevokeTokenCommandHandler(
             return BadRequest<Unit>("Invalid or already revoked refresh token.");
         }
 
-        existingToken.RevokedAtUtc = DateTime.UtcNow;
+        existingToken.RevokedAtUtc = DateTimeOffset.UtcNow;
         existingToken.RevokedByIp = userAccessor.GetIpAddress();
 
         await dbContext.SaveChangesAsync(cancellationToken);

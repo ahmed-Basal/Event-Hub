@@ -34,14 +34,14 @@ public static class ActivityQueryExtensions
         return query;
     }
 
-    public static IQueryable<Activity> FilterByDate(this IQueryable<Activity> query, DateTime? date)
+    public static IQueryable<Activity> FilterByDate(this IQueryable<Activity> query, DateTimeOffset? date)
     {
         if (!date.HasValue)
         {
             return query;
         }
 
-        var startOfDay = DateTime.SpecifyKind(date.Value.Date, DateTimeKind.Utc);
+        var startOfDay = new DateTimeOffset(date.Value.UtcDateTime.Date, TimeSpan.Zero);
         var endOfDay = startOfDay.AddDays(1);
 
         return query.Where(a => a.Date >= startOfDay && a.Date < endOfDay);

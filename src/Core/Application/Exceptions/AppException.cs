@@ -7,7 +7,7 @@ public class AppException(
     string? traceId = null,
     string? path = null,
     string? method = null,
-    DateTime? timestamp = null)
+    DateTimeOffset? timestamp = null)
 {
     public int StatusCode { get; set; } = statusCode;
     public string Message { get; set; } = message;
@@ -15,5 +15,5 @@ public class AppException(
     public string? TraceId { get; set; } = traceId;
     public string? Path { get; set; } = path;
     public string? Method { get; set; } = method;
-    public DateTime Timestamp { get; set; } = timestamp ?? DateTime.UtcNow;
+    public DateTimeOffset Timestamp { get; set; } = timestamp ?? DateTimeOffset.UtcNow;
 }

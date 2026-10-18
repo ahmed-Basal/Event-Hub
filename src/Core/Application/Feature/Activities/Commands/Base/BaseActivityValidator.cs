@@ -1,6 +1,6 @@
 using FluentValidation;
 
-namespace Core.Application.Feature.Activities.Commands;
+namespace Core.Application.Feature.Activities.Commands.Base;
 
 public class BaseActivityValidator<T> : AbstractValidator<T> where T : BaseActivityCommand
 {

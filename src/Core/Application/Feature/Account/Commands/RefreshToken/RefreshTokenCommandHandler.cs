@@ -35,7 +35,7 @@ public class RefreshTokenCommandHandler(
 
         var user = existingToken.User;
         var ipAddress = userAccessor.GetIpAddress();
-        existingToken.RevokedAtUtc = DateTime.UtcNow;
+        existingToken.RevokedAtUtc = DateTimeOffset.UtcNow;
         existingToken.RevokedByIp = ipAddress;
 
         var newRefreshToken = tokenService.GenerateRefreshToken(user.Id, ipAddress);

@@ -5,7 +5,7 @@ public record ActivityDto
     public required string ID { get; init; }
     public required string Title { get; init; }
     public required string Slug { get; init; }
-    public DateTime Date { get; init; }
+    public DateTimeOffset Date { get; init; }
     public required string Description { get; init; }
     public required string Category { get; init; }
     public bool IsCancelled { get; init; }

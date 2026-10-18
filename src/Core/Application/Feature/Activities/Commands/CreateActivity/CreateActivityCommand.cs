@@ -1,5 +1,5 @@
 using Core.Application.Bases;
-using Core.Application.Feature.Activities.Commands;
+using Core.Application.Feature.Activities.Commands.Base;
 using MediatR;
 
 namespace Core.Application.Feature.Activities.Commands.CreateActivity;

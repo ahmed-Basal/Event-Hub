@@ -1,4 +1,4 @@
-using Core.Application.Feature.Activities.Commands;
+using Core.Application.Feature.Activities.Commands.Base;
 
 namespace Core.Application.Feature.Activities.Commands.CreateActivity;
 

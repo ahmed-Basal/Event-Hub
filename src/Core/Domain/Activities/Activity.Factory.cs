@@ -8,7 +8,7 @@ public sealed partial class Activity
         string title,
         string description,
         string category,
-        DateTime date,
+        DateTimeOffset date,
         string city,
         string venue,
         double latitude,

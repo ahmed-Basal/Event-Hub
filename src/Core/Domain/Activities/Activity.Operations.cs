@@ -17,7 +17,7 @@ public sealed partial class Activity
         string title,
         string description,
         string category,
-        DateTime date,
+        DateTimeOffset date,
         string level,
         string? image = null,
         IEnumerable<string>? tags = null)

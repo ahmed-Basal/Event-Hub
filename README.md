@@ -7,6 +7,8 @@
 [![Scalar API](https://img.shields.io/badge/Scalar-API%20Reference-059669?style=for-the-badge&logo=openapiinitiative&logoColor=white)](https://scalar.com/)
 [![Vite](https://img.shields.io/badge/Vite-8.3-646CFF?style=for-the-badge&logo=vite&logoColor=white)](https://vitejs.dev/)
 [![Docker Compose](https://img.shields.io/badge/Docker-Ready-2496ED?style=for-the-badge&logo=docker&logoColor=white)](https://www.docker.com/)
+[![CI Pipeline](https://github.com/ahmed-Basal/Event-Hub/actions/workflows/ci.yml/badge.svg)](https://github.com/ahmed-Basal/Event-Hub/actions/workflows/ci.yml)
+[![CD Pipeline](https://github.com/ahmed-Basal/Event-Hub/actions/workflows/cd.yml/badge.svg)](https://github.com/ahmed-Basal/Event-Hub/actions/workflows/cd.yml)
 
 > **DevMeet Egypt** is an enterprise-grade full-stack platform for discovering, organizing, and managing developer conferences, workshops, and tech meetups across Egypt. Built with **ASP.NET Core (Clean Architecture + CQRS + DDD)** and a modern **React 19 SPA (Vite + TypeScript + TanStack Query + MUI)**.
 
@@ -22,6 +24,7 @@
 - [Quick Start Guide](#-quick-start-guide)
 - [Project Structure](#-project-structure)
 - [Observability & Monitoring](#-observability--monitoring)
+- [CI/CD Pipelines](#-cicd-pipelines)
 - [License](#-license)
 
 ---
@@ -256,6 +259,38 @@ When running with the telemetry stack:
 - **Seq Structured Logging:** `http://localhost:8081` (Real-time structured event logs)
 - **Prometheus Metrics:** `http://localhost:9090` (Scrapes `/metrics` every 15s)
 - **Grafana Dashboards:** `http://localhost:3001` (`admin` / `admin`)
+
+---
+
+## 🚀 CI/CD Pipelines
+
+The project includes production-ready automated CI/CD workflows using **GitHub Actions**:
+
+### 1. Continuous Integration (`ci.yml`)
+Triggers on pull requests and pushes to `main`:
+- **Backend Job (.NET 11)**:
+  - Configures .NET 11 Preview SDK
+  - Restores NuGet dependencies with caching
+  - Builds the solution (`dotnet build -c Release`)
+  - Runs unit & integration tests (`xUnit`) and collects code coverage
+  - Uploads test coverage artifacts
+- **Frontend Job (React 19 + TypeScript)**:
+  - Sets up Node.js 22 with npm cache
+  - Enforces code quality with `oxlint`
+  - Compiles TypeScript and builds Vite production bundles (`tsc -b && vite build`)
+  - Uploads frontend dist artifacts
+- **Docker Verification**:
+  - Validates `docker-compose.yml` configuration
+  - Builds Docker images for both API and UI to prevent container drift
+
+### 2. Continuous Delivery & Container Registry (`cd.yml`)
+Triggers on pushes to `main` and release tags (`v*.*.*`):
+- Authenticates securely to **GitHub Container Registry (GHCR)** via `GITHUB_TOKEN`
+- Builds and tags multi-stage Docker images for both `api` and `ui`
+- Pushes images to:
+  - `ghcr.io/ahmed-basal/event-hub/api:latest`
+  - `ghcr.io/ahmed-basal/event-hub/ui:latest`
+- Utilizes GitHub Actions Layer Cache (`cache-from: type=gha`, `cache-to: type=gha,mode=max`) for lightning-fast builds
 
 ---
 

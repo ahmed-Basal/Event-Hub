@@ -15,7 +15,7 @@ public sealed partial class Activity : AuditEntity
     }
     public string Title { get; private set; } = string.Empty;
     public string Slug { get; private set; } = string.Empty;
-    public DateTime Date { get; private set; } = DateTime.UtcNow;
+    public DateTimeOffset Date { get; private set; } = DateTimeOffset.UtcNow;
     public string Description { get; private set; } = string.Empty;
     public string Category { get; private set; } = string.Empty;
     public bool IsCancelled { get; private set; }

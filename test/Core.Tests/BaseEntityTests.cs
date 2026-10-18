@@ -42,7 +42,7 @@ public class BaseEntityTests
             title: "Cairo .NET Meetup",
             description: "Community discussion",
             category: "culture",
-            date: DateTime.UtcNow.AddDays(7),
+            date: DateTimeOffset.UtcNow.AddDays(7),
             city: "Cairo",
             venue: "Downtown",
             latitude: 30.0444,

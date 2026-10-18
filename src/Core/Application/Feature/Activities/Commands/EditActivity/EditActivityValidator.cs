@@ -1,4 +1,4 @@
-using Core.Application.Feature.Activities.Commands;
+using Core.Application.Feature.Activities.Commands.Base;
 using FluentValidation;
 
 namespace Core.Application.Feature.Activities.Commands.EditActivity;

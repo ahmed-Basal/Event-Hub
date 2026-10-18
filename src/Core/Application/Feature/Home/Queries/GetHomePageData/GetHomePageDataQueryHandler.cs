@@ -11,7 +11,7 @@ public class GetHomePageDataQueryHandler(IAppDbContext context)
     public async Task<Response<HomePageDto>> Handle(GetHomePageDataQuery request, CancellationToken cancellationToken)
     {
         var upcoming = await context.Activities
-            .Where(a => !a.IsCancelled && a.Date >= DateTime.UtcNow)
+            .Where(a => !a.IsCancelled && a.Date >= DateTimeOffset.UtcNow)
             .OrderBy(a => a.Date)
             .Take(4)
             .ToListAsync(cancellationToken);
