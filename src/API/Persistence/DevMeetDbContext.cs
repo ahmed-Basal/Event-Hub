@@ -16,8 +16,8 @@ public class DevMeetDbContext(
     IOutboxWakeup? outboxWakeup = null)
     : IdentityDbContext<User>(options), IDataProtectionKeyContext, IAppDbContext
 {
-    public required DbSet<Activity> Activities { get; set; }
-    public required DbSet<ActivityAttendee> ActivityAttendees { get; set; }
+    public DbSet<Activity> Activities { get; set; } = null!;
+    public DbSet<ActivityAttendee> ActivityAttendees { get; set; } = null!;
     public DbSet<DataProtectionKey> DataProtectionKeys { get; set; } = null!;
     public DbSet<RefreshToken> RefreshTokens { get; set; } = null!;
     public DbSet<Comment> Comments { get; set; } = null!;
@@ -26,6 +26,7 @@ public class DevMeetDbContext(
     public DbSet<Notification> Notifications { get; set; } = null!;
     public DbSet<TicketOrder> TicketOrders { get; set; } = null!;
     public DbSet<ProcessedWebhookEvent> ProcessedWebhookEvents { get; set; } = null!;
+    public DbSet<IdempotencyRecord> IdempotencyRecords { get; set; } = null!;
     public DbSet<OutboxMessage> OutboxMessages { get; set; } = null!;
 
     protected override void OnModelCreating(ModelBuilder builder)

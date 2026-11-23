@@ -82,7 +82,18 @@ public class ProcessStripeWebhookCommandHandler(
             }
         }
 
-        await dbContext.SaveChangesAsync(cancellationToken);
+        try
+        {
+            await dbContext.SaveChangesAsync(cancellationToken);
+        }
+        catch (DbUpdateException ex) when (ex.InnerException is Npgsql.PostgresException { SqlState: "23505" })
+        {
+            logger.LogInformation(
+                "Concurrent duplicate Stripe webhook event {EventId} ({EventType}) ignored via unique constraint.",
+                parsed.EventId, parsed.EventType);
+            return Success(Unit.Value);
+        }
+
         return Success(Unit.Value);
     }
 }

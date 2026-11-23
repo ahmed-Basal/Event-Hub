@@ -36,21 +36,51 @@
     {
       "clientId": "reactivities-web",
       "name": "DevMeet React Frontend",
-      "description": "Public SPA client using PKCE flow",
+      "description": "Public SPA/BFF client using Authorization Code + PKCE flow",
       "enabled": true,
       "publicClient": true,
-      "directAccessGrantsEnabled": true,
+      "directAccessGrantsEnabled": false,
       "standardFlowEnabled": true,
       "implicitFlowEnabled": false,
+      "attributes": {
+        "pkce.code.challenge.method": "S256"
+      },
       "protocol": "openid-connect",
       "redirectUris": [
-        "http://localhost:5173/*",
+        "http://localhost:3000/api/auth/callback",
         "http://localhost:3000/*",
-        "http://localhost:80/*",
-        "http://localhost/*"
+        "http://localhost:5173/*"
       ],
       "webOrigins": [
-        "*"
+        "http://localhost:3000",
+        "http://localhost:5173"
+      ],
+      "protocolMappers": [
+        {
+          "name": "reactivities-api-audience",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-audience-mapper",
+          "consentRequired": false,
+          "config": {
+            "included.client.audience": "reactivities-api",
+            "id.token.claim": "false",
+            "access.token.claim": "true"
+          }
+        },
+        {
+          "name": "realm-roles-mapper",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-usermodel-realm-role-mapper",
+          "consentRequired": false,
+          "config": {
+            "multivalued": "true",
+            "userinfo.token.claim": "true",
+            "id.token.claim": "true",
+            "access.token.claim": "true",
+            "claim.name": "roles",
+            "jsonType.label": "String"
+          }
+        }
       ]
     }
   ],

@@ -1,8 +1,13 @@
 <Solution>
   <Folder Name="/src/">
     <Project Path="src/API/API.csproj" />
+    <Project Path="src/BuildingBlocks/Domain/BuildingBlocks.Domain.csproj" />
+    <Project Path="src/BuildingBlocks/Contracts/BuildingBlocks.Contracts.csproj" />
+    <Project Path="src/BuildingBlocks/Application/BuildingBlocks.Application.csproj" />
   </Folder>
   <Folder Name="/test/">
     <Project Path="test/Core.Tests/Core.Tests.csproj" />
+    <Project Path="test/Architecture.Tests/Architecture.Tests.csproj" />
+    <Project Path="test/Integration.Tests/Integration.Tests.csproj" />
   </Folder>
 </Solution>

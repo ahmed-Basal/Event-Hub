@@ -7,6 +7,7 @@ using Infrastructure.Outbox;
 using Infrastructure.Payments;
 using Infrastructure.Photos;
 using Infrastructure.Security;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
@@ -34,71 +35,74 @@ public static class ModuleInfrastructureDi
 
         services.AddScoped<IAppDbContext>(sp => sp.GetRequiredService<DevMeetDbContext>());
 
-        // ── 2. Security & Authentication (JWT, Identity & Keycloak OIDC) ────
+        // ── 2. Security & Authentication (Keycloak OIDC Primary + Optional Legacy JWT) ────
         services.AddOptions<JwtOptions>()
-            .BindConfiguration(JwtOptions.SectionName)
-            .ValidateDataAnnotations()
-            .ValidateOnStart();
+            .BindConfiguration(JwtOptions.SectionName);
 
         services.AddOptions<KeycloakOptions>()
             .BindConfiguration(KeycloakOptions.SectionName);
 
+        var jwtOptions = config.GetSection(JwtOptions.SectionName).Get<JwtOptions>();
+        var legacyJwtConfigured = !string.IsNullOrWhiteSpace(jwtOptions?.TokenKey) && jwtOptions.TokenKey.Length >= 64;
+
         var keycloakSection = config.GetSection(KeycloakOptions.SectionName);
         var keycloakEnabled = keycloakSection.GetValue<bool>("Enabled", defaultValue: true);
         var keycloakAuthority = keycloakSection.GetValue<string>("Authority") ?? "http://localhost:8082/realms/reactivities";
-        var keycloakAudience = keycloakSection.GetValue<string>("Audience") ?? "account";
+        var keycloakAudience = keycloakSection.GetValue<string>("Audience") ?? "reactivities-api";
         var keycloakRequireHttps = keycloakSection.GetValue<bool>("RequireHttpsMetadata", defaultValue: false);
         var keycloakValidIssuer = keycloakSection.GetValue<string>("ValidIssuer") ?? keycloakAuthority;
 
+        var defaultScheme = keycloakEnabled && !legacyJwtConfigured
+            ? "Keycloak"
+            : JwtBearerDefaults.AuthenticationScheme;
+
         var authBuilder = services.AddAuthentication(options =>
         {
-            options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
-            options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-            options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-        })
-        .AddJwtBearer(JwtBearerDefaults.AuthenticationScheme, opt =>
+            options.DefaultScheme = defaultScheme;
+            options.DefaultAuthenticateScheme = defaultScheme;
+            options.DefaultChallengeScheme = defaultScheme;
+        });
+
+        if (legacyJwtConfigured)
         {
-            var jwtOptions = config.GetSection(JwtOptions.SectionName).Get<JwtOptions>()
-                ?? throw new InvalidOperationException("Jwt configuration section is missing.");
-            if (string.IsNullOrWhiteSpace(jwtOptions.TokenKey) || jwtOptions.TokenKey.Length < 64)
+            authBuilder.AddJwtBearer(JwtBearerDefaults.AuthenticationScheme, opt =>
             {
-                throw new InvalidOperationException("Jwt:TokenKey must be configured and at least 64 characters long.");
-            }
-            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtOptions.TokenKey));
+                var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtOptions!.TokenKey));
 
-            opt.TokenValidationParameters = new TokenValidationParameters
-            {
-                ValidateIssuerSigningKey = true,
-                IssuerSigningKey = key,
-                ValidateIssuer = !string.IsNullOrWhiteSpace(jwtOptions.Issuer),
-                ValidIssuer = jwtOptions.Issuer,
-                ValidateAudience = !string.IsNullOrWhiteSpace(jwtOptions.Audience),
-                ValidAudience = jwtOptions.Audience,
-                ValidateLifetime = true,
-                ClockSkew = TimeSpan.Zero
-            };
-
-            opt.Events = new JwtBearerEvents
-            {
-                OnMessageReceived = context =>
+                opt.TokenValidationParameters = new TokenValidationParameters
                 {
-                    var accessToken = context.Request.Query["access_token"];
-                    var path = context.HttpContext.Request.Path;
-                    if (!string.IsNullOrEmpty(accessToken) && path.StartsWithSegments("/comments"))
+                    ValidateIssuerSigningKey = true,
+                    IssuerSigningKey = key,
+                    ValidateIssuer = !string.IsNullOrWhiteSpace(jwtOptions.Issuer),
+                    ValidIssuer = jwtOptions.Issuer,
+                    ValidateAudience = !string.IsNullOrWhiteSpace(jwtOptions.Audience),
+                    ValidAudience = jwtOptions.Audience,
+                    ValidateLifetime = true,
+                    ClockSkew = TimeSpan.Zero
+                };
+
+                opt.Events = new JwtBearerEvents
+                {
+                    OnMessageReceived = context =>
                     {
-                        context.Token = accessToken;
+                        var accessToken = context.Request.Query["access_token"];
+                        var path = context.HttpContext.Request.Path;
+                        if (!string.IsNullOrEmpty(accessToken) && path.StartsWithSegments("/comments"))
+                        {
+                            context.Token = accessToken;
+                            return Task.CompletedTask;
+                        }
+
+                        var token = context.Request.Cookies["jwtToken"];
+                        if (!string.IsNullOrEmpty(token))
+                        {
+                            context.Token = token;
+                        }
                         return Task.CompletedTask;
                     }
-
-                    var token = context.Request.Cookies["jwtToken"];
-                    if (!string.IsNullOrEmpty(token))
-                    {
-                        context.Token = token;
-                    }
-                    return Task.CompletedTask;
-                }
-            };
-        });
+                };
+            });
+        }
 
         if (keycloakEnabled)
         {
@@ -112,7 +116,7 @@ public static class ModuleInfrastructureDi
                     ValidateIssuer = true,
                     ValidIssuer = keycloakValidIssuer,
                     ValidateAudience = !string.IsNullOrEmpty(keycloakAudience),
-                    ValidAudience = keycloakAudience,
+                    ValidAudiences = [keycloakAudience, "account"],
                     ValidateLifetime = true,
                     ClockSkew = TimeSpan.FromSeconds(30),
                     NameClaimType = "preferred_username",
@@ -121,18 +125,19 @@ public static class ModuleInfrastructureDi
             });
         }
 
+        services.AddTransient<IClaimsTransformation, KeycloakClaimsTransformation>();
+
         services.AddAuthorization(options =>
         {
-            if (keycloakEnabled)
-            {
-                var defaultPolicy = new AuthorizationPolicyBuilder(
-                    JwtBearerDefaults.AuthenticationScheme,
-                    "Keycloak"
-                )
-                .RequireAuthenticatedUser()
-                .Build();
+            var activeSchemes = new List<string>();
+            if (legacyJwtConfigured) activeSchemes.Add(JwtBearerDefaults.AuthenticationScheme);
+            if (keycloakEnabled) activeSchemes.Add("Keycloak");
 
-                options.DefaultPolicy = defaultPolicy;
+            if (activeSchemes.Count > 0)
+            {
+                options.DefaultPolicy = new AuthorizationPolicyBuilder([.. activeSchemes])
+                    .RequireAuthenticatedUser()
+                    .Build();
             }
 
             options.AddPolicy(IsHostRequirement.PolicyName, policy =>
@@ -151,11 +156,14 @@ public static class ModuleInfrastructureDi
         services.AddHttpClient();
         services.AddHttpContextAccessor();
         services.AddScoped<IUserAccessor, UserAccessor>();
+        services.AddScoped<BuildingBlocks.Contracts.ICurrentUser>(sp => sp.GetRequiredService<UserAccessor>());
+        services.AddScoped<UserAccessor>();
         services.AddScoped<ITokenService, TokenService>();
         services.AddScoped<IPhotoAccessor, PhotoAccessor>();
         services.AddScoped<IEmailService, EmailService>();
         services.AddScoped<IGitHubAuthService, GitHubAuthService>();
         services.AddScoped<IPaymentService, StripePaymentService>();
+        services.AddScoped<BuildingBlocks.Contracts.IIdempotencyStore, Infrastructure.Payments.PostgresIdempotencyStore>();
         services.AddSingleton<IOutboxWakeup, OutboxWakeup>();
         services.AddHostedService<OutboxProcessor>();
         services.AddSingleton<ISseNotificationBroker, SseNotificationBroker>();

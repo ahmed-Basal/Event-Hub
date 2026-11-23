@@ -74,7 +74,6 @@ export const useAppStore = create<AppStoreState>()(
     {
       name: 'devmeet-global-store',
       partialize: (state) => ({
-        user: state.user,
         bookmarks: state.bookmarks,
       }),
     }

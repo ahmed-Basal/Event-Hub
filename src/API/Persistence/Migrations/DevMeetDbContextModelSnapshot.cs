@@ -140,6 +140,32 @@ namespace Infrastructure.Data.Migrations
                     b.ToTable("Comments");
                 });
 
+            modelBuilder.Entity("Domain.IdempotencyRecord", b =>
+                {
+                    b.Property<string>("ScopeKey")
+                        .HasMaxLength(350)
+                        .HasColumnType("character varying(350)");
+
+                    b.Property<DateTimeOffset>("CreatedAtUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTimeOffset>("ExpiresAtUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("ResponseJson")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<int>("StatusCode")
+                        .HasColumnType("integer");
+
+                    b.HasKey("ScopeKey");
+
+                    b.HasIndex("ExpiresAtUtc");
+
+                    b.ToTable("IdempotencyRecords");
+                });
+
             modelBuilder.Entity("Domain.Notification", b =>
                 {
                     b.Property<string>("Id")
@@ -309,6 +335,12 @@ namespace Infrastructure.Data.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
+                    b.Property<uint>("xmin")
+                        .IsConcurrencyToken()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("xid")
+                        .HasColumnName("xmin");
+
                     b.HasKey("Id");
 
                     b.HasIndex("ActivityId");
@@ -414,9 +446,19 @@ namespace Infrastructure.Data.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
+                    b.Property<DateTimeOffset?>("ClaimedAtUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("ClaimedBy")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
                     b.Property<string>("Content")
                         .IsRequired()
                         .HasColumnType("text");
+
+                    b.Property<DateTimeOffset?>("DeadLetteredOnUtc")
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("Error")
                         .HasMaxLength(2000)
@@ -445,6 +487,8 @@ namespace Infrastructure.Data.Migrations
                         .HasColumnType("character varying(500)");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("ClaimedAtUtc");
 
                     b.HasIndex("Status", "NextRetryUtc", "OccurredOnUtc");
 

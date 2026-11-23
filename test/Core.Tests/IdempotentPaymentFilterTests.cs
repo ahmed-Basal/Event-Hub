@@ -1,15 +1,30 @@
+using System.Collections.Concurrent;
 using API.Filters;
+using BuildingBlocks.Contracts;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Abstractions;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.AspNetCore.Routing;
-using Microsoft.Extensions.Caching.Memory;
 
 namespace Core.Tests;
 
 public class IdempotentPaymentFilterTests
 {
+    private sealed class FakeIdempotencyStore : IIdempotencyStore
+    {
+        private readonly ConcurrentDictionary<string, IdempotentResponse> _store = new();
+
+        public Task<IdempotentResponse?> GetAsync(string scopeKey, CancellationToken ct = default)
+            => Task.FromResult(_store.TryGetValue(scopeKey, out var val) ? val : null);
+
+        public Task SaveAsync(string scopeKey, int statusCode, string responseJson, TimeSpan ttl, CancellationToken ct = default)
+        {
+            _store.TryAdd(scopeKey, new IdempotentResponse(statusCode, responseJson));
+            return Task.CompletedTask;
+        }
+    }
+
     private static ActionExecutingContext CreateContext(string? idempotencyKey = null)
     {
         var httpContext = new DefaultHttpContext();
@@ -30,8 +45,7 @@ public class IdempotentPaymentFilterTests
     [Fact]
     public async Task MissingHeader_ShouldReturn400BadRequest_AndSkipAction()
     {
-        using var cache = new MemoryCache(new MemoryCacheOptions());
-        var filter = new IdempotentPaymentFilter(cache);
+        var filter = new IdempotentPaymentFilter(new FakeIdempotencyStore());
         var context = CreateContext();
         var invoked = false;
 
@@ -47,10 +61,9 @@ public class IdempotentPaymentFilterTests
     }
 
     [Fact]
-    public async Task SameIdempotencyKey_ShouldReplayCachedResponse_WithoutReExecuting()
+    public async Task SameIdempotencyKey_ShouldReplayStoredResponse_WithoutReExecuting()
     {
-        using var cache = new MemoryCache(new MemoryCacheOptions());
-        var filter = new IdempotentPaymentFilter(cache);
+        var filter = new IdempotentPaymentFilter(new FakeIdempotencyStore());
         var key = Guid.NewGuid().ToString();
         var executionCount = 0;
 

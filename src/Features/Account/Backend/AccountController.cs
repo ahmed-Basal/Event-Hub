@@ -135,7 +135,7 @@ public class AccountController(ISender mediator) : BaseApiController
                 HttpOnly = true,
                 Secure = isHttps,
                 SameSite = isHttps ? SameSiteMode.None : SameSiteMode.Lax,
-                Expires = DateTimeOffset.UtcNow.AddDays(7),
+                Expires = DateTimeOffset.UtcNow.AddMinutes(15),
                 Path = "/"
             });
         }

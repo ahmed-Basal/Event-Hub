@@ -73,6 +73,18 @@ export default function LoginPage() {
         </Typography>
       </Box>
 
+      <Button
+        component="a"
+        href="/api/auth/login"
+        variant="contained"
+        color="secondary"
+        size="large"
+      >
+        Sign in with Keycloak (SSO / MFA)
+      </Button>
+
+      <Divider>OR LEGACY CREDENTIALS</Divider>
+
       <FormTextField name="email" control={control} label="Email" type="email" />
       <FormTextField name="password" control={control} label="Password" type="password" />
 

@@ -24,8 +24,6 @@ public static class IdentityServiceExtensions
         .AddSignInManager<SignInManager<User>>()
         .AddDefaultTokenProviders();
 
-        services.AddAuthorization();
-
         return services;
     }
 }

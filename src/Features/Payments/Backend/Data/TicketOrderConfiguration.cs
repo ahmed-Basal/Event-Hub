@@ -26,5 +26,6 @@ public class TicketOrderConfiguration : IEntityTypeConfiguration<TicketOrder>
 
         builder.HasIndex(o => o.StripeSessionId);
         builder.HasIndex(o => new { o.UserId, o.ActivityId });
+        builder.Property<uint>("xmin").IsRowVersion();
     }
 }

@@ -33,6 +33,28 @@ public class OutboxAndPaymentReliabilityTests
         Assert.Equal(OutboxStatus.Failed, msg.Status);
         Assert.Equal(2, msg.RetryCount);
         Assert.Null(msg.NextRetryUtc);
+        Assert.NotNull(msg.DeadLetteredOnUtc);
+    }
+
+    [Fact]
+    public void OutboxMessage_ResolveEventType_ShouldResolveByFullNameAcrossAssemblies()
+    {
+        var domainEvent = new TicketOrderCreatedEvent("ord-99", "act-1", "user-1", 10m, "usd");
+        var msg = OutboxMessage.FromDomainEvent(domainEvent);
+
+        var resolved = OutboxMessage.ResolveEventType(msg.Type);
+
+        Assert.Equal(typeof(TicketOrderCreatedEvent), resolved);
+    }
+
+    [Fact]
+    public void IdempotencyRecord_Create_ShouldSetExpirationAndScopeKey()
+    {
+        var record = IdempotencyRecord.Create(" key-1 ", 200, "{\"ok\":true}", TimeSpan.FromMinutes(10));
+
+        Assert.Equal("key-1", record.ScopeKey);
+        Assert.Equal(200, record.StatusCode);
+        Assert.True(record.ExpiresAtUtc > record.CreatedAtUtc);
     }
 
     [Fact]

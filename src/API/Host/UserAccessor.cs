@@ -1,13 +1,20 @@
 using System.Security.Claims;
 using Application.Interfaces;
+using BuildingBlocks.Contracts;
 using Domain;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 
 namespace Infrastructure.Security;
 
-public class UserAccessor(IHttpContextAccessor httpContextAccessor, IAppDbContext appDbContext) : IUserAccessor
+public class UserAccessor(IHttpContextAccessor httpContextAccessor, IAppDbContext appDbContext)
+    : IUserAccessor, ICurrentUser
 {
+    string? ICurrentUser.UserId => GetUserIdOrNull();
+    string? ICurrentUser.Username => GetUsername();
+    string? ICurrentUser.Email => GetEmail();
+    bool ICurrentUser.IsAuthenticated => httpContextAccessor.HttpContext?.User.Identity?.IsAuthenticated == true;
+    bool ICurrentUser.IsInRole(string role) => httpContextAccessor.HttpContext?.User.IsInRole(role) == true;
     public string? GetEmail()
     {
         return httpContextAccessor.HttpContext?.User.FindFirstValue(ClaimTypes.Email)
@@ -36,27 +43,12 @@ public class UserAccessor(IHttpContextAccessor httpContextAccessor, IAppDbContex
     public async Task<User> GetUserAsync()
     {
         var userId = GetUserId();
-        var email = GetEmail();
-        var username = GetUsername();
 
-        var user = await appDbContext.Users.FirstOrDefaultAsync(u =>
-            u.Id == userId || (email != null && u.Email == email) || (username != null && u.UserName == username));
+        var user = await appDbContext.Users
+            .FirstOrDefaultAsync(u => u.Id == userId);
 
-        if (user == null && !string.IsNullOrEmpty(userId))
-        {
-            var resolvedUserName = username ?? email ?? userId;
-            var resolvedEmail = email ?? $"{resolvedUserName}@keycloak.local";
-            user = User.Create(
-                userName: resolvedUserName,
-                email: resolvedEmail,
-                displayName: username ?? email ?? "User",
-                emailConfirmed: true,
-                id: userId);
-            appDbContext.Users.Add(user);
-            await appDbContext.SaveChangesAsync();
-        }
-
-        return user ?? throw new UnauthorizedAccessException("User not found in database");
+        return user ?? throw new UnauthorizedAccessException(
+            $"Authenticated subject '{userId}' is not provisioned in the local profile store.");
     }
 
     public string? GetIpAddress()

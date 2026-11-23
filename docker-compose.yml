@@ -6,9 +6,9 @@ services:
     image: postgres:17-alpine
     container_name: reactivities-postgres
     environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: "121600129"
-      POSTGRES_DB: reactivities
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env}
+      POSTGRES_DB: ${POSTGRES_DB:-reactivities}
     volumes:
       - postgres_data:/var/lib/postgresql/data
       - ./keycloak/init-keycloak-db.sql:/docker-entrypoint-initdb.d/init-keycloak-db.sql:ro
@@ -68,7 +68,7 @@ services:
     image: grafana/grafana:latest
     container_name: reactivities-grafana
     environment:
-      GF_SECURITY_ADMIN_PASSWORD: admin
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD:?Set GRAFANA_ADMIN_PASSWORD in .env}
     volumes:
       - grafana_data:/var/lib/grafana
       - ./observability/grafana/provisioning:/etc/grafana/provisioning:ro
@@ -85,12 +85,12 @@ services:
     container_name: reactivities-keycloak
     command: start-dev --import-realm
     environment:
-      KEYCLOAK_ADMIN: admin
-      KEYCLOAK_ADMIN_PASSWORD: admin
+      KEYCLOAK_ADMIN: ${KEYCLOAK_ADMIN:-admin}
+      KEYCLOAK_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD:?Set KEYCLOAK_ADMIN_PASSWORD in .env}
       KC_DB: postgres
       KC_DB_URL: jdbc:postgresql://postgres:5432/keycloak
-      KC_DB_USERNAME: postgres
-      KC_DB_PASSWORD: "121600129"
+      KC_DB_USERNAME: ${POSTGRES_USER:-postgres}
+      KC_DB_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env}
       KC_HEALTH_ENABLED: "true"
       KC_METRICS_ENABLED: "true"
     volumes:
@@ -111,8 +111,10 @@ services:
     container_name: reactivities-api
     environment:
       ASPNETCORE_ENVIRONMENT: Docker
+      ConnectionStrings__DefaultConnection: Host=postgres;Port=5432;Database=${POSTGRES_DB:-reactivities};Username=${POSTGRES_USER:-postgres};Password=${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env}
       Keycloak__Authority: http://keycloak:8080/realms/reactivities
       Keycloak__ValidIssuer: http://localhost:8082/realms/reactivities
+      Keycloak__Audience: reactivities-api
     ports:
       - "8085:8080"
     depends_on:

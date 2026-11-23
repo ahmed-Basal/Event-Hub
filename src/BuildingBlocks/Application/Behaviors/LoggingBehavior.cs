@@ -1,5 +1,5 @@
 using System.Diagnostics;
-using Application.Interfaces;
+using BuildingBlocks.Contracts;
 using MediatR;
 using Microsoft.Extensions.Logging;
 
@@ -11,7 +11,7 @@ namespace Application.Behaviors;
 /// </summary>
 public class LoggingBehavior<TRequest, TResponse>(
     ILogger<LoggingBehavior<TRequest, TResponse>> logger,
-    IUserAccessor userAccessor)
+    ICurrentUser currentUser)
     : IPipelineBehavior<TRequest, TResponse>
     where TRequest : notnull
 {
@@ -23,7 +23,7 @@ public class LoggingBehavior<TRequest, TResponse>(
         CancellationToken cancellationToken)
     {
         var requestName = typeof(TRequest).Name;
-        var userId = userAccessor.GetUsername() ?? "Anonymous";
+        var userId = currentUser.Username ?? "Anonymous";
 
         logger.LogInformation(
             "Starting MediatR request {RequestName} for user [{UserId}]",
