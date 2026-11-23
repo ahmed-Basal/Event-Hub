@@ -24,7 +24,7 @@ services:
 
   # ── Seq (Logs + log-correlated traces) ────────────────────────────────────
   seq:
-    image: datalust/seq:latest
+    image: datalust/seq:2024.3
     container_name: reactivities-seq
     environment:
       ACCEPT_EULA: "Y"
@@ -32,50 +32,85 @@ services:
     volumes:
       - seq_data:/data
     ports:
-      - "5341:5341"   # OTLP ingestion + log API
       - "8081:80"     # Web UI -> http://localhost:8081
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:80/api || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
     networks:
       - reactivities-net
 
   # ── Jaeger (Distributed Trace UI) ─────────────────────────────────────────
   jaeger:
-    image: jaegertracing/all-in-one:latest
+    image: jaegertracing/all-in-one:1.65.0
     container_name: reactivities-jaeger
     environment:
       COLLECTOR_OTLP_ENABLED: "true"
     ports:
       - "16686:16686"  # Jaeger UI -> http://localhost:16686
-      - "4317:4317"    # OTLP gRPC from API
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:14269/ || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
     networks:
       - reactivities-net
 
-  # ── Prometheus (Metrics Scraper) ──────────────────────────────────────────
+  # ── OpenTelemetry Collector (Centralized Trace Batching & Fan-out) ────────
+  otel-collector:
+    image: otel/opentelemetry-collector-contrib:0.120.0
+    container_name: reactivities-otel-collector
+    command: ["--config=/etc/otelcol-contrib/config.yaml"]
+    volumes:
+      - ./observability/otel-collector-config.yaml:/etc/otelcol-contrib/config.yaml:ro
+    depends_on:
+      jaeger:
+        condition: service_started
+      seq:
+        condition: service_started
+    networks:
+      - reactivities-net
+
+  # ── Prometheus (Metrics Scraper + Alert Rules) ────────────────────────────
   prometheus:
-    image: prom/prometheus:latest
+    image: prom/prometheus:v3.2.1
     container_name: reactivities-prometheus
     volumes:
       - ./observability/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - ./observability/alert-rules.yml:/etc/prometheus/alert-rules.yml:ro
       - prometheus_data:/prometheus
     ports:
       - "9090:9090"   # Prometheus UI -> http://localhost:9090
     depends_on:
       - api
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:9090/-/healthy || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
     networks:
       - reactivities-net
 
   # ── Grafana (Metrics Dashboards) ───────────────────────────────────────────
   grafana:
-    image: grafana/grafana:latest
+    image: grafana/grafana:11.5.2
     container_name: reactivities-grafana
     environment:
       GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD:?Set GRAFANA_ADMIN_PASSWORD in .env}
     volumes:
       - grafana_data:/var/lib/grafana
       - ./observability/grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./observability/grafana/dashboards:/var/lib/grafana/dashboards:ro
     ports:
       - "3001:3000"   # Grafana UI -> http://localhost:3001
     depends_on:
       - prometheus
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:3000/api/health || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
     networks:
       - reactivities-net
 
@@ -115,17 +150,21 @@ services:
       Keycloak__Authority: http://keycloak:8080/realms/reactivities
       Keycloak__ValidIssuer: http://localhost:8082/realms/reactivities
       Keycloak__Audience: reactivities-api
+      OpenTelemetry__OtlpCollectorEndpoint: http://otel-collector:4317
     ports:
       - "8085:8080"
     depends_on:
       postgres:
         condition: service_healthy
-      seq:
-        condition: service_started
-      jaeger:
+      otel-collector:
         condition: service_started
       keycloak:
         condition: service_started
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:8080/health/live || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
     networks:
       - reactivities-net
 

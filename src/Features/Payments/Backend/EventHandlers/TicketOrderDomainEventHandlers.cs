@@ -1,5 +1,7 @@
+using System.Diagnostics;
 using Application.Common.Events;
 using Application.Interfaces;
+using Application.Observability;
 using Domain;
 using Domain.Events;
 using MediatR;
@@ -19,6 +21,10 @@ public sealed class TicketOrderPaidEventHandler(
         CancellationToken cancellationToken)
     {
         var e = notification.DomainEvent;
+        var mode = string.IsNullOrWhiteSpace(e.PaymentIntentId) || e.PaymentIntentId.StartsWith("pi_sandbox_", StringComparison.OrdinalIgnoreCase)
+            ? "sandbox"
+            : "stripe";
+        DevMeetTelemetry.PaymentsTotal.Add(1, new TagList { { "outcome", "paid" }, { "mode", mode } });
         try
         {
             var activity = await dbContext.Activities
@@ -83,6 +89,7 @@ public sealed class TicketOrderRefundedEventHandler(
         CancellationToken cancellationToken)
     {
         var e = notification.DomainEvent;
+        DevMeetTelemetry.PaymentsTotal.Add(1, new TagList { { "outcome", "refunded" }, { "mode", "stripe" } });
         try
         {
             var activityTitle = await dbContext.Activities
@@ -128,6 +135,7 @@ public sealed class TicketOrderLifecycleAuditEventHandler(
         CancellationToken cancellationToken)
     {
         var e = notification.DomainEvent;
+        DevMeetTelemetry.PaymentsTotal.Add(1, new TagList { { "outcome", "failed" }, { "mode", "stripe" } });
         logger.LogWarning(
             "DomainEvent {EventId}: TicketOrder {OrderId} failed for Activity {ActivityId} by User {UserId}",
             e.EventId, e.OrderId, e.ActivityId, e.UserId);

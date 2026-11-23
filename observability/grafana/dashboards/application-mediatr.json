@@ -1,0 +1,52 @@
+{
+  "uid": "eventhub-application-mediatr",
+  "title": "2. Application & MediatR",
+  "tags": ["event-hub", "mediatr", "cqrs"],
+  "timezone": "browser",
+  "schemaVersion": 39,
+  "version": 1,
+  "refresh": "10s",
+  "time": { "from": "now-1h", "to": "now" },
+  "panels": [
+    {
+      "id": 1,
+      "title": "Commands vs Queries Rate",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 0 },
+      "targets": [
+        { "expr": "sum by (request_type) (rate(mediatr_requests_total[5m]))", "legendFormat": "{{request_type}}", "refId": "A" }
+      ],
+      "fieldConfig": { "defaults": { "unit": "reqps" } }
+    },
+    {
+      "id": 2,
+      "title": "Success vs Error Rate",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 0 },
+      "targets": [
+        { "expr": "sum by (status) (rate(mediatr_requests_total[5m]))", "legendFormat": "{{status}}", "refId": "A" }
+      ],
+      "fieldConfig": { "defaults": { "unit": "reqps" } }
+    },
+    {
+      "id": 3,
+      "title": "Slowest MediatR Request Types (p95)",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 8 },
+      "targets": [
+        { "expr": "topk(10, histogram_quantile(0.95, sum(rate(mediatr_request_duration_ms_bucket[5m])) by (le, request)))", "legendFormat": "{{request}}", "refId": "A" }
+      ],
+      "fieldConfig": { "defaults": { "unit": "ms" } }
+    },
+    {
+      "id": 4,
+      "title": "Exception Frequency by Request Type",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 8 },
+      "targets": [
+        { "expr": "sum by (request) (rate(mediatr_requests_total{status=\"error\"}[5m]))", "legendFormat": "{{request}}", "refId": "A" }
+      ],
+      "fieldConfig": { "defaults": { "unit": "reqps" } }
+    }
+  ]
+}

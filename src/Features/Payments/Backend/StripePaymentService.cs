@@ -1,8 +1,11 @@
+using System.Diagnostics;
 using Application.Interfaces;
+using Application.Observability;
 using Domain;
 using Microsoft.Extensions.Options;
 using Stripe;
 using Stripe.Checkout;
+using Activity = Domain.Activity;
 
 namespace Infrastructure.Payments;
 
@@ -20,51 +23,77 @@ public class StripePaymentService(IOptions<StripeSettings> options) : IPaymentSe
         string cancelUrl,
         CancellationToken ct = default)
     {
+        using var activitySpan = DevMeetTelemetry.ActivitySource.StartActivity("Stripe: CreateCheckoutSession", ActivityKind.Client);
+        activitySpan?.SetTag("dependency.name", "stripe");
+        activitySpan?.SetTag("payment.currency", activity.Currency);
+
         if (!IsStripeConfigured)
         {
+            activitySpan?.SetTag("payment.mode", "sandbox");
             var sandboxSessionId = $"cs_sandbox_{order.Id}";
             var sep = successUrl.Contains('?') ? '&' : '?';
             var sandboxUrl = $"{successUrl}{sep}orderId={Uri.EscapeDataString(order.Id)}&sandbox=true";
+            DevMeetTelemetry.TicketOrdersCreatedTotal.Add(1, new KeyValuePair<string, object?>("currency", order.Currency));
             return new CheckoutSessionResult(order.Id, sandboxSessionId, sandboxUrl, IsSandbox: true);
         }
 
-        StripeConfiguration.ApiKey = _settings.SecretKey;
-
-        var sessionOptions = new SessionCreateOptions
+        activitySpan?.SetTag("payment.mode", "stripe");
+        var sw = Stopwatch.StartNew();
+        var outcome = "success";
+        try
         {
-            Mode = "payment",
-            CustomerEmail = user.Email,
-            SuccessUrl = $"{successUrl}?orderId={Uri.EscapeDataString(order.Id)}&session_id={{CHECKOUT_SESSION_ID}}",
-            CancelUrl = cancelUrl,
-            Metadata = new Dictionary<string, string>
+            StripeConfiguration.ApiKey = _settings.SecretKey;
+
+            var sessionOptions = new SessionCreateOptions
             {
-                ["orderId"] = order.Id,
-                ["activityId"] = activity.ID,
-                ["userId"] = user.Id
-            },
-            LineItems =
-            [
-                new SessionLineItemOptions
+                Mode = "payment",
+                CustomerEmail = user.Email,
+                SuccessUrl = $"{successUrl}?orderId={Uri.EscapeDataString(order.Id)}&session_id={{CHECKOUT_SESSION_ID}}",
+                CancelUrl = cancelUrl,
+                Metadata = new Dictionary<string, string>
                 {
-                    Quantity = 1,
-                    PriceData = new SessionLineItemPriceDataOptions
+                    ["orderId"] = order.Id,
+                    ["activityId"] = activity.ID,
+                    ["userId"] = user.Id
+                },
+                LineItems =
+                [
+                    new SessionLineItemOptions
                     {
-                        Currency = string.IsNullOrWhiteSpace(activity.Currency) ? "usd" : activity.Currency.ToLowerInvariant(),
-                        UnitAmount = (long)(activity.Price * 100m),
-                        ProductData = new SessionLineItemPriceDataProductDataOptions
+                        Quantity = 1,
+                        PriceData = new SessionLineItemPriceDataOptions
                         {
-                            Name = activity.Title,
-                            Description = $"{activity.Venue}, {activity.City}"
+                            Currency = string.IsNullOrWhiteSpace(activity.Currency) ? "usd" : activity.Currency.ToLowerInvariant(),
+                            UnitAmount = (long)(activity.Price * 100m),
+                            ProductData = new SessionLineItemPriceDataProductDataOptions
+                            {
+                                Name = activity.Title,
+                                Description = $"{activity.Venue}, {activity.City}"
+                            }
                         }
                     }
-                }
-            ]
-        };
+                ]
+            };
 
-        var service = new SessionService();
-        var session = await service.CreateAsync(sessionOptions, cancellationToken: ct);
-
-        return new CheckoutSessionResult(order.Id, session.Id, session.Url, IsSandbox: false);
+            var service = new SessionService();
+            var session = await service.CreateAsync(sessionOptions, cancellationToken: ct);
+            DevMeetTelemetry.TicketOrdersCreatedTotal.Add(1, new KeyValuePair<string, object?>("currency", order.Currency));
+            activitySpan?.SetStatus(ActivityStatusCode.Ok);
+            return new CheckoutSessionResult(order.Id, session.Id, session.Url, IsSandbox: false);
+        }
+        catch (Exception ex)
+        {
+            outcome = "failure";
+            DevMeetTelemetry.RecordException(activitySpan, ex);
+            throw;
+        }
+        finally
+        {
+            sw.Stop();
+            var tags = new TagList { { "dependency", "stripe" }, { "operation", "create_checkout" }, { "outcome", outcome } };
+            DevMeetTelemetry.DependencyCallsTotal.Add(1, tags);
+            DevMeetTelemetry.DependencyDurationMs.Record(sw.Elapsed.TotalMilliseconds, tags);
+        }
     }
 
     public WebhookParseResult VerifyAndParseWebhook(string jsonPayload, string stripeSignature)

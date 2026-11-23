@@ -1,6 +1,8 @@
+using System.Diagnostics;
 using System.Text.Json;
 using System.Threading.Channels;
 using Application.Common.Events;
+using Application.Observability;
 using Domain.Common;
 using Infrastructure.Data;
 using MediatR;
@@ -75,12 +77,20 @@ public sealed class OutboxProcessor(
 
     public async Task<int> ProcessBatchAsync(CancellationToken ct)
     {
+        var sw = Stopwatch.StartNew();
+        using var batchActivity = DevMeetTelemetry.ActivitySource.StartActivity("Outbox: ProcessBatch", ActivityKind.Internal);
+
         using var scope = scopeFactory.CreateScope();
         var dbContext = scope.ServiceProvider.GetRequiredService<DevMeetDbContext>();
         var publisher = scope.ServiceProvider.GetRequiredService<IPublisher>();
 
         var now = DateTimeOffset.UtcNow;
         var staleCutoff = now - StaleClaimTimeout;
+
+        var pendingCount = await dbContext.OutboxMessages
+            .AsNoTracking()
+            .CountAsync(m => m.Status == OutboxStatus.Pending, ct);
+        DevMeetTelemetry.SetOutboxPendingCount(pendingCount);
 
         List<OutboxMessage> messages;
         if (dbContext.Database.IsNpgsql())
@@ -114,16 +124,27 @@ public sealed class OutboxProcessor(
                 .ToListAsync(ct);
         }
 
-        if (messages.Count == 0) return 0;
+        batchActivity?.SetTag("outbox.batch_size", messages.Count);
+        if (messages.Count == 0)
+        {
+            return 0;
+        }
 
         foreach (var msg in messages)
         {
+            var eventShortName = msg.Type.Split(',')[0].Split('.').LastOrDefault() ?? "Unknown";
+            using var msgActivity = DevMeetTelemetry.ActivitySource.StartActivity("Outbox: DispatchEvent", ActivityKind.Internal);
+            msgActivity?.SetTag("outbox.event_type", eventShortName);
+            msgActivity?.SetTag("outbox.attempt", msg.RetryCount + 1);
+
             try
             {
                 var eventType = OutboxMessage.ResolveEventType(msg.Type);
                 if (eventType is null)
                 {
                     msg.MarkRetryOrFailed($"Could not resolve domain event type '{msg.Type}'.", maxRetries: 1);
+                    DevMeetTelemetry.OutboxProcessedTotal.Add(1, new KeyValuePair<string, object?>("outcome", "failed"));
+                    msgActivity?.SetStatus(ActivityStatusCode.Error, "Unresolvable event type");
                     await dbContext.SaveChangesAsync(ct);
                     continue;
                 }
@@ -131,6 +152,8 @@ public sealed class OutboxProcessor(
                 if (JsonSerializer.Deserialize(msg.Content, eventType) is not IDomainEvent domainEvent)
                 {
                     msg.MarkRetryOrFailed($"Failed to deserialize domain event '{msg.Type}'.", maxRetries: 1);
+                    DevMeetTelemetry.OutboxProcessedTotal.Add(1, new KeyValuePair<string, object?>("outcome", "failed"));
+                    msgActivity?.SetStatus(ActivityStatusCode.Error, "Deserialization failed");
                     await dbContext.SaveChangesAsync(ct);
                     continue;
                 }
@@ -140,17 +163,29 @@ public sealed class OutboxProcessor(
 
                 await publisher.Publish(notification, ct);
                 msg.MarkProcessed();
+                msgActivity?.SetStatus(ActivityStatusCode.Ok);
+                DevMeetTelemetry.OutboxProcessedTotal.Add(1, new KeyValuePair<string, object?>("outcome", "processed"));
             }
             catch (Exception ex)
             {
                 logger.LogWarning(ex,
                     "Failed processing OutboxMessage {OutboxMessageId} ({EventType}) on attempt {Attempt}",
-                    msg.Id, msg.Type, msg.RetryCount + 1);
+                    msg.Id, eventShortName, msg.RetryCount + 1);
                 msg.MarkRetryOrFailed(ex.Message);
+                DevMeetTelemetry.RecordException(msgActivity, ex);
+                var outcome = msg.Status == OutboxStatus.Failed ? "failed" : "retry";
+                DevMeetTelemetry.OutboxProcessedTotal.Add(1, new KeyValuePair<string, object?>("outcome", outcome));
             }
 
             await dbContext.SaveChangesAsync(ct);
         }
+
+        sw.Stop();
+        DevMeetTelemetry.OutboxBatchDurationMs.Record(sw.Elapsed.TotalMilliseconds);
+        var remaining = await dbContext.OutboxMessages
+            .AsNoTracking()
+            .CountAsync(m => m.Status == OutboxStatus.Pending, ct);
+        DevMeetTelemetry.SetOutboxPendingCount(remaining);
 
         return messages.Count;
     }

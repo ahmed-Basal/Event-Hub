@@ -1,16 +1,14 @@
 using System.Diagnostics;
+using Application.Observability;
 using MediatR;
-using Microsoft.Extensions.Logging;
 
 namespace Application.Behaviors;
 
-public class TracingBehavior<TRequest, TResponse>(
-    ILogger<TracingBehavior<TRequest, TResponse>> logger)
+public class TracingBehavior<TRequest, TResponse>
     : IPipelineBehavior<TRequest, TResponse>
     where TRequest : notnull
 {
-    public const string ActivitySourceName = "DevMeet.Application";
-    private static readonly ActivitySource _activitySource = new(ActivitySourceName);
+    public const string ActivitySourceName = DevMeetTelemetry.ActivitySourceName;
 
     public async Task<TResponse> Handle(
         TRequest request,
@@ -18,12 +16,14 @@ public class TracingBehavior<TRequest, TResponse>(
         CancellationToken cancellationToken)
     {
         var requestName = typeof(TRequest).Name;
+        var requestType = requestName.EndsWith("Query", StringComparison.Ordinal) ? "query" : "command";
 
-        using var activity = _activitySource.StartActivity(
+        using var activity = DevMeetTelemetry.ActivitySource.StartActivity(
             $"MediatR: {requestName}",
             ActivityKind.Internal);
 
         activity?.SetTag("mediatr.request", requestName);
+        activity?.SetTag("mediatr.request_type", requestType);
 
         try
         {
@@ -33,14 +33,7 @@ public class TracingBehavior<TRequest, TResponse>(
         }
         catch (Exception ex)
         {
-            activity?.SetStatus(ActivityStatusCode.Error, ex.Message);
-            activity?.AddEvent(new ActivityEvent("exception", tags: new ActivityTagsCollection
-            {
-                { "exception.type", ex.GetType().FullName },
-                { "exception.message", ex.Message },
-                { "exception.stacktrace", ex.ToString() }
-            }));
-            logger.LogError(ex, "MediatR request {RequestName} failed", requestName);
+            DevMeetTelemetry.RecordException(activity, ex);
             throw;
         }
     }

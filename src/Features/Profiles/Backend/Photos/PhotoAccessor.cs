@@ -1,4 +1,6 @@
+using System.Diagnostics;
 using Application.Interfaces;
+using Application.Observability;
 using CloudinaryDotNet;
 using CloudinaryDotNet.Actions;
 using Microsoft.Extensions.Logging;
@@ -30,28 +32,52 @@ public class PhotoAccessor : IPhotoAccessor
         string fileName,
         CancellationToken ct = default)
     {
+        using var activity = DevMeetTelemetry.ActivitySource.StartActivity("Cloudinary: UploadPhoto", ActivityKind.Client);
+        activity?.SetTag("dependency.name", "cloudinary");
+
         if (_cloudinary is null)
         {
             _logger.LogWarning("Cloudinary is not fully configured (CloudName/ApiKey/ApiSecret). Set values via dotnet user-secrets.");
             return null;
         }
 
-        var uploadParams = new ImageUploadParams
+        var sw = Stopwatch.StartNew();
+        var outcome = "success";
+        try
         {
-            File = new FileDescription(fileName, fileStream),
-            Transformation = new Transformation().Height(500).Width(500).Crop("fill"),
-            Folder = "devmeet"
-        };
+            var uploadParams = new ImageUploadParams
+            {
+                File = new FileDescription(fileName, fileStream),
+                Transformation = new Transformation().Height(500).Width(500).Crop("fill"),
+                Folder = "devmeet"
+            };
 
-        var result = await _cloudinary.UploadAsync(uploadParams, ct);
+            var result = await _cloudinary.UploadAsync(uploadParams, ct);
 
-        if (result.Error is not null)
-        {
-            _logger.LogError("Cloudinary upload failed: {Error}", result.Error.Message);
-            return null;
+            if (result.Error is not null)
+            {
+                outcome = "failure";
+                _logger.LogError("Cloudinary upload failed: {Error}", result.Error.Message);
+                activity?.SetStatus(ActivityStatusCode.Error, result.Error.Message);
+                return null;
+            }
+
+            activity?.SetStatus(ActivityStatusCode.Ok);
+            return new PhotoUploadResult(result.PublicId, result.SecureUrl.AbsoluteUri);
         }
-
-        return new PhotoUploadResult(result.PublicId, result.SecureUrl.AbsoluteUri);
+        catch (Exception ex)
+        {
+            outcome = "failure";
+            DevMeetTelemetry.RecordException(activity, ex);
+            throw;
+        }
+        finally
+        {
+            sw.Stop();
+            var tags = new TagList { { "dependency", "cloudinary" }, { "operation", "upload_photo" }, { "outcome", outcome } };
+            DevMeetTelemetry.DependencyCallsTotal.Add(1, tags);
+            DevMeetTelemetry.DependencyDurationMs.Record(sw.Elapsed.TotalMilliseconds, tags);
+        }
     }
 
     public async Task<bool> DeletePhotoAsync(string publicId, CancellationToken ct = default)

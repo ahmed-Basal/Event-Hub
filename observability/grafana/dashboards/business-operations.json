@@ -1,0 +1,58 @@
+{
+  "uid": "eventhub-business-operations",
+  "title": "4. Business Operations",
+  "tags": ["event-hub", "business", "payments"],
+  "timezone": "browser",
+  "schemaVersion": 39,
+  "version": 1,
+  "refresh": "15s",
+  "time": { "from": "now-6h", "to": "now" },
+  "panels": [
+    {
+      "id": 1,
+      "title": "Ticket Orders Created (1h)",
+      "type": "stat",
+      "gridPos": { "h": 4, "w": 6, "x": 0, "y": 0 },
+      "targets": [{ "expr": "sum(increase(devmeet_ticket_orders_created_total[1h]))", "refId": "A" }]
+    },
+    {
+      "id": 2,
+      "title": "Activities Created (1h)",
+      "type": "stat",
+      "gridPos": { "h": 4, "w": 6, "x": 6, "y": 0 },
+      "targets": [{ "expr": "sum(increase(devmeet_activities_created_total[1h]))", "refId": "A" }]
+    },
+    {
+      "id": 3,
+      "title": "Activities Cancelled (1h)",
+      "type": "stat",
+      "gridPos": { "h": 4, "w": 6, "x": 12, "y": 0 },
+      "targets": [{ "expr": "sum(increase(devmeet_activities_cancelled_total[1h]))", "refId": "A" }]
+    },
+    {
+      "id": 4,
+      "title": "Outbox Pending Backlog",
+      "type": "stat",
+      "gridPos": { "h": 4, "w": 6, "x": 18, "y": 0 },
+      "targets": [{ "expr": "devmeet_outbox_pending_messages", "refId": "A" }]
+    },
+    {
+      "id": 5,
+      "title": "Payment Outcomes (Paid / Failed / Refunded)",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 4 },
+      "targets": [
+        { "expr": "sum by (outcome, mode) (increase(devmeet_payments_total[15m]))", "legendFormat": "{{outcome}} ({{mode}})", "refId": "A" }
+      ]
+    },
+    {
+      "id": 6,
+      "title": "Notification Delivery Outcomes",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 4 },
+      "targets": [
+        { "expr": "sum by (channel, outcome) (rate(devmeet_notifications_delivered_total[5m]))", "legendFormat": "{{channel}} - {{outcome}}", "refId": "A" }
+      ]
+    }
+  ]
+}

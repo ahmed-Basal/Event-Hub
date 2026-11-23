@@ -6,8 +6,8 @@ using Microsoft.Extensions.Logging;
 namespace Application.Behaviors;
 
 /// <summary>
-/// Pipeline behavior that logs MediatR request execution, user context, 
-/// execution duration, performance warnings for slow queries, and failures.
+/// Pipeline behavior that logs MediatR request execution, user context,
+/// execution duration, and slow-request warnings without duplicating exception error logs.
 /// </summary>
 public class LoggingBehavior<TRequest, TResponse>(
     ILogger<LoggingBehavior<TRequest, TResponse>> logger,
@@ -23,32 +23,28 @@ public class LoggingBehavior<TRequest, TResponse>(
         CancellationToken cancellationToken)
     {
         var requestName = typeof(TRequest).Name;
-        var userId = currentUser.Username ?? "Anonymous";
+        var user = currentUser.Username ?? "Anonymous";
 
-        logger.LogInformation(
-            "Starting MediatR request {RequestName} for user [{UserId}]",
-            requestName, userId);
+        logger.LogDebug("Starting MediatR request {RequestName} for user {User}", requestName, user);
 
         var stopwatch = Stopwatch.StartNew();
-
         try
         {
             var response = await next();
             stopwatch.Stop();
 
             var elapsedMs = stopwatch.ElapsedMilliseconds;
-
             if (elapsedMs > SlowRequestThresholdMs)
             {
                 logger.LogWarning(
-                    "Long-running request detected: {RequestName} took {ElapsedMs}ms (> {Threshold}ms) for user [{UserId}]",
-                    requestName, elapsedMs, SlowRequestThresholdMs, userId);
+                    "Slow MediatR request {RequestName} took {ElapsedMilliseconds}ms (> {ThresholdMs}ms)",
+                    requestName, elapsedMs, SlowRequestThresholdMs);
             }
             else
             {
-                logger.LogInformation(
-                    "Completed MediatR request {RequestName} in {ElapsedMs}ms for user [{UserId}]",
-                    requestName, elapsedMs, userId);
+                logger.LogDebug(
+                    "Completed MediatR request {RequestName} in {ElapsedMilliseconds}ms",
+                    requestName, elapsedMs);
             }
 
             return response;
@@ -56,10 +52,11 @@ public class LoggingBehavior<TRequest, TResponse>(
         catch (Exception ex)
         {
             stopwatch.Stop();
-            logger.LogError(
+            // ExceptionMiddleware logs the full error once for HTTP requests; log here at Debug to avoid duplicates.
+            logger.LogDebug(
                 ex,
-                "MediatR request {RequestName} failed after {ElapsedMs}ms for user [{UserId}]: {ErrorMessage}",
-                requestName, stopwatch.ElapsedMilliseconds, userId, ex.Message);
+                "MediatR request {RequestName} threw {ExceptionType} after {ElapsedMilliseconds}ms",
+                requestName, ex.GetType().Name, stopwatch.ElapsedMilliseconds);
             throw;
         }
     }

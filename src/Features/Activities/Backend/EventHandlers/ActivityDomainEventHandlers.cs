@@ -1,5 +1,6 @@
 using Application.Common.Events;
 using Application.Interfaces;
+using Application.Observability;
 using Domain;
 using Domain.Events;
 using MediatR;
@@ -19,6 +20,7 @@ public sealed class ActivityCancelledEventHandler(
         CancellationToken cancellationToken)
     {
         var e = notification.DomainEvent;
+        DevMeetTelemetry.ActivitiesCancelledTotal.Add(1);
         try
         {
             var recipientIds = await dbContext.ActivityAttendees
@@ -195,6 +197,7 @@ public sealed class ActivityLifecycleAuditEventHandler(
         CancellationToken cancellationToken)
     {
         var e = notification.DomainEvent;
+        DevMeetTelemetry.ActivitiesCreatedTotal.Add(1);
         logger.LogInformation("DomainEvent {EventId}: Activity {ActivityId} ({Title}) created",
             e.EventId, e.ActivityId, e.Title);
         return Task.CompletedTask;

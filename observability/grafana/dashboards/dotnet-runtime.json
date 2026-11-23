@@ -1,0 +1,63 @@
+{
+  "uid": "eventhub-dotnet-runtime",
+  "title": "3. .NET Runtime",
+  "tags": ["event-hub", "dotnet", "runtime"],
+  "timezone": "browser",
+  "schemaVersion": 39,
+  "version": 1,
+  "refresh": "10s",
+  "time": { "from": "now-1h", "to": "now" },
+  "panels": [
+    {
+      "id": 1,
+      "title": "Process Working Set Memory",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 0 },
+      "targets": [
+        { "expr": "dotnet_process_memory_working_set_bytes", "legendFormat": "Working Set", "refId": "A" }
+      ],
+      "fieldConfig": { "defaults": { "unit": "bytes" } }
+    },
+    {
+      "id": 2,
+      "title": "GC Collections / sec by Generation",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 0 },
+      "targets": [
+        { "expr": "rate(dotnet_gc_collections_total[5m])", "legendFormat": "{{gc_heap_generation}}", "refId": "A" }
+      ],
+      "fieldConfig": { "defaults": { "unit": "ops" } }
+    },
+    {
+      "id": 3,
+      "title": "GC Allocation Rate",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 8 },
+      "targets": [
+        { "expr": "rate(dotnet_gc_heap_total_allocated_bytes_total[5m])", "legendFormat": "Allocated Bytes/sec", "refId": "A" }
+      ],
+      "fieldConfig": { "defaults": { "unit": "Bps" } }
+    },
+    {
+      "id": 4,
+      "title": "ThreadPool Threads & Queue Length",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 8 },
+      "targets": [
+        { "expr": "dotnet_thread_pool_thread_count_total", "legendFormat": "Thread Count", "refId": "A" },
+        { "expr": "dotnet_thread_pool_queue_length_total", "legendFormat": "Queue Length", "refId": "B" }
+      ],
+      "fieldConfig": { "defaults": { "unit": "short" } }
+    },
+    {
+      "id": 5,
+      "title": "Process CPU Time / sec",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 24, "x": 0, "y": 16 },
+      "targets": [
+        { "expr": "sum by (cpu_mode) (rate(dotnet_process_cpu_time_seconds_total[5m]))", "legendFormat": "{{cpu_mode}}", "refId": "A" }
+      ],
+      "fieldConfig": { "defaults": { "unit": "s" } }
+    }
+  ]
+}

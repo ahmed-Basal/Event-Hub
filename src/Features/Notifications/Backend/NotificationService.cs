@@ -1,5 +1,7 @@
+using System.Diagnostics;
 using Application.Feature.Notifications;
 using Application.Interfaces;
+using Application.Observability;
 using Domain;
 using Microsoft.EntityFrameworkCore;
 
@@ -41,6 +43,9 @@ public class NotificationService(
 
         dbContext.Notifications.AddRange(entities);
         await dbContext.SaveChangesAsync(ct);
+        DevMeetTelemetry.NotificationsDeliveredTotal.Add(
+            entities.Count,
+            new TagList { { "channel", "db" }, { "outcome", "success" } });
 
         foreach (var entity in entities)
         {
@@ -58,7 +63,19 @@ public class NotificationService(
                 CreatedAt = entity.CreatedAt
             };
 
-            await sseBroker.PublishAsync(entity.RecipientId, dto, ct);
+            try
+            {
+                await sseBroker.PublishAsync(entity.RecipientId, dto, ct);
+                DevMeetTelemetry.NotificationsDeliveredTotal.Add(
+                    1,
+                    new TagList { { "channel", "sse" }, { "outcome", "success" } });
+            }
+            catch
+            {
+                DevMeetTelemetry.NotificationsDeliveredTotal.Add(
+                    1,
+                    new TagList { { "channel", "sse" }, { "outcome", "failure" } });
+            }
         }
     }
 }
