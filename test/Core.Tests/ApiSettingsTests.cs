@@ -2,7 +2,7 @@ using API.Options;
 using Microsoft.Extensions.Configuration;
 using Xunit;
 
-namespace Core.Application.Tests;
+namespace Application.Tests;
 
 public class ApiSettingsTests
 {

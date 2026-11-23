@@ -1,7 +1,7 @@
-using Core.Domain.Common;
+using Domain.Common;
 using Xunit;
 
-namespace Core.Application.Tests;
+namespace Application.Tests;
 
 public class SlugHelperTests
 {

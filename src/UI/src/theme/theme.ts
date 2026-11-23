@@ -1,53 +1,9 @@
+'use client';
+
 import { createTheme } from '@mui/material/styles';
+import { tokens } from './tokens';
 
-declare module '@mui/material/styles' {
-  interface Palette {
-    accent: Palette['primary'];
-    teal: Palette['primary'];
-    custom: {
-      surface: string;
-      surface2: string;
-      surface3: string;
-      border: string;
-      borderHover: string;
-      textMuted: string;
-    };
-  }
-
-  interface PaletteOptions {
-    accent?: PaletteOptions['primary'];
-    teal?: PaletteOptions['primary'];
-    custom?: {
-      surface?: string;
-      surface2?: string;
-      surface3?: string;
-      border?: string;
-      borderHover?: string;
-      textMuted?: string;
-    };
-  }
-
-  interface Theme {
-    customShadows: {
-      gold: string;
-      coral: string;
-      card: string;
-      dropdown: string;
-    };
-  }
-
-  interface ThemeOptions {
-    customShadows?: {
-      gold?: string;
-      coral?: string;
-      card?: string;
-      dropdown?: string;
-    };
-  }
-}
-
-import { tokens, type DesignTokens } from './tokens';
-export { tokens, type DesignTokens };
+export { tokens };
 
 export const theme = createTheme({
   palette: {
@@ -58,30 +14,28 @@ export const theme = createTheme({
     },
     primary: {
       main: tokens.primary,
-      contrastText: tokens.bg,
-      light: '#FBBF24',
-      dark: '#D97706',
+      light: tokens.primaryLight,
+      dark: tokens.primaryHover,
+      contrastText: '#FFFFFF',
     },
     secondary: {
       main: tokens.accent,
+      light: '#F472B6',
+      dark: tokens.accentHover,
       contrastText: '#FFFFFF',
-      light: '#FF707E',
-      dark: '#E03042',
-    },
-    accent: {
-      main: tokens.accent,
-      contrastText: '#FFFFFF',
-      light: '#FF707E',
-      dark: '#E03042',
-    },
-    teal: {
-      main: tokens.teal,
-      contrastText: tokens.bg,
-      light: '#22D3EE',
-      dark: '#0891B2',
     },
     info: {
       main: tokens.teal,
+      contrastText: tokens.bg,
+    },
+    success: {
+      main: tokens.teal,
+    },
+    warning: {
+      main: tokens.gold,
+    },
+    error: {
+      main: tokens.accent,
     },
     text: {
       primary: tokens.textPrimary,
@@ -89,30 +43,13 @@ export const theme = createTheme({
       disabled: tokens.textMuted,
     },
     divider: tokens.border,
-    error: {
-      main: tokens.accent,
-    },
-    custom: {
-      surface: tokens.surface,
-      surface2: tokens.surface2,
-      surface3: tokens.surface3,
-      border: tokens.border,
-      borderHover: tokens.borderHover,
-      textMuted: tokens.textMuted,
-    },
-  },
-  customShadows: {
-    gold: tokens.shadowGold,
-    coral: tokens.shadowCoral,
-    card: tokens.shadowCard,
-    dropdown: tokens.shadowDropdown,
   },
   typography: {
-    fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
+    fontFamily: "var(--font-inter), 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
     h1: { fontWeight: 800, letterSpacing: '-0.03em' },
     h2: { fontWeight: 700, letterSpacing: '-0.02em' },
     h3: { fontWeight: 700, letterSpacing: '-0.01em' },
-    h4: { fontWeight: 600 },
+    h4: { fontWeight: 700 },
     h5: { fontWeight: 600 },
     h6: { fontWeight: 600 },
     button: { textTransform: 'none', fontWeight: 600 },
@@ -127,21 +64,14 @@ export const theme = createTheme({
         body: {
           backgroundColor: tokens.bg,
           color: tokens.textPrimary,
-          scrollbarColor: `${tokens.surface2} ${tokens.bg}`,
-          '&::-webkit-scrollbar': { width: '6px' },
-          '&::-webkit-scrollbar-track': { background: tokens.bg },
-          '&::-webkit-scrollbar-thumb': {
-            background: tokens.surface2,
-            borderRadius: '3px',
-          },
         },
       },
     },
     MuiAppBar: {
       styleOverrides: {
         root: {
-          backgroundColor: `${tokens.bg}cc`,
-          backdropFilter: 'blur(12px)',
+          backgroundColor: `${tokens.bg}dd`,
+          backdropFilter: 'blur(14px)',
           borderBottom: `1px solid ${tokens.border}`,
           boxShadow: 'none',
           backgroundImage: 'none',
@@ -154,91 +84,8 @@ export const theme = createTheme({
           backgroundColor: tokens.surface,
           border: `1px solid ${tokens.border}`,
           boxShadow: tokens.shadowCard,
-          borderRadius: '18px',
+          borderRadius: '16px',
           backgroundImage: 'none',
-          transition: 'transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease',
-          '&:hover': {
-            transform: 'translateY(-4px)',
-            boxShadow: '0px 24px 50px 0px rgba(0, 0, 0, 0.45)',
-            borderColor: tokens.borderHover,
-          },
-        },
-      },
-    },
-    MuiButton: {
-      styleOverrides: {
-        root: {
-          borderRadius: '9999px',
-          fontWeight: 600,
-          fontSize: '0.875rem',
-          padding: '10px 24px',
-          transition: 'all 0.25s cubic-bezier(0.16, 1, 0.3, 1)',
-          '&.MuiButton-containedPrimary': {
-            backgroundColor: tokens.primary,
-            color: '#FFFFFF',
-            boxShadow: `0 8px 28px ${tokens.primaryGlow}`,
-            '&:hover': {
-              backgroundColor: '#4F46E5',
-              boxShadow: `0 12px 36px ${tokens.primaryGlow}`,
-              transform: 'translateY(-2px)',
-            },
-          },
-          '&.MuiButton-containedSecondary': {
-            backgroundColor: tokens.accent,
-            color: '#FFFFFF',
-            boxShadow: tokens.shadowCoral,
-            '&:hover': {
-              backgroundColor: '#DB2777',
-              boxShadow: '0 12px 36px rgba(236, 72, 153, 0.6)',
-              transform: 'translateY(-2px)',
-            },
-          },
-        },
-        outlined: {
-          borderColor: tokens.border,
-          color: tokens.textPrimary,
-          backgroundColor: 'rgba(255, 255, 255, 0.03)',
-          '&:hover': {
-            borderColor: tokens.borderHover,
-            backgroundColor: 'rgba(99, 102, 241, 0.1)',
-          },
-        },
-      },
-    },
-    MuiIconButton: {
-      styleOverrides: {
-        root: {
-          transition: 'all 0.2s ease-in-out',
-          '&:hover': {
-            backgroundColor: 'rgba(255, 255, 255, 0.08)',
-          },
-        },
-      },
-    },
-    MuiTooltip: {
-      styleOverrides: {
-        tooltip: {
-          backgroundColor: tokens.surface2,
-          color: tokens.textPrimary,
-          border: `1px solid ${tokens.border}`,
-          backdropFilter: 'blur(8px)',
-          borderRadius: '8px',
-          fontSize: '0.75rem',
-          fontWeight: 500,
-          boxShadow: tokens.shadowDropdown,
-        },
-        arrow: {
-          color: tokens.surface2,
-        },
-      },
-    },
-    MuiChip: {
-      styleOverrides: {
-        root: {
-          borderRadius: '9999px',
-          fontWeight: 600,
-          fontSize: '0.72rem',
-          letterSpacing: '0.04em',
         },
       },
     },
@@ -251,14 +98,38 @@ export const theme = createTheme({
         },
       },
     },
-    MuiDialog: {
+    MuiButton: {
       styleOverrides: {
-        paper: {
-          backgroundColor: tokens.surface,
-          border: `1px solid ${tokens.border}`,
-          borderRadius: '20px',
-          boxShadow: '0px 24px 60px 0px rgba(0, 0, 0, 0.6)',
-          backgroundImage: 'none',
+        root: {
+          borderRadius: '10px',
+          fontWeight: 600,
+          transition: 'all 0.2s ease',
+          '&.MuiButton-containedPrimary': {
+            backgroundColor: tokens.primary,
+            color: '#FFFFFF',
+            boxShadow: tokens.shadowPrimary,
+            '&:hover': {
+              backgroundColor: tokens.primaryHover,
+              transform: 'translateY(-1px)',
+            },
+          },
+          '&.MuiButton-containedSecondary': {
+            backgroundColor: tokens.accent,
+            color: '#FFFFFF',
+            boxShadow: tokens.shadowCoral,
+            '&:hover': {
+              backgroundColor: tokens.accentHover,
+              transform: 'translateY(-1px)',
+            },
+          },
+        },
+        outlined: {
+          borderColor: tokens.border,
+          color: tokens.textPrimary,
+          '&:hover': {
+            borderColor: tokens.borderHover,
+            backgroundColor: 'rgba(14, 165, 233, 0.1)',
+          },
         },
       },
     },
@@ -269,7 +140,6 @@ export const theme = createTheme({
           border: `1px solid ${tokens.border}`,
           borderRadius: '14px',
           boxShadow: tokens.shadowDropdown,
-          backgroundImage: 'none',
           padding: '6px',
         },
       },
@@ -278,15 +148,34 @@ export const theme = createTheme({
       styleOverrides: {
         root: {
           borderRadius: '8px',
-          fontSize: '0.875rem',
-          transition: 'all 0.15s ease',
           '&.Mui-selected': {
             backgroundColor: `${tokens.primary}22`,
-            color: tokens.primary,
+            color: tokens.primaryLight,
           },
           '&:hover': {
-            backgroundColor: 'rgba(255, 255, 255, 0.05)',
+            backgroundColor: 'rgba(255, 255, 255, 0.06)',
           },
+        },
+      },
+    },
+    MuiTextField: {
+      styleOverrides: {
+        root: {
+          '& .MuiOutlinedInput-root': {
+            borderRadius: '12px',
+            backgroundColor: tokens.surface2,
+            '& fieldset': { borderColor: tokens.border },
+            '&:hover fieldset': { borderColor: tokens.borderHover },
+            '&.Mui-focused fieldset': { borderColor: tokens.primary },
+          },
+        },
+      },
+    },
+    MuiChip: {
+      styleOverrides: {
+        root: {
+          borderRadius: '9999px',
+          fontWeight: 600,
         },
       },
     },
@@ -297,21 +186,7 @@ export const theme = createTheme({
         },
       },
     },
-    MuiTextField: {
-      styleOverrides: {
-        root: {
-          '& .MuiOutlinedInput-root': {
-            borderRadius: '9999px',
-            backgroundColor: tokens.surface3,
-            '& fieldset': { borderColor: tokens.border },
-            '&:hover fieldset': { borderColor: tokens.borderHover },
-            '&.Mui-focused fieldset': { borderColor: tokens.primary },
-          },
-        },
-      },
-    },
   },
 });
 
-export const lammaMubarmegeen = theme;
 export default theme;

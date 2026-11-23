@@ -1,0 +1,96 @@
+{
+  "id": "reactivities",
+  "realm": "reactivities",
+  "displayName": "DevMeet Reactivities",
+  "enabled": true,
+  "sslRequired": "none",
+  "registrationAllowed": true,
+  "loginWithEmailAllowed": true,
+  "duplicateEmailsAllowed": false,
+  "resetPasswordAllowed": true,
+  "editUsernameAllowed": true,
+  "roles": {
+    "realm": [
+      {
+        "name": "User",
+        "description": "Standard User Role"
+      },
+      {
+        "name": "Admin",
+        "description": "Administrator Role"
+      }
+    ]
+  },
+  "defaultRoles": [
+    "User"
+  ],
+  "clients": [
+    {
+      "clientId": "reactivities-api",
+      "name": "DevMeet Backend API",
+      "description": "Bearer token resource server for .NET Core API",
+      "enabled": true,
+      "bearerOnly": true,
+      "protocol": "openid-connect"
+    },
+    {
+      "clientId": "reactivities-web",
+      "name": "DevMeet React Frontend",
+      "description": "Public SPA client using PKCE flow",
+      "enabled": true,
+      "publicClient": true,
+      "directAccessGrantsEnabled": true,
+      "standardFlowEnabled": true,
+      "implicitFlowEnabled": false,
+      "protocol": "openid-connect",
+      "redirectUris": [
+        "http://localhost:5173/*",
+        "http://localhost:3000/*",
+        "http://localhost:80/*",
+        "http://localhost/*"
+      ],
+      "webOrigins": [
+        "*"
+      ]
+    }
+  ],
+  "users": [
+    {
+      "username": "bob",
+      "enabled": true,
+      "email": "bob@test.com",
+      "firstName": "Bob",
+      "lastName": "Smith",
+      "emailVerified": true,
+      "credentials": [
+        {
+          "type": "password",
+          "value": "Pa$$w0rd",
+          "temporary": false
+        }
+      ],
+      "realmRoles": [
+        "User"
+      ]
+    },
+    {
+      "username": "admin",
+      "enabled": true,
+      "email": "admin@test.com",
+      "firstName": "Admin",
+      "lastName": "User",
+      "emailVerified": true,
+      "credentials": [
+        {
+          "type": "password",
+          "value": "Pa$$w0rd",
+          "temporary": false
+        }
+      ],
+      "realmRoles": [
+        "Admin",
+        "User"
+      ]
+    }
+  ]
+}

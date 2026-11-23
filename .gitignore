@@ -27,8 +27,9 @@
 *.crt
 *.key
 
-## Node / React / Vite
+## Node / React / Next.js / Vite
 **/node_modules/
+**/.next/
 **/dist/
 **/dist-ssr/
 *.local

@@ -6,7 +6,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using Xunit;
 
-namespace Core.Application.Tests;
+namespace Application.Tests;
 
 public class ApiConfigurationTests
 {

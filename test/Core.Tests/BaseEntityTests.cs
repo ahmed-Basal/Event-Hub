@@ -1,8 +1,8 @@
-using Core.Domain;
-using Core.Domain.Common;
+using Domain;
+using Domain.Common;
 using Xunit;
 
-namespace Core.Application.Tests;
+namespace Application.Tests;
 
 public class BaseEntityTests
 {

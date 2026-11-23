@@ -11,6 +11,7 @@ services:
       POSTGRES_DB: reactivities
     volumes:
       - postgres_data:/var/lib/postgresql/data
+      - ./keycloak/init-keycloak-db.sql:/docker-entrypoint-initdb.d/init-keycloak-db.sql:ro
     ports:
       - "5432:5432"
     healthcheck:
@@ -78,6 +79,30 @@ services:
     networks:
       - reactivities-net
 
+  # ── Keycloak (Identity & Access Management / OIDC) ────────────────────────
+  keycloak:
+    image: quay.io/keycloak/keycloak:26.1
+    container_name: reactivities-keycloak
+    command: start-dev --import-realm
+    environment:
+      KEYCLOAK_ADMIN: admin
+      KEYCLOAK_ADMIN_PASSWORD: admin
+      KC_DB: postgres
+      KC_DB_URL: jdbc:postgresql://postgres:5432/keycloak
+      KC_DB_USERNAME: postgres
+      KC_DB_PASSWORD: "121600129"
+      KC_HEALTH_ENABLED: "true"
+      KC_METRICS_ENABLED: "true"
+    volumes:
+      - ./keycloak/realm-export.json:/opt/keycloak/data/import/realm.json:ro
+    ports:
+      - "8082:8080"   # Keycloak UI / Realm -> http://localhost:8082
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - reactivities-net
+
   # ── .NET API ───────────────────────────────────────────────────────────────
   api:
     build:
@@ -86,6 +111,8 @@ services:
     container_name: reactivities-api
     environment:
       ASPNETCORE_ENVIRONMENT: Docker
+      Keycloak__Authority: http://keycloak:8080/realms/reactivities
+      Keycloak__ValidIssuer: http://localhost:8082/realms/reactivities
     ports:
       - "8085:8080"
     depends_on:
@@ -95,17 +122,23 @@ services:
         condition: service_started
       jaeger:
         condition: service_started
+      keycloak:
+        condition: service_started
     networks:
       - reactivities-net
 
-  # ── React Client (Nginx) ───────────────────────────────────────────────────
+  # ── Next.js Web Client (SSR Standalone) ────────────────────────────────────
   client:
     build:
-      context: ./src/UI
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: src/UI/Dockerfile
     container_name: reactivities-client
+    environment:
+      NEXT_PUBLIC_API_URL: http://localhost:8085/api
+      NEXT_PUBLIC_HUB_URL: http://localhost:8085/comments
+      INTERNAL_API_URL: http://api:8080/api
     ports:
-      - "80:80"
+      - "3000:3000"
     depends_on:
       - api
     networks:

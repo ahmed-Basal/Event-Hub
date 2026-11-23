@@ -1,0 +1,87 @@
+@import 'react-calendar/dist/Calendar.css';
+@import 'leaflet/dist/leaflet.css';
+@import 'cropperjs/dist/cropper.css';
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  background-color: #0A0E1A;
+  color: #FFFFFF;
+  min-height: 100vh;
+}
+
+/* Custom Dark Scrollbar */
+::-webkit-scrollbar {
+  width: 7px;
+  height: 7px;
+}
+::-webkit-scrollbar-track {
+  background: #0A0E1A;
+}
+::-webkit-scrollbar-thumb {
+  background: #1C2640;
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #0EA5E9;
+}
+
+/* Dark Neon React Calendar (Neil's Calendar styled with tokens.ts) */
+.react-calendar {
+  width: 100% !important;
+  background: #131A2D !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  border-radius: 16px !important;
+  color: #FFFFFF !important;
+  font-family: inherit !important;
+  padding: 12px !important;
+}
+
+.react-calendar__navigation button {
+  color: #FFFFFF !important;
+  border-radius: 8px !important;
+  font-weight: 600;
+}
+
+.react-calendar__navigation button:enabled:hover,
+.react-calendar__navigation button:enabled:focus {
+  background-color: #1C2640 !important;
+}
+
+.react-calendar__month-view__weekdays {
+  color: #94A3B8 !important;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+}
+
+.react-calendar__tile {
+  color: #FFFFFF !important;
+  border-radius: 8px !important;
+  padding: 10px 6px !important;
+}
+
+.react-calendar__tile:enabled:hover,
+.react-calendar__tile:enabled:focus {
+  background-color: #1C2640 !important;
+}
+
+.react-calendar__tile--now {
+  background: rgba(20, 184, 166, 0.2) !important;
+  color: #14B8A6 !important;
+  font-weight: 700;
+}
+
+.react-calendar__tile--active {
+  background: #0EA5E9 !important;
+  color: #FFFFFF !important;
+  font-weight: 700;
+}
+
+.react-calendar__month-view__days__day--neighboringMonth {
+  color: #64748B !important;
+}

@@ -68,17 +68,17 @@ jobs:
       - name: Install Dependencies
         run: npm ci
 
-      - name: Run Linter (oxlint)
+      - name: Run Linter (ESLint)
         run: npm run lint
 
-      - name: Build React SPA (TypeScript + Vite)
+      - name: Build Next.js App
         run: npm run build
 
       - name: Upload Frontend Build Artifacts
         uses: actions/upload-artifact@v4
         with:
           name: frontend-dist
-          path: src/UI/dist/
+          path: src/UI/.next/
           retention-days: 7
 
   docker-verification:
@@ -107,7 +107,7 @@ jobs:
       - name: Build UI Container Image
         uses: docker/build-push-action@v6
         with:
-          context: ./src/UI
+          context: .
           file: src/UI/Dockerfile
           push: false
           tags: devmeet-ui:test

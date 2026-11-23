@@ -1,0 +1,18 @@
+namespace Application.Feature.Activities.Commands.Base;
+
+public abstract record BaseActivityCommand
+{
+    public required string Title { get; init; }
+    public DateTimeOffset Date { get; init; }
+    public required string Description { get; init; }
+    public required string Category { get; init; }
+    public required string City { get; init; }
+    public required string Venue { get; init; }
+    public double Latitude { get; init; }
+    public double Longitude { get; init; }
+    public string? Image { get; init; }
+    public string? Level { get; init; }
+    public decimal Price { get; init; }
+    public string? Currency { get; init; }
+    public List<string>? Tags { get; init; }
+}

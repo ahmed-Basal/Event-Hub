@@ -3,8 +3,6 @@ FROM mcr.microsoft.com/dotnet/sdk:11.0 AS build
 WORKDIR /app
 
 COPY src/API/API.csproj                       src/API/
-COPY src/Core/Core.csproj                     src/Core/
-COPY src/Infrastructure/Infrastructure.csproj src/Infrastructure/
 
 RUN dotnet restore src/API/API.csproj
 
