@@ -1,0 +1,68 @@
+# Production-oriented Docker Compose override:
+# Usage: docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d --build
+#
+# Key differences from local dev:
+# - Dedicated one-shot `migrate` service runs EF Core migrations once before API replicas start
+# - API sets ApplyMigrationsOnStartup=false and ASPNETCORE_ENVIRONMENT=Production
+# - Keycloak runs `start` (not `start-dev`)
+# - Internal infra ports (postgres, seq, jaeger, prometheus) are not published to host
+
+services:
+  postgres:
+    ports: []
+    restart: unless-stopped
+
+  seq:
+    ports: []
+    environment:
+      ACCEPT_EULA: "Y"
+      SEQ_FIRSTRUN_NOAUTHENTICATION: "false"
+    restart: unless-stopped
+
+  jaeger:
+    ports: []
+    restart: unless-stopped
+
+  prometheus:
+    ports: []
+    restart: unless-stopped
+
+  grafana:
+    restart: unless-stopped
+
+  keycloak:
+    command: start --import-realm --http-enabled=true --proxy-headers=xforwarded
+    restart: unless-stopped
+
+  migrate:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    command: ["--migrate-only"]
+    environment:
+      ASPNETCORE_ENVIRONMENT: Production
+      ConnectionStrings__DefaultConnection: Host=postgres;Port=5432;Database=${POSTGRES_DB:-reactivities};Username=${POSTGRES_USER:-postgres};Password=${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: "no"
+    networks:
+      - reactivities-net
+
+  api:
+    environment:
+      ASPNETCORE_ENVIRONMENT: Production
+      ApplyMigrationsOnStartup: "false"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
+      otel-collector:
+        condition: service_started
+      keycloak:
+        condition: service_started
+    restart: unless-stopped
+
+  client:
+    restart: unless-stopped

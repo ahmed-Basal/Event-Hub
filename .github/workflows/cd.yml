@@ -48,8 +48,8 @@ jobs:
       - name: Build & Push API Image
         uses: docker/build-push-action@v6
         with:
-          context: .
-          file: src/API/Dockerfile
+          context: ./backend
+          file: backend/Dockerfile
           push: true
           tags: ${{ steps.meta-api.outputs.tags }}
           labels: ${{ steps.meta-api.outputs.labels }}
@@ -71,8 +71,8 @@ jobs:
       - name: Build & Push UI Image
         uses: docker/build-push-action@v6
         with:
-          context: ./src/UI
-          file: src/UI/Dockerfile
+          context: ./frontend
+          file: frontend/Dockerfile
           push: true
           tags: ${{ steps.meta-ui.outputs.tags }}
           labels: ${{ steps.meta-ui.outputs.labels }}

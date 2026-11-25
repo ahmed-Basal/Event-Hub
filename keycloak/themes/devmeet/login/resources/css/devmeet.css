@@ -1,0 +1,329 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+
+:root,
+html,
+html.pf-v5-theme-dark {
+  --devmeet-bg: #0A0E1A;
+  --devmeet-surface: #131A2D;
+  --devmeet-surface-2: #1C2640;
+  --devmeet-surface-3: #253356;
+  --devmeet-primary: #0EA5E9;
+  --devmeet-primary-hover: #0284C7;
+  --devmeet-primary-light: #38BDF8;
+  --devmeet-teal: #14B8A6;
+  --devmeet-accent: #F43F5E;
+  --devmeet-gold: #F59E0B;
+  --devmeet-border: rgba(255, 255, 255, 0.1);
+  --devmeet-border-hover: rgba(14, 165, 233, 0.5);
+  --devmeet-text: #FFFFFF;
+  --devmeet-text-secondary: #94A3B8;
+  --devmeet-text-muted: #64748B;
+
+  --pf-v5-global--FontFamily--text: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --pf-v5-global--FontFamily--heading: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --pf-v5-global--BackgroundColor--100: var(--devmeet-surface);
+  --pf-v5-global--BackgroundColor--200: var(--devmeet-bg);
+  --pf-v5-global--Color--100: var(--devmeet-text);
+  --pf-v5-global--Color--200: var(--devmeet-text-secondary);
+  --pf-v5-global--BorderColor--100: var(--devmeet-border);
+  --pf-v5-global--primary-color--100: var(--devmeet-primary);
+  --pf-v5-global--primary-color--200: var(--devmeet-primary-hover);
+  --pf-v5-global--link--Color: var(--devmeet-primary-light);
+  --pf-v5-global--link--Color--hover: var(--devmeet-primary);
+  color-scheme: dark;
+}
+
+body#keycloak-bg {
+  margin: 0;
+  min-height: 100vh;
+  font-family: var(--pf-v5-global--FontFamily--text);
+  color: var(--devmeet-text);
+  background-color: var(--devmeet-bg);
+  background-image:
+    radial-gradient(ellipse 75% 55% at 15% 10%, rgba(14, 165, 233, 0.18), transparent 60%),
+    radial-gradient(ellipse 65% 50% at 85% 90%, rgba(20, 184, 166, 0.14), transparent 60%),
+    linear-gradient(180deg, #0A0E1A 0%, #0D1426 100%);
+  background-attachment: fixed;
+}
+
+.pf-v5-c-login {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem 1rem;
+  background: transparent !important;
+}
+
+.pf-v5-c-login__container {
+  width: 100%;
+  max-width: 460px;
+  grid-template-columns: 1fr !important;
+  gap: 1.25rem;
+}
+
+.pf-v5-c-login__header {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 0.25rem;
+}
+
+#kc-header-wrapper.pf-v5-c-brand {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  font-size: 1.55rem;
+  font-weight: 800;
+  letter-spacing: -0.025em;
+  color: var(--devmeet-text);
+  text-transform: none;
+}
+
+#kc-header-wrapper.pf-v5-c-brand::before {
+  content: '';
+  display: inline-block;
+  width: 40px;
+  height: 40px;
+  border-radius: 11px;
+  background-color: var(--devmeet-primary);
+  background-image:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23ffffff'%3E%3Cpath d='M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z'/%3E%3C/svg%3E"),
+    linear-gradient(135deg, #0EA5E9 0%, #14B8A6 100%);
+  background-repeat: no-repeat, no-repeat;
+  background-position: center, center;
+  background-size: 22px 22px, 100% 100%;
+  box-shadow: 0 10px 28px rgba(14, 165, 233, 0.35);
+}
+
+.pf-v5-c-login__main {
+  width: 100%;
+  background: linear-gradient(180deg, rgba(19, 26, 45, 0.96) 0%, rgba(15, 21, 38, 0.98) 100%) !important;
+  border: 1px solid var(--devmeet-border) !important;
+  border-radius: 18px !important;
+  box-shadow: 0 24px 56px -10px rgba(0, 0, 0, 0.65), 0 0 0 1px rgba(14, 165, 233, 0.16) !important;
+  overflow: hidden;
+  backdrop-filter: blur(14px);
+}
+
+.pf-v5-c-login__main-header {
+  padding: 1.75rem 2rem 0.75rem !important;
+  border-bottom: none !important;
+  background: transparent !important;
+}
+
+#kc-page-title.pf-v5-c-title {
+  font-size: 1.45rem !important;
+  font-weight: 800 !important;
+  color: var(--devmeet-text) !important;
+  letter-spacing: -0.02em;
+  text-align: center;
+}
+
+.pf-v5-c-login__main-body {
+  padding: 0.75rem 2rem 1.75rem !important;
+  color: var(--devmeet-text-secondary);
+}
+
+.pf-v5-c-form {
+  row-gap: 1.1rem;
+}
+
+.pf-v5-c-form__label,
+.pf-v5-c-form__label-text {
+  color: var(--devmeet-text-secondary) !important;
+  font-size: 0.85rem !important;
+  font-weight: 600 !important;
+}
+
+.pf-v5-c-form-control {
+  --pf-v5-c-form-control--BackgroundColor: var(--devmeet-surface-2);
+  --pf-v5-c-form-control--Color: var(--devmeet-text);
+  --pf-v5-c-form-control--BorderTopColor: transparent;
+  --pf-v5-c-form-control--BorderRightColor: transparent;
+  --pf-v5-c-form-control--BorderLeftColor: transparent;
+  --pf-v5-c-form-control--BorderBottomColor: transparent;
+  background-color: var(--devmeet-surface-2) !important;
+  border: 1px solid var(--devmeet-border) !important;
+  border-radius: 11px !important;
+  transition: border-color 0.18s ease, box-shadow 0.18s ease, background-color 0.18s ease;
+}
+
+.pf-v5-c-form-control::before,
+.pf-v5-c-form-control::after {
+  display: none !important;
+}
+
+.pf-v5-c-form-control:hover {
+  border-color: rgba(255, 255, 255, 0.22) !important;
+}
+
+.pf-v5-c-form-control:focus-within {
+  border-color: var(--devmeet-primary) !important;
+  box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.22) !important;
+}
+
+.pf-v5-c-form-control > input,
+.pf-v5-c-form-control > select,
+.pf-v5-c-form-control > textarea {
+  background: transparent !important;
+  color: var(--devmeet-text) !important;
+  font-size: 0.95rem !important;
+  padding: 0.72rem 0.9rem !important;
+  outline: none !important;
+  border: none !important;
+}
+
+.pf-v5-c-form-control > input::placeholder {
+  color: var(--devmeet-text-muted) !important;
+}
+
+.pf-v5-c-input-group {
+  gap: 0.45rem;
+  background: transparent !important;
+}
+
+.pf-v5-c-button.pf-m-control {
+  background-color: var(--devmeet-surface-2) !important;
+  color: var(--devmeet-text-secondary) !important;
+  border: 1px solid var(--devmeet-border) !important;
+  border-radius: 11px !important;
+  padding: 0.7rem 0.9rem !important;
+}
+
+.pf-v5-c-button.pf-m-control::after {
+  display: none !important;
+}
+
+.pf-v5-c-button.pf-m-control:hover {
+  color: var(--devmeet-text) !important;
+  border-color: var(--devmeet-border-hover) !important;
+  background-color: var(--devmeet-surface-3) !important;
+}
+
+.pf-v5-c-button.pf-m-primary {
+  width: 100%;
+  margin-top: 0.4rem;
+  padding: 0.78rem 1.25rem !important;
+  border-radius: 11px !important;
+  border: none !important;
+  font-size: 0.96rem !important;
+  font-weight: 700 !important;
+  color: #FFFFFF !important;
+  background: linear-gradient(135deg, var(--devmeet-primary) 0%, var(--devmeet-teal) 100%) !important;
+  box-shadow: 0 10px 26px rgba(14, 165, 233, 0.32) !important;
+  cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.18s ease, filter 0.18s ease;
+}
+
+.pf-v5-c-button.pf-m-primary:hover {
+  filter: brightness(1.07);
+  box-shadow: 0 12px 30px rgba(14, 165, 233, 0.45) !important;
+  transform: translateY(-1px);
+}
+
+.pf-v5-c-button.pf-m-primary:active {
+  transform: translateY(0);
+}
+
+.pf-v5-c-button.pf-m-secondary {
+  border-radius: 11px !important;
+  background-color: var(--devmeet-surface-2) !important;
+  color: var(--devmeet-text) !important;
+  border: 1px solid var(--devmeet-border) !important;
+}
+
+a {
+  color: var(--devmeet-primary-light) !important;
+  text-decoration: none;
+  font-weight: 600;
+}
+
+a:hover {
+  color: var(--devmeet-primary) !important;
+  text-decoration: underline;
+}
+
+.pf-v5-c-check__label,
+.pf-v5-c-helper-text__item-text {
+  color: var(--devmeet-text-secondary) !important;
+  font-size: 0.84rem !important;
+}
+
+.pf-v5-c-helper-text__item.pf-m-error .pf-v5-c-helper-text__item-text,
+#input-error-container-username,
+#input-error-container-password,
+.pf-m-error {
+  color: #FDA4AF !important;
+}
+
+.pf-v5-c-alert {
+  border-radius: 12px !important;
+  background-color: rgba(28, 38, 64, 0.9) !important;
+  border: 1px solid var(--devmeet-border) !important;
+  color: var(--devmeet-text) !important;
+  margin-bottom: 1rem;
+}
+
+.pf-v5-c-alert.pf-m-danger {
+  background-color: rgba(244, 63, 94, 0.14) !important;
+  border-color: rgba(244, 63, 94, 0.45) !important;
+}
+
+.pf-v5-c-alert.pf-m-warning {
+  background-color: rgba(245, 158, 11, 0.14) !important;
+  border-color: rgba(245, 158, 11, 0.45) !important;
+}
+
+.pf-v5-c-alert.pf-m-success {
+  background-color: rgba(20, 184, 166, 0.14) !important;
+  border-color: rgba(20, 184, 166, 0.45) !important;
+}
+
+.pf-v5-c-alert.pf-m-info {
+  background-color: rgba(14, 165, 233, 0.14) !important;
+  border-color: rgba(14, 165, 233, 0.45) !important;
+}
+
+.pf-v5-c-alert__title {
+  color: var(--devmeet-text) !important;
+}
+
+#kc-registration-container,
+.pf-v5-c-login__main-footer-band {
+  background-color: rgba(10, 14, 26, 0.48) !important;
+  border-top: 1px solid var(--devmeet-border) !important;
+  margin: 1.5rem -2rem -1.75rem !important;
+  padding: 1rem 2rem !important;
+  text-align: center;
+  color: var(--devmeet-text-secondary);
+  font-size: 0.9rem;
+}
+
+.pf-v5-c-login__main-footer {
+  padding: 0 2rem 1rem !important;
+  background: transparent !important;
+}
+
+#kc-totp-secret-qr-code {
+  display: block;
+  margin: 1rem auto;
+  padding: 12px;
+  background: #FFFFFF;
+  border-radius: 14px;
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.45);
+}
+
+#kc-totp-settings,
+ol#kc-totp-settings li {
+  color: var(--devmeet-text-secondary);
+}
+
+#kc-totp-secret-key {
+  background: var(--devmeet-surface-2);
+  color: var(--devmeet-primary-light);
+  padding: 0.4rem 0.7rem;
+  border-radius: 8px;
+  border: 1px solid var(--devmeet-border);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+}

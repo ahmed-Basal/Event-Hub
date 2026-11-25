@@ -1,0 +1,18 @@
+using DevMeet.Shared.Common;
+
+namespace Core.Tests;
+
+public class SlugHelperTests
+{
+    [Theory]
+    [InlineData("Tech Meetup Cairo", "tech-meetup-cairo")]
+    [InlineData("DotNet 11 & React 19!", "dotnet-11-react-19")]
+    [InlineData("   Spaced   Event   ", "spaced-event")]
+    [InlineData("", "")]
+    [InlineData(null, "")]
+    public void GenerateSlug_ShouldReturnExpectedSlug(string? input, string expected)
+    {
+        var result = SlugHelper.GenerateSlug(input);
+        Assert.Equal(expected, result);
+    }
+}

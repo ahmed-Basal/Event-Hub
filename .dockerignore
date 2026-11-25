@@ -4,5 +4,11 @@
 **/bin
 **/obj
 **/node_modules
-**/.env.development
+**/.next
+**/TestResults
+**/.env
+**/.env.*
+!**/.env.example
 **/dist
+observability/
+*.md

@@ -1,0 +1,39 @@
+<Solution>
+  <Folder Name="/src/Shared/">
+    <Project Path="src/Shared/DevMeet.Shared/DevMeet.Shared.csproj" />
+  </Folder>
+  <Folder Name="/src/Host/">
+    <Project Path="src/Host/DevMeet.API/DevMeet.API.csproj" />
+  </Folder>
+  <Folder Name="/src/Modules/Identity/">
+    <Project Path="src/Modules/Identity/Identity.Contracts/Identity.Contracts.csproj" />
+    <Project Path="src/Modules/Identity/Identity.Module/Identity.Module.csproj" />
+  </Folder>
+  <Folder Name="/src/Modules/Activities/">
+    <Project Path="src/Modules/Activities/Activities.Contracts/Activities.Contracts.csproj" />
+    <Project Path="src/Modules/Activities/Activities.Module/Activities.Module.csproj" />
+  </Folder>
+  <Folder Name="/src/Modules/Comments/">
+    <Project Path="src/Modules/Comments/Comments.Module/Comments.Module.csproj" />
+  </Folder>
+  <Folder Name="/src/Modules/Profiles/">
+    <Project Path="src/Modules/Profiles/Profiles.Contracts/Profiles.Contracts.csproj" />
+    <Project Path="src/Modules/Profiles/Profiles.Module/Profiles.Module.csproj" />
+  </Folder>
+  <Folder Name="/src/Modules/Notifications/">
+    <Project Path="src/Modules/Notifications/Notifications.Contracts/Notifications.Contracts.csproj" />
+    <Project Path="src/Modules/Notifications/Notifications.Module/Notifications.Module.csproj" />
+  </Folder>
+  <Folder Name="/src/Modules/Payments/">
+    <Project Path="src/Modules/Payments/Payments.Contracts/Payments.Contracts.csproj" />
+    <Project Path="src/Modules/Payments/Payments.Module/Payments.Module.csproj" />
+  </Folder>
+  <Folder Name="/src/Modules/Diagnostics/">
+    <Project Path="src/Modules/Diagnostics/Diagnostics.Module/Diagnostics.Module.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/Architecture.Tests/Architecture.Tests.csproj" />
+    <Project Path="tests/Core.Tests/Core.Tests.csproj" />
+    <Project Path="tests/Integration.Tests/Integration.Tests.csproj" />
+  </Folder>
+</Solution>
